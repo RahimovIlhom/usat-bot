@@ -3,3 +3,4 @@ environs==9.5.0
 Django==4.2.13
 whitenoise==6.6.0
 mysqlclient==2.2.4
+aiomysql==0.2.0
