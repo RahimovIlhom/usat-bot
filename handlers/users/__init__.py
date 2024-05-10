@@ -1,5 +1,6 @@
 from . import help
 from . import start
-from . import register
+from . import profile
 from . import admin
+from . import contract
 from . import echo

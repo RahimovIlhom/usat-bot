@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import SimpleUser, EducationalAreas, TypeOfEducation, ContractPrice, Applicant, Olympian
+from .models import SimpleUser, DirectionOdEducation, TypeOfEducation, ContractPrice, Applicant, Olympian
 
 
 class SimpleUserAdmin(admin.ModelAdmin):
@@ -40,7 +40,7 @@ class OlympianAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SimpleUser, SimpleUserAdmin)
-admin.site.register(EducationalAreas, EducationalAreasAdmin)
+admin.site.register(DirectionOdEducation, EducationalAreasAdmin)
 admin.site.register(TypeOfEducation, TypeOfEducationAdmin)
 admin.site.register(ContractPrice, ContractPriceAdmin)
 admin.site.register(Applicant, ApplicantAdmin)

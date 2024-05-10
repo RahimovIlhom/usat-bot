@@ -1,9 +1,26 @@
 from aiogram import types
 
-from loader import dp
+from data.config import ADMINS
+from filters import IsPrivate
+from keyboards.default import admin_menu_markup_uz, menu_markup_uz, menu_markup_ru
+from loader import dp, db
 
 
-# Echo bot
-@dp.message_handler(state=None)
+@dp.message_handler(IsPrivate(), state=None, text="◀️ Orqaga", user_id=ADMINS)
+async def bot_echo(message: types.Message):
+    await message.answer("Menu", reply_markup=admin_menu_markup_uz)
+
+
+@dp.message_handler(IsPrivate(), state=None, text=["◀️ Orqaga", "◀️ Назад"])
+async def bot_echo(message: types.Message):
+    simple_user = await db.select_simple_user(message.from_user.id)
+    if simple_user:
+        if simple_user[2] == 'uz':
+            await message.answer("Bosh menyu:", reply_markup=menu_markup_uz)
+        else:
+            await message.answer("Главное меню:", reply_markup=menu_markup_ru)
+
+
+@dp.message_handler(IsPrivate(), state=None)
 async def bot_echo(message: types.Message):
     await message.answer(message.text)

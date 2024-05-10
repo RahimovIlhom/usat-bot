@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import EducationalAreas, LANGUAGES, Applicant
+from users.models import DirectionOdEducation, LANGUAGES, Applicant
 
 
 class Science(models.Model):
@@ -15,7 +15,7 @@ class Science(models.Model):
 
 
 class Test(models.Model):
-    directionOfEducation = models.ForeignKey(EducationalAreas, on_delete=models.SET_NULL, null=True, blank=True,
+    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='tests')
     science = models.ForeignKey(Science, on_delete=models.SET_NULL, null=True, blank=True, related_name='tests')
     questionsCount = models.IntegerField()

@@ -19,7 +19,7 @@ class SimpleUser(models.Model):
         db_table = 'simple_users'
 
 
-class EducationalAreas(models.Model):
+class DirectionOdEducation(models.Model):
     nameUz = models.CharField(max_length=255)
     nameRu = models.CharField(max_length=255)
 
@@ -42,7 +42,7 @@ class TypeOfEducation(models.Model):
 
 
 class ContractPrice(models.Model):
-    directionOfEducation = models.ForeignKey(EducationalAreas, on_delete=models.SET_NULL, null=True, blank=True,
+    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='contract_price')
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name="contract_price")
@@ -63,7 +63,7 @@ class Applicant(models.Model):
     lastName = models.CharField(max_length=255, null=True, blank=True)
     middleName = models.CharField(max_length=255, null=True, blank=True)
     passport = models.CharField(max_length=20, null=True, blank=True, unique=True)
-    directionOfEducation = models.ForeignKey(EducationalAreas, on_delete=models.SET_NULL, null=True, blank=True,
+    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='applicants')
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='applicants')
