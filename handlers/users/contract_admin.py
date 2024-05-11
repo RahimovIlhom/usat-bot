@@ -6,18 +6,23 @@ from aiogram.types import ReplyKeyboardRemove
 
 from data.config import ADMINS
 from filters import IsPrivate
-from keyboards.default import directions_menu_markup, types_of_education_menu_markup
+from keyboards.default import directions_menu_markup, types_of_education_menu_markup, contract_menu_markup
 from keyboards.inline import all_directions_inlines, directions_callback_data, all_types_of_edu_inlines, \
-    types_callback_data, type_of_edu_inlines, delete_type_of_edu_inlines, direction_inlines, delete_direction_inlines
+    types_callback_data, type_of_edu_inlines, delete_type_of_edu_inlines, direction_inlines, delete_direction_inlines, \
+    contracts_callback_data, all_types_for_contract_inlines
+from keyboards.inline import all_directions_for_contract_inlines
 from loader import dp, db
-from states import AddDirectionStates, TypesOfEduStates
+from states import AddDirectionStates, TypesOfEduStates, AddContractSumma
 
 
 @dp.message_handler(IsPrivate(), text="Barcha yo'nalishlar", user_id=ADMINS)
-async def all_directions_branch(msg: Union[types.Message, types.CallbackQuery]):
+async def all_directions_branch(msg: Union[types.Message, types.CallbackQuery], delete: bool = False):
     if isinstance(msg, types.CallbackQuery):
         call = msg
-        await call.message.edit_text("Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
+        if delete:
+            await call.message.answer("Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
+        else:
+            await call.message.edit_text("Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
     else:
         await msg.answer(msg.text, reply_markup=await all_directions_inlines())
 
@@ -71,7 +76,7 @@ async def show_direction(call: types.CallbackQuery, callback_data: dict, state: 
         if do == 'yes':
             await db.delete_direction(direction_id)
             await call.message.edit_text("✅ Ta'lim yo'nalishi muvaffaqiyatli o'chirildi!", reply_markup=None)
-            await all_directions_branch(call)
+            await all_directions_branch(call, True)
         elif do == 'no':
             await show_direction_of_edu(call, direction_id)
         else:
@@ -97,10 +102,13 @@ async def delete_direction_of_edu(call, id):
 
 
 @dp.message_handler(IsPrivate(), text="Barcha ta'lim turlari", user_id=ADMINS)
-async def all_types_branch(msg: Union[types.Message, types.CallbackQuery]):
+async def all_types_branch(msg: Union[types.Message, types.CallbackQuery], delete: bool = False):
     if isinstance(msg, types.CallbackQuery):
         call = msg
-        await call.message.edit_text("Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
+        if delete:
+            await call.message.answer("Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
+        else:
+            await call.message.edit_text("Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
     else:
         await msg.answer(msg.text, reply_markup=await all_types_of_edu_inlines())
 
@@ -153,7 +161,7 @@ async def show_type_of_edu(call: types.CallbackQuery, callback_data: dict, state
         if do == 'yes':
             await db.delete_type_of_education(type_id)
             await call.message.edit_text("✅ Ta'lim turi muvaffaqiyatli o'chirildi!", reply_markup=None)
-            await all_types_branch(call)
+            await all_types_branch(call, True)
         elif do == 'no':
             await show_type_of_education(call, type_id)
         else:
@@ -176,3 +184,76 @@ async def delete_type_of_edu(call, id):
             f"uz: {type_of_edu[1]}\n"
             f"ru: {type_of_edu[2]}")
     await call.message.edit_text(info, reply_markup=await delete_type_of_edu_inlines(type_of_edu[0]))
+
+
+@dp.message_handler(IsPrivate(), text="Yo'nalishlar bo'yicha kontrakt summalari", user_id=ADMINS)
+async def contract_for_directions(msg: types.Message):
+    await msg.answer("Qaysi yo'nalish bo'yicha kontrakt summasini ko'rmoqchisiz?",
+                     reply_markup=await all_directions_for_contract_inlines())
+
+
+@dp.message_handler(IsPrivate(), text="Kontrakt summasini kiritish", user_id=ADMINS)
+async def add_contract_for_direction(msg: Union[types.Message, types.CallbackQuery]):
+    if isinstance(msg, types.CallbackQuery):
+        call = msg
+        await call.message.edit_text("Qaysi yo'nalish bo'yicha kontrakt summa qo'shmoqchisiz?",
+                                     reply_markup=await all_directions_for_contract_inlines(action='add'))
+    else:
+        await msg.answer("Qaysi yo'nalish bo'yicha kontrakt summa qo'shmoqchisiz?",
+                         reply_markup=await all_directions_for_contract_inlines(action='add'))
+
+
+@dp.callback_query_handler(IsPrivate(), contracts_callback_data.filter(), user_id=ADMINS)
+async def select_func(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    direction_id = callback_data.get('direction_id')
+    type_id = callback_data.get('type_id')
+    contract_id = callback_data.get('contract_id')
+    action = callback_data.get('action')
+    if direction_id == 'close':
+        await call.message.delete()
+    elif action == 'add':
+        if type_id == 'back':
+            await add_contract_for_direction(call)
+        elif type_id == '0':
+            await add_contract_for_type(call, direction_id)
+        else:
+            await add_contract_summa(call, direction_id, type_id, state)
+
+
+async def add_contract_for_type(call, direction_id):
+    direction = await db.select_direction(direction_id)
+    await call.message.edit_text(f"{direction[1]} ta'lim yo'nalishining qaysi ta'lim turiga qo'shmoqchisiz?",
+                                 reply_markup=await all_types_for_contract_inlines(direction_id, 'add'))
+
+
+async def add_contract_summa(call, direction_id, type_id, state):
+    direction = await db.select_direction(direction_id)
+    type_of_edu = await db.select_type_of_education(type_id)
+    info = (f"Ta'lim yo'nalishi:\n"
+            f"{direction[1]}\n\n"
+            f"Ta'lim turi:\n"
+            f"{type_of_edu[1]}")
+    await call.message.edit_text(info, reply_markup=None)
+    await call.message.answer("Kontrakt summa miqdorini kiriting: ", reply_markup=ReplyKeyboardRemove())
+    await state.set_state(AddContractSumma.summa)
+    await state.set_data({
+        'direction_id': direction_id,
+        'type_id': type_id
+    })
+
+
+@dp.message_handler(state=AddContractSumma.summa, user_id=ADMINS)
+async def contract_summa(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    summa = msg.text
+    if summa.isdigit():
+        resp = await db.add_or_set_contract_price(int(summa), **data)
+        if resp == 'set':
+            answer_text = "✅ Kontrakt summasi muvaffaqiyatli o'zgartirildi"
+        else:
+            answer_text = "✅ Kontrakt summasi muvaffaqiyatli qo'shildi"
+        await msg.answer(answer_text, reply_markup=contract_menu_markup)
+        await state.reset_data()
+        await state.finish()
+    else:
+        await msg.answer("Kontrakt miqdori xato qayta kiriting:")

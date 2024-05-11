@@ -2,5 +2,5 @@ from . import help
 from . import start
 from . import profile
 from . import admin
-from . import contract
+from . import contract_admin
 from . import echo

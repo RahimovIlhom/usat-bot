@@ -93,5 +93,21 @@ class Database:
         query = "DELETE FROM types_of_education WHERE id = %s"
         await self.execute_query(query, id)
 
+    async def select_contact_price(self, direction_id, type_id):
+        query = "SELECT id, amount FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s"
+        return await self.execute_query(query, direction_id, type_id, fetchone=True)
+
+    async def add_or_set_contract_price(self, summa, direction_id, type_id):
+        contract_price = await self.select_contact_price(direction_id, type_id)
+        if contract_price:
+            query = "UPDATE contract_prices SET amount = %s WHERE id = %s"
+            await self.execute_query(query, summa, contract_price[0])
+            return 'set'
+        else:
+            query = ("INSERT INTO contract_prices (amount, directionOfEducation_id, typeOfEducation_id) VALUES "
+                     "(%s, %s, %s);")
+            await self.execute_query(query, summa, direction_id, type_id)
+            return 'add'
+
 
 
