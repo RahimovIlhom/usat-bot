@@ -36,7 +36,7 @@ async def direction_inlines(id):
         callback_data=await make_directions_callback_data(id, 'delete')
     ))
     markup.insert(InlineKeyboardButton(
-        text="✏️ tahrirlash",
+        text="✏️ Tahrirlash",
         callback_data=await make_directions_callback_data(id, 'edit')
     ))
     markup.insert(InlineKeyboardButton(

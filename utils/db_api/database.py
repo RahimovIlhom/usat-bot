@@ -72,5 +72,26 @@ class Database:
         query = "DELETE FROM educational_areas WHERE id = %s"
         await self.execute_query(query, id)
 
+    async def select_types_of_education(self):
+        query = "SELECT id, nameUz, nameRu FROM types_of_education;"
+        return await self.execute_query(query, fetchall=True)
+
+    async def select_type_of_education(self, id):
+        query = "SELECT id, nameUz, nameRu FROM types_of_education WHERE id = %s;"
+        return await self.execute_query(query, id, fetchone=True)
+
+    async def add_or_set_type_of_education(self, nameUz, nameRu, id=None):
+        if id:
+            if await self.select_type_of_education(id):
+                query = "UPDATE types_of_education SET nameUz = %s, nameRu = %s WHERE id = %s;"
+                await self.execute_query(query, nameUz, nameRu, id)
+        else:
+            query = "INSERT INTO types_of_education (nameUz, nameRu) VALUES (%s, %s);"
+            await self.execute_query(query, nameUz, nameRu)
+
+    async def delete_type_of_education(self, id):
+        query = "DELETE FROM types_of_education WHERE id = %s"
+        await self.execute_query(query, id)
+
 
 
