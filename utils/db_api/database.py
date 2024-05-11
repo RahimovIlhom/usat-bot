@@ -1,6 +1,3 @@
-import datetime
-from uuid import uuid4
-
 import aiomysql
 from environs import Env
 
@@ -27,7 +24,7 @@ class Database:
             self.pool.close()
             await self.pool.wait_closed()
 
-    async def execute_query(self, query, *args, fetchall=False, fetchone=False, **kwargs):
+    async def execute_query(self, query, *args, fetchall=False, fetchone=False):
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(query, args)
@@ -97,6 +94,15 @@ class Database:
         query = "SELECT id, amount FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s"
         return await self.execute_query(query, direction_id, type_id, fetchone=True)
 
+    async def select_contract_prices_for_direction(self, direction_id):
+        query = """
+        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz 
+        FROM contract_prices cp
+        JOIN types_of_education te ON cp.typeOfEducation_id = te.id
+        WHERE cp.directionOfEducation_id = %s;
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
+
     async def add_or_set_contract_price(self, summa, direction_id, type_id):
         contract_price = await self.select_contact_price(direction_id, type_id)
         if contract_price:
@@ -108,6 +114,3 @@ class Database:
                      "(%s, %s, %s);")
             await self.execute_query(query, summa, direction_id, type_id)
             return 'add'
-
-
-

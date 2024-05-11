@@ -9,7 +9,7 @@ from filters import IsPrivate
 from keyboards.default import directions_menu_markup, types_of_education_menu_markup, contract_menu_markup
 from keyboards.inline import all_directions_inlines, directions_callback_data, all_types_of_edu_inlines, \
     types_callback_data, type_of_edu_inlines, delete_type_of_edu_inlines, direction_inlines, delete_direction_inlines, \
-    contracts_callback_data, all_types_for_contract_inlines
+    contracts_callback_data, all_types_for_contract_inlines, all_contract_prices_inlines
 from keyboards.inline import all_directions_for_contract_inlines
 from loader import dp, db
 from states import AddDirectionStates, TypesOfEduStates, AddContractSumma
@@ -187,9 +187,14 @@ async def delete_type_of_edu(call, id):
 
 
 @dp.message_handler(IsPrivate(), text="Yo'nalishlar bo'yicha kontrakt summalari", user_id=ADMINS)
-async def contract_for_directions(msg: types.Message):
-    await msg.answer("Qaysi yo'nalish bo'yicha kontrakt summasini ko'rmoqchisiz?",
-                     reply_markup=await all_directions_for_contract_inlines())
+async def contract_for_directions(msg: Union[types.Message, types.CallbackQuery]):
+    if isinstance(msg, types.CallbackQuery):
+        call = msg
+        await call.message.edit_text("Qaysi yo'nalish bo'yicha kontrakt summasini ko'rmoqchisiz?",
+                                     reply_markup=await all_directions_for_contract_inlines())
+    else:
+        await msg.answer("Qaysi yo'nalish bo'yicha kontrakt summasini ko'rmoqchisiz?",
+                         reply_markup=await all_directions_for_contract_inlines())
 
 
 @dp.message_handler(IsPrivate(), text="Kontrakt summasini kiritish", user_id=ADMINS)
@@ -218,6 +223,11 @@ async def select_func(call: types.CallbackQuery, callback_data: dict, state: FSM
             await add_contract_for_type(call, direction_id)
         else:
             await add_contract_summa(call, direction_id, type_id, state)
+    elif action == 'read':
+        if type_id == 'back':
+            await contract_for_directions(call)
+        else:
+            await show_contract_prices(call, direction_id)
 
 
 async def add_contract_for_type(call, direction_id):
@@ -257,3 +267,9 @@ async def contract_summa(msg: types.Message, state: FSMContext):
         await state.finish()
     else:
         await msg.answer("Kontrakt miqdori xato qayta kiriting:")
+
+
+async def show_contract_prices(call, direction_id):
+    direction = await db.select_direction(direction_id)
+    await call.message.edit_text(f"<b>{direction[1]}</b> ta'lim yo'nalishi bo'yicha kontrakt narxlari:",
+                                 reply_markup=await all_contract_prices_inlines(direction_id))
