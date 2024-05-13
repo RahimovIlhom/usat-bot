@@ -84,4 +84,3 @@ contract_menu_markup = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
-

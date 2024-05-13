@@ -1,4 +1,5 @@
 from aiogram import executor
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 from loader import dp, main
 import middlewares, filters, handlers
@@ -10,6 +11,9 @@ async def on_startup(dispatcher):
     await set_default_commands(dispatcher)
     await on_startup_notify(dispatcher)
     await main()
+
+
+dp.middleware.setup(LoggingMiddleware())
 
 
 if __name__ == '__main__':
