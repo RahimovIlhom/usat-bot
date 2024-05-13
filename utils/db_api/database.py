@@ -118,3 +118,8 @@ class Database:
     async def delete_contract_price(self, direction_id, type_id):
         query = "DELETE FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s;"
         await self.execute_query(query, direction_id, type_id)
+
+    async def get_applicant(self, tgId):
+        query = ("SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
+                 "typeOfEducation_id, contractFile, olympian, createdTime FROM applicants WHERE tgId = %s")
+        return await self.execute_query(query, tgId, fetchone=True)

@@ -2,8 +2,8 @@ from django.db import models
 
 
 LANGUAGES = (
-    ('uz', 'uz'),
-    ('ru', 'ru')
+    ('uz', 'Uzbek'),
+    ('ru', 'Russian'),
 )
 
 
@@ -67,6 +67,7 @@ class Applicant(models.Model):
                                              related_name='applicants')
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='applicants')
+    languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz')
     contractFile = models.CharField(max_length=255, null=True, blank=True)
     olympian = models.BooleanField(default=False)
     createdTime = models.DateTimeField(auto_now_add=True)

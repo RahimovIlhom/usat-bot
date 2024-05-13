@@ -64,7 +64,7 @@ async def all_contract_prices_inlines(direction_id, action='read'):
     return markup
 
 
-async def detail_contract_inlines(direction_id, type_id, contract_id, action='read'):
+async def detail_contract_inlines(direction_id, type_id, contract_id):
     markup = InlineKeyboardMarkup(row_width=2)
     markup.insert(InlineKeyboardButton(
         text="🗑 O'chirish",
@@ -81,7 +81,7 @@ async def detail_contract_inlines(direction_id, type_id, contract_id, action='re
     return markup
 
 
-async def delete_contract_inlines(direction_id, type_id, contract_id, action='read'):
+async def delete_contract_inlines(direction_id, type_id, contract_id):
     markup = InlineKeyboardMarkup(row_width=2)
     markup.insert(InlineKeyboardButton(
         text="❌ O'chirish",
