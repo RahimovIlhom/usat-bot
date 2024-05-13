@@ -9,7 +9,8 @@ from filters import IsPrivate
 from keyboards.default import directions_menu_markup, types_of_education_menu_markup, contract_menu_markup
 from keyboards.inline import all_directions_inlines, directions_callback_data, all_types_of_edu_inlines, \
     types_callback_data, type_of_edu_inlines, delete_type_of_edu_inlines, direction_inlines, delete_direction_inlines, \
-    contracts_callback_data, all_types_for_contract_inlines, all_contract_prices_inlines
+    contracts_callback_data, all_types_for_contract_inlines, all_contract_prices_inlines, detail_contract_inlines, \
+    delete_contract_inlines
 from keyboards.inline import all_directions_for_contract_inlines
 from loader import dp, db
 from states import AddDirectionStates, TypesOfEduStates, AddContractSumma
@@ -214,6 +215,7 @@ async def select_func(call: types.CallbackQuery, callback_data: dict, state: FSM
     type_id = callback_data.get('type_id')
     contract_id = callback_data.get('contract_id')
     action = callback_data.get('action')
+    do = callback_data.get('do')
     if direction_id == 'close':
         await call.message.delete()
     elif action == 'add':
@@ -226,8 +228,23 @@ async def select_func(call: types.CallbackQuery, callback_data: dict, state: FSM
     elif action == 'read':
         if type_id == 'back':
             await contract_for_directions(call)
-        else:
+        elif type_id == '0':
             await show_contract_prices(call, direction_id)
+        elif contract_id != '0':
+            await show_one_contract_price(call, direction_id, type_id, contract_id)
+    elif action == 'back':
+        await show_contract_prices(call, direction_id)
+    elif action == 'delete':
+        if do == 'yes':
+            await db.delete_contract_price(direction_id, type_id)
+            await call.message.edit_text("✅ Kontrakt miqdori muvaffaqiyatli o'chirildi!")
+            await show_contract_prices(call, direction_id, True)
+        elif do == 'no':
+            await show_one_contract_price(call, direction_id, type_id, contract_id)
+        else:
+            await delete_contract_price(call, direction_id, type_id, contract_id)
+    elif action == 'edit':
+        await edit_contract_price(call, direction_id, type_id, contract_id, state)
 
 
 async def add_contract_for_type(call, direction_id):
@@ -253,7 +270,7 @@ async def add_contract_summa(call, direction_id, type_id, state):
 
 
 @dp.message_handler(state=AddContractSumma.summa, user_id=ADMINS)
-async def contract_summa(msg: types.Message, state: FSMContext):
+async def contract_summa(msg: types.Message, state: FSMContext, set_summa: bool = False):
     data = await state.get_data()
     summa = msg.text
     if summa.isdigit():
@@ -266,10 +283,63 @@ async def contract_summa(msg: types.Message, state: FSMContext):
         await state.reset_data()
         await state.finish()
     else:
-        await msg.answer("Kontrakt miqdori xato qayta kiriting:")
+        await msg.answer("Kontrakt miqdori xato, qayta kiriting:")
 
 
-async def show_contract_prices(call, direction_id):
+async def show_contract_prices(call, direction_id, deleted=False):
     direction = await db.select_direction(direction_id)
-    await call.message.edit_text(f"<b>{direction[1]}</b> ta'lim yo'nalishi bo'yicha kontrakt narxlari:",
-                                 reply_markup=await all_contract_prices_inlines(direction_id))
+    if deleted:
+        await call.message.answer(f"<b>{direction[1]}</b> ta'lim yo'nalishi bo'yicha kontrakt narxlari:",
+                                  reply_markup=await all_contract_prices_inlines(direction_id))
+    else:
+        await call.message.edit_text(f"<b>{direction[1]}</b> ta'lim yo'nalishi bo'yicha kontrakt narxlari:",
+                                     reply_markup=await all_contract_prices_inlines(direction_id))
+
+
+async def show_one_contract_price(call: Union[types.Message, types.CallbackQuery], direction_id, type_id, contract_id):
+    contract = await db.select_contact_price(direction_id, type_id)
+    type_of_edu = await db.select_type_of_education(type_id)
+    direction = await db.select_direction(direction_id)
+    info_text = (f"Ta'lim yo'nalishi:\n"
+                 f"uz: {direction[1]}\n"
+                 f"ru: {direction[2]}\n\n"
+                 f"Ta'lim turi:\n"
+                 f"uz: {type_of_edu[1]}\n"
+                 f"ru: {type_of_edu[2]}\n\n"
+                 f"Kontrakt miqdori: {contract[1]}")
+    if isinstance(call, types.Message):
+        await call.answer(info_text, reply_markup=await detail_contract_inlines(direction_id, type_id, contract_id))
+    else:
+        await call.message.edit_text(info_text,
+                                     reply_markup=await detail_contract_inlines(direction_id, type_id, contract_id))
+
+
+async def delete_contract_price(call, direction_id, type_id, contract_id):
+    contract = await db.select_contact_price(direction_id, type_id)
+    type_of_edu = await db.select_type_of_education(type_id)
+    direction = await db.select_direction(direction_id)
+    question_text = (f"Rostdan ham quyidagi kontrakt miqdorini o'chirmoqchimisiz?\n\n"
+                     f"Ta'lim yo'nalishi:\n"
+                     f"uz: {direction[1]}\n\n"
+                     f"Ta'lim turi:\n"
+                     f"uz: {type_of_edu[1]}\n\n"
+                     f"Kontrakt miqdori: {contract[1]}")
+    await call.message.edit_text(question_text,
+                                 reply_markup=await delete_contract_inlines(direction_id, type_id, contract_id))
+
+
+async def edit_contract_price(call, direction_id, type_id, contract_id, state):
+    direction = await db.select_direction(direction_id)
+    type_of_edu = await db.select_type_of_education(type_id)
+    info = (f"Ta'lim yo'nalishi:\n"
+            f"{direction[1]}\n\n"
+            f"Ta'lim turi:\n"
+            f"{type_of_edu[1]}")
+    await call.message.edit_text(info, reply_markup=None)
+    await call.message.answer("O'zgartirish uchun kontrakt summa miqdorini kiriting: ",
+                              reply_markup=ReplyKeyboardRemove())
+    await state.set_state(AddContractSumma.summa)
+    await state.set_data({
+        'direction_id': direction_id,
+        'type_id': type_id
+    })

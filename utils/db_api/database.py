@@ -114,3 +114,7 @@ class Database:
                      "(%s, %s, %s);")
             await self.execute_query(query, summa, direction_id, type_id)
             return 'add'
+
+    async def delete_contract_price(self, direction_id, type_id):
+        query = "DELETE FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s;"
+        await self.execute_query(query, direction_id, type_id)
