@@ -30,8 +30,9 @@ async def submit_application_ru(msg: types.Message, state: FSMContext):
 
 @dp.message_handler(IsPrivate(), content_types=ContentType.CONTACT, state=ApplicantRegisterStates.phone)
 async def send_contact(msg: types.Message, state: FSMContext):
-    await state.set_data({'phone': msg.contact.phone_number})
     simple_user = await db.select_simple_user(msg.from_user.id)
+    await state.set_data({'phone': msg.contact.phone_number,
+                          'language': simple_user[2]})
     if simple_user[2] == 'uz':
         info = "ID-kartangizdagi Shaxsiy raqamingizni kiriting. "
         image = InputFile('data/images/pinfl.jpg')
@@ -45,3 +46,36 @@ async def send_contact(msg: types.Message, state: FSMContext):
     except:
         await msg.answer_photo(image, caption=info, reply_markup=ReplyKeyboardRemove())
     await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(IsPrivate(), content_types=ContentType.ANY, state=ApplicantRegisterStates.phone)
+async def send_contact(msg: types.Message):
+    await msg.delete()
+    simple_user = await db.select_simple_user(msg.from_user.id)
+    if simple_user[2] == 'uz':
+        info = "Iltimos, pastdagi tugmani bosib, telefon raqamingizni yuboring."
+        markup = phone_markup_uz
+    else:
+        info = "Пожалуйста, нажмите кнопку ниже и укажите свой номер телефона."
+        markup = phone_markup_ru
+    await msg.answer(info, reply_markup=markup)
+
+
+@dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.TEXT)
+async def send_pinfl(msg: types.Message, state: FSMContext):
+    pinfl = msg.text
+    data = await state.get_data()
+    if data.get('language') == 'uz':
+        err_text = "❗️ Shaxsiy raqam xato. Iltimos, qayta yuboring."
+        resp_text = "Talabalik - oltin davr deyishadi. Shu davrni bizning universitetda o'tkazishga ahd qilganingizdan xursandmiz. O'z navbatida biz ham sizga sifatli ta'lim berishga, kelajakda yetuk mutaxassis bo'lib yetishingizga yordam berishga tayyormiz!"
+    else:
+        err_text = "❗️ Персональный номер указан неверно. Пожалуйста, отправьте повторно."
+        resp_text = "Студенчество называют золотой эпохой. Мы рады, что вы решили провести этот период в нашем университете. В свою очередь, мы также готовы предоставить вам качественное образование и помочь вам стать квалифицированным специалистом в будущем!"
+    if pinfl.isdigit():
+        if len(pinfl) == 14:
+            await state.update_data({'pinfl': pinfl})
+            await msg.answer(resp_text)
+            await ApplicantRegisterStates.next()
+            return
+
+    await msg.answer(err_text)
