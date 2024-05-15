@@ -55,6 +55,17 @@ class ContractPrice(models.Model):
         db_table = 'contract_prices'
 
 
+APPLICATION_STATUS = (
+    ('DRAFT', 'DRAFT'),
+    ('SUBMITTED', 'SUBMITTED'),
+    ('REJECTED', 'REJECTED'),
+    ('ACCEPTED', 'ACCEPTED'),
+    ('PASSED', 'PASSED'),
+    ('FAILED', 'FAILED'),
+    ('EXAMINED', 'EXAMINED'),
+)
+
+
 class Applicant(models.Model):
     tgId = models.BigIntegerField(primary_key=True)
     phoneNumber = models.CharField(max_length=20, unique=True)
@@ -70,11 +81,12 @@ class Applicant(models.Model):
     languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz')
     contractFile = models.CharField(max_length=255, null=True, blank=True)
     olympian = models.BooleanField(default=False)
+    applicationStatus = models.CharField(max_length=20, choices=APPLICATION_STATUS, default='DRAFT')
     createdTime = models.DateTimeField(auto_now_add=True)
     updatedTime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.firstName} - {self.pinfl}"
+        return f"{self.phoneNumber} - {self.pinfl}"
 
     class Meta:
         db_table = 'applicants'

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiomysql
 from environs import Env
 
@@ -96,7 +98,7 @@ class Database:
 
     async def select_contract_prices_for_direction(self, direction_id):
         query = """
-        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz 
+        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz, te.nameRu 
         FROM contract_prices cp
         JOIN types_of_education te ON cp.typeOfEducation_id = te.id
         WHERE cp.directionOfEducation_id = %s;
@@ -119,7 +121,20 @@ class Database:
         query = "DELETE FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s;"
         await self.execute_query(query, direction_id, type_id)
 
-    async def get_applicant(self, tgId):
-        query = ("SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
-                 "typeOfEducation_id, contractFile, olympian, createdTime FROM applicants WHERE tgId = %s")
-        return await self.execute_query(query, tgId, fetchone=True)
+    async def get_applicant(self, tgId, pinfl=None, phone=None):
+        query = (
+            "SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
+            "typeOfEducation_id, contractFile, olympian, createdTime FROM applicants WHERE tgId = %s OR pinfl = %s OR "
+            "phoneNumber = %s;")
+        return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
+
+    async def add_applicant(self, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
+                            directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
+        query = (
+            "INSERT INTO applicants (tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, "
+            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, applicationStatus, olympian, "
+            "createdTime, updatedTime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+        )
+        await self.execute_query(query, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
+                                 directionOfEducation_id, typeOfEducation_id, languageOfEducation, 'SUBMITTED',
+                                 olympian, datetime.now(), datetime.now())

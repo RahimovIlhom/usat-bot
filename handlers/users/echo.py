@@ -3,6 +3,7 @@ from aiogram import types
 from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import admin_menu_markup_uz, menu_markup_uz, menu_markup_ru
+from keyboards.inline import application_callback_data
 from loader import dp, db
 
 
@@ -24,3 +25,8 @@ async def bot_echo(message: types.Message):
 @dp.message_handler(IsPrivate(), state=None)
 async def bot_echo(message: types.Message):
     await message.answer(message.text)
+
+
+@dp.callback_query_handler(application_callback_data.filter(), state=None)
+async def select_application_func(call: types.CallbackQuery):
+    await call.message.delete()
