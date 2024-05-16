@@ -244,7 +244,7 @@ async def select_func(call: types.CallbackQuery, callback_data: dict, state: FSM
         else:
             await delete_contract_price(call, direction_id, type_id, contract_id)
     elif action == 'edit':
-        await edit_contract_price(call, direction_id, type_id, contract_id, state)
+        await edit_contract_price(call, direction_id, type_id, state)
 
 
 async def add_contract_for_type(call, direction_id):
@@ -270,7 +270,7 @@ async def add_contract_summa(call, direction_id, type_id, state):
 
 
 @dp.message_handler(state=AddContractSumma.summa, user_id=ADMINS)
-async def contract_summa(msg: types.Message, state: FSMContext, set_summa: bool = False):
+async def contract_summa(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     summa = msg.text
     if summa.isdigit():
@@ -328,7 +328,7 @@ async def delete_contract_price(call, direction_id, type_id, contract_id):
                                  reply_markup=await delete_contract_inlines(direction_id, type_id, contract_id))
 
 
-async def edit_contract_price(call, direction_id, type_id, contract_id, state):
+async def edit_contract_price(call, direction_id, type_id, state):
     direction = await db.select_direction(direction_id)
     type_of_edu = await db.select_type_of_education(type_id)
     info = (f"Ta'lim yo'nalishi:\n"

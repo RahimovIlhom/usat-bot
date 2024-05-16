@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiomysql
 from environs import Env
 
@@ -96,7 +98,7 @@ class Database:
 
     async def select_contract_prices_for_direction(self, direction_id):
         query = """
-        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz 
+        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz, te.nameRu 
         FROM contract_prices cp
         JOIN types_of_education te ON cp.typeOfEducation_id = te.id
         WHERE cp.directionOfEducation_id = %s;
@@ -118,3 +120,36 @@ class Database:
     async def delete_contract_price(self, direction_id, type_id):
         query = "DELETE FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s;"
         await self.execute_query(query, direction_id, type_id)
+
+    async def get_applicant(self, tgId, pinfl=None, phone=None):
+        query = (
+            "SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
+            "typeOfEducation_id, contractFile, olympian, createdTime FROM applicants WHERE tgId = %s OR pinfl = %s OR "
+            "phoneNumber = %s;")
+        return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
+
+    async def add_applicant(self, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
+                            directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
+        query = (
+            "INSERT INTO applicants (tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, "
+            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, applicationStatus, olympian, "
+            "createdTime, updatedTime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+        )
+        await self.execute_query(query, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
+                                 directionOfEducation_id, typeOfEducation_id, languageOfEducation, 'SUBMITTED',
+                                 olympian, datetime.now(), datetime.now())
+
+    async def get_exam_result(self, tgId):
+        query = "SELECT id, applicant_id, result FROM exam_results WHERE applicant_id = %s"
+        return await self.execute_query(query, tgId, fetchone=True)
+
+    async def select_active_tests_for_faculty(self, faculty_id: int, language: str):
+        query = (
+            "SELECT tests.id, tests.directionOfEducation_id, tests.science_id, sciences.nameUz, sciences.nameRu, "
+            "tests.questionsCount, tests.language, tests.isActive, tests.createdTime "
+            "FROM tests "
+            "JOIN sciences ON sciences.id = tests.science_id "
+            "WHERE tests.directionOfEducation_id = %s AND tests.isActive = %s AND tests.language = %s;"
+        )
+        return await self.execute_query(query, faculty_id, True, language, fetchall=True)
+

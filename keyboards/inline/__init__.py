@@ -5,3 +5,5 @@ from .types_edu_menu import (types_callback_data, all_types_of_edu_inlines, type
 from .contracts_menu import (contracts_callback_data, all_directions_for_contract_inlines,
                              all_types_for_contract_inlines, all_contract_prices_inlines, detail_contract_inlines,
                              delete_contract_inlines)
+from .applicant_inlines import (application_callback_data, all_faculties_inlines, types_and_contracts,
+                                choices_e_edu_language)
