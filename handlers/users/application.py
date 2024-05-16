@@ -16,7 +16,7 @@ from states import ApplicantRegisterStates
 async def submit_application_uz(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
-        await msg.answer("Siz allaqachon hujjat topshirib bo'lgansiz!")
+        await msg.answer("❗️ Siz allaqachon hujjat topshirib bo'lgansiz!")
     else:
         await msg.answer("Pastdagi tugmani bosib, telefon raqamingizni yuboring.", reply_markup=phone_markup_uz)
         await state.set_state(ApplicantRegisterStates.phone)
@@ -26,7 +26,7 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
 async def submit_application_ru(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
-        await msg.answer("Вы уже подали документы!")
+        await msg.answer("❗️ Вы уже подали документы!")
     else:
         await msg.answer("Нажмите кнопку ниже и отправьте свой номер телефона.", reply_markup=phone_markup_ru)
         await state.set_state(ApplicantRegisterStates.phone)

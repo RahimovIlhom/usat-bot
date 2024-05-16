@@ -138,3 +138,18 @@ class Database:
         await self.execute_query(query, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
                                  directionOfEducation_id, typeOfEducation_id, languageOfEducation, 'SUBMITTED',
                                  olympian, datetime.now(), datetime.now())
+
+    async def get_exam_result(self, tgId):
+        query = "SELECT id, applicant_id, result FROM exam_results WHERE applicant_id = %s"
+        return await self.execute_query(query, tgId, fetchone=True)
+
+    async def select_active_tests_for_faculty(self, faculty_id: int, language: str):
+        query = (
+            "SELECT tests.id, tests.directionOfEducation_id, tests.science_id, sciences.nameUz, sciences.nameRu, "
+            "tests.questionsCount, tests.language, tests.isActive, tests.createdTime "
+            "FROM tests "
+            "JOIN sciences ON sciences.id = tests.science_id "
+            "WHERE tests.directionOfEducation_id = %s AND tests.isActive = %s AND tests.language = %s;"
+        )
+        return await self.execute_query(query, faculty_id, True, language, fetchall=True)
+

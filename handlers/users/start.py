@@ -26,6 +26,7 @@ async def bot_start(message: types.Message, state: FSMContext):
             await message.answer("Bosh menyu:", reply_markup=menu_markup_uz)
         else:
             await message.answer("Главное меню:", reply_markup=menu_markup_ru)
+        await state.finish()
     else:
         answer = ("Assalomu alaykum! Fan va texnologiyalar universitetining rasmiy Telegram botiga xush kelibsiz. Bu "
                   "yerda siz universitetga hujjat topshirishingiz, onlayn imtihon topshirishingiz, shartnomani "

@@ -86,7 +86,7 @@ class Applicant(models.Model):
     updatedTime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.phoneNumber} - {self.pinfl}"
+        return f"{self.firstName} {self.lastName} - {self.pinfl}"
 
     class Meta:
         db_table = 'applicants'
