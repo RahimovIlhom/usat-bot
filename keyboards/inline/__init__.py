@@ -7,3 +7,5 @@ from .contracts_menu import (contracts_callback_data, all_directions_for_contrac
                              delete_contract_inlines)
 from .applicant_inlines import (application_callback_data, all_faculties_inlines, types_and_contracts,
                                 choices_e_edu_language)
+from .you_are_ready import ready_inline_button
+from .question_responses import responses_callback_data, all_responses_inlines
