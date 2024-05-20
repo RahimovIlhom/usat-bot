@@ -2,16 +2,17 @@ import asyncio
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import ContentType
+from aiogram.types import ContentType, ReplyKeyboardRemove
 from aiogram.utils.exceptions import BadRequest
 
 from filters import IsPrivate
+from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines
 from loader import dp, db
 from states import TestExecutionStates
 
 
-@dp.message_handler(IsPrivate(), text=["Imtihon topshirish", "Сдать экзамен"])
+@dp.message_handler(IsPrivate(), text=["🧑‍💻 Imtihon topshirish", "🧑‍💻 Сдать экзамен"])
 async def check_execution_text(msg: types.Message):
     applicant = await db.get_applicant(msg.from_user.id)
     simple_user = await db.select_simple_user(msg.from_user.id)
@@ -58,32 +59,73 @@ async def you_are_ready(call: types.CallbackQuery, state: FSMContext):
         'number': 1
     }
     await state.update_data(test_data)
+    await call.message.edit_reply_markup(None)
     if simple_user[2] == 'uz':
-        await call.message.edit_text(f"{test[3]} fanidan test savollari. Tayyorlaning, imtixon 10 soniyadan keyin boshlanadi.")
+        await call.message.answer(f"{test[3]} fanidan test savollari. Tayyorlaning, imtixon 10 soniyadan keyin boshlanadi.",
+                                  reply_markup=ReplyKeyboardRemove())
     else:
-        await call.message.edit_text(f"Тестовые вопросы по предмету {test[4]}. Подготовьтесь, экзамен начнется через 10 секунд.")
+        await call.message.answer(f"Тестовые вопросы по предмету {test[4]}. Подготовьтесь, экзамен начнется через 10 секунд.",
+                                  reply_markup=ReplyKeyboardRemove())
     time_message = await call.message.answer(f"{10}")
     # for i in range(9, -1, -1):
     #     await asyncio.sleep(1)
     #     await time_message.edit_text(f"{i}")
     await time_message.delete()
-    await science1_all_questions(call, state, call.data)
+    await science1_all_questions(call, {}, state)
 
 
 @dp.callback_query_handler(responses_callback_data.filter(), state=TestExecutionStates.science1)
-async def science1_all_questions(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
+async def science1_all_questions(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    user_resp = callback_data.get('response')
     simple_user = await db.select_simple_user(call.from_user.id)
     language = simple_user[2]
     data = await state.get_data()
     questions = data.get('questions')
     number = data.get('number')
+    true_responses = data.get('true_responses')
+    user_responses = data.get('user_responses')
+    await state.update_data(
+        {
+            'user_responses': user_responses + user_resp if user_responses else f"{user_resp if user_resp else ''}",
+        }
+    )
+
+    if user_resp:
+        text_template = "{}\n\nВаш ответ: {}" if language != 'uz' else "{}\n\nSizning javobingiz: {}"
+        try:
+            await call.message.edit_caption(text_template.format(call.message.caption, user_resp).replace('<', '&lt'),
+                                            reply_markup=None)
+        except BadRequest:
+            await call.message.edit_text(text_template.format(call.message.text, user_resp).replace('<', '&lt'),
+                                         reply_markup=None)
+
+    if not questions:
+        data = await state.get_data()
+        user_responses = data.get('user_responses')
+        count = len(tuple(filter(lambda array: array[0] == array[1], zip(true_responses, user_responses))))
+        if language == 'uz':
+            await call.message.answer(f"Hozirgi kod uchun test yakunlandi. Natija: {count}",
+                                      reply_markup=menu_markup_uz)
+        else:
+            await call.message.answer(f"Тест для текущего кода завершен. Результат: {count}",
+                                      reply_markup=menu_markup_ru)
+        await state.finish()
+        return
     question = questions.pop(0)
     image = question[2]
     if language == 'uz':
-        q_text = f"{number}-savol.\n\n{question[3]}"
+        q_text = f"{number}-savol.\n\n{question[3].replace('<', '&lt')}"
     else:
-        q_text = f"{number}-й вопрос.\n\n{question[3]}"
+        q_text = f"{number}-й вопрос.\n\n{question[3].replace('<', '&lt')}"
     true_resp = question[4]
+    await state.update_data(
+        {
+            'true_responses': true_responses + true_resp if true_responses else f"{true_resp}",
+            'questions': questions,
+            'number': number + 1,
+        }
+    )
+
     if image:
         try:
             await call.message.answer_photo(image, q_text, reply_markup=await all_responses_inlines(language))

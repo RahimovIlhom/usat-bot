@@ -16,19 +16,19 @@ from loader import dp, db
 from states import AddDirectionStates, TypesOfEduStates, AddContractSumma
 
 
-@dp.message_handler(IsPrivate(), text="Barcha yo'nalishlar", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="🎓 Barcha yo'nalishlar", user_id=ADMINS)
 async def all_directions_branch(msg: Union[types.Message, types.CallbackQuery], delete: bool = False):
     if isinstance(msg, types.CallbackQuery):
         call = msg
         if delete:
-            await call.message.answer("Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
+            await call.message.answer("🎓 Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
         else:
-            await call.message.edit_text("Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
+            await call.message.edit_text("🎓 Barcha yo'nalishlar", reply_markup=await all_directions_inlines())
     else:
         await msg.answer(msg.text, reply_markup=await all_directions_inlines())
 
 
-@dp.message_handler(IsPrivate(), text="Yo'nalish qo'shish", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="➕ Yo'nalish qo'shish", user_id=ADMINS)
 async def add_or_set_direction_branch(msg: Union[types.Message, types.CallbackQuery], state: FSMContext,
                                       direction_id: int = None):
     if isinstance(msg, types.CallbackQuery):
@@ -102,19 +102,19 @@ async def delete_direction_of_edu(call, id):
     await call.message.edit_text(info, reply_markup=await delete_direction_inlines(direction[0]))
 
 
-@dp.message_handler(IsPrivate(), text="Barcha ta'lim turlari", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="🎓 Barcha ta'lim turlari", user_id=ADMINS)
 async def all_types_branch(msg: Union[types.Message, types.CallbackQuery], delete: bool = False):
     if isinstance(msg, types.CallbackQuery):
         call = msg
         if delete:
-            await call.message.answer("Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
+            await call.message.answer("🎓 Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
         else:
-            await call.message.edit_text("Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
+            await call.message.edit_text("🎓 Barcha ta'lim turlari", reply_markup=await all_types_of_edu_inlines())
     else:
         await msg.answer(msg.text, reply_markup=await all_types_of_edu_inlines())
 
 
-@dp.message_handler(IsPrivate(), text="Ta'lim turi qo'shish", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="➕ Ta'lim turi qo'shish", user_id=ADMINS)
 async def add_or_set_type_branch(msg: Union[types.Message, types.CallbackQuery], state: FSMContext,
                                  type_id: int = None):
     if isinstance(msg, types.CallbackQuery):
@@ -187,7 +187,7 @@ async def delete_type_of_edu(call, id):
     await call.message.edit_text(info, reply_markup=await delete_type_of_edu_inlines(type_of_edu[0]))
 
 
-@dp.message_handler(IsPrivate(), text="Yo'nalishlar bo'yicha kontrakt summalari", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="🏷️ Yo'nalishlar bo'yicha kontrakt summalari", user_id=ADMINS)
 async def contract_for_directions(msg: Union[types.Message, types.CallbackQuery]):
     if isinstance(msg, types.CallbackQuery):
         call = msg
@@ -198,7 +198,7 @@ async def contract_for_directions(msg: Union[types.Message, types.CallbackQuery]
                          reply_markup=await all_directions_for_contract_inlines())
 
 
-@dp.message_handler(IsPrivate(), text="Kontrakt summasini kiritish", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="➕ Kontrakt summasini kiritish", user_id=ADMINS)
 async def add_contract_for_direction(msg: Union[types.Message, types.CallbackQuery]):
     if isinstance(msg, types.CallbackQuery):
         call = msg

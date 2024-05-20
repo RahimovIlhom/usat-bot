@@ -12,7 +12,7 @@ from loader import dp, db
 from states import ApplicantRegisterStates
 
 
-@dp.message_handler(IsPrivate(), text="Universitetga hujjat topshirish")
+@dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
 async def submit_application_uz(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
@@ -22,7 +22,7 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
         await state.set_state(ApplicantRegisterStates.phone)
 
 
-@dp.message_handler(IsPrivate(), text="Подать документы в университет")
+@dp.message_handler(IsPrivate(), text="📰 Подать документы в университет")
 async def submit_application_ru(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
