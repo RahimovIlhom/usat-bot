@@ -4,15 +4,15 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 admin_menu_markup_uz = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Arizalar bo'limi"),
-            KeyboardButton(text="Imtihon bo'limi"),
+            KeyboardButton(text="📑 Arizalar bo'limi"),
+            KeyboardButton(text="📚 Imtihon bo'limi"),
         ],
         [
-            KeyboardButton(text="Yo'nalishlar bo'limi"),
-            KeyboardButton(text="Ta'lim turlari bo'limi"),
+            KeyboardButton(text="👨‍🎓 Yo'nalishlar bo'limi"),
+            KeyboardButton(text="🎓 Ta'lim turlari bo'limi"),
         ],
         [
-            KeyboardButton(text="Kontrakt summalari"),
+            KeyboardButton(text="🏷️ Kontrakt summalari"),
         ],
     ],
     resize_keyboard=True
@@ -22,8 +22,8 @@ admin_menu_markup_uz = ReplyKeyboardMarkup(
 applications_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Ariza yuborganlar"),
-            KeyboardButton(text="Arizasi tasdiqlanganlar"),
+            KeyboardButton(text="📋 Ariza yuborganlar"),
+            KeyboardButton(text="✅ Arizasi tasdiqlanganlar"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),
@@ -35,7 +35,8 @@ applications_menu_markup = ReplyKeyboardMarkup(
 exams_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Testlar")
+            KeyboardButton(text="🗃️ Testlar"),
+            KeyboardButton(text="📈 Imtihon natijalari"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),
@@ -47,8 +48,8 @@ exams_menu_markup = ReplyKeyboardMarkup(
 directions_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Barcha yo'nalishlar"),
-            KeyboardButton(text="Yo'nalish qo'shish"),
+            KeyboardButton(text="🎓 Barcha yo'nalishlar"),
+            KeyboardButton(text="➕ Yo'nalish qo'shish"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),
@@ -60,8 +61,8 @@ directions_menu_markup = ReplyKeyboardMarkup(
 types_of_education_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Barcha ta'lim turlari"),
-            KeyboardButton(text="Ta'lim turi qo'shish"),
+            KeyboardButton(text="🎓 Barcha ta'lim turlari"),
+            KeyboardButton(text="➕ Ta'lim turi qo'shish"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),
@@ -73,10 +74,10 @@ types_of_education_menu_markup = ReplyKeyboardMarkup(
 contract_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Yo'nalishlar bo'yicha kontrakt summalari"),
+            KeyboardButton(text="🏷️ Yo'nalishlar bo'yicha kontrakt summalari"),
         ],
         [
-            KeyboardButton(text="Kontrakt summasini kiritish"),
+            KeyboardButton(text="➕ Kontrakt summasini kiritish"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),

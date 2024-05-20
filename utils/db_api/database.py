@@ -124,8 +124,9 @@ class Database:
     async def get_applicant(self, tgId, pinfl=None, phone=None):
         query = (
             "SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
-            "typeOfEducation_id, contractFile, olympian, createdTime FROM applicants WHERE tgId = %s OR pinfl = %s OR "
-            "phoneNumber = %s;")
+            "typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime FROM applicants WHERE tgId "
+            "= %s OR pinfl = %s OR phoneNumber = %s;"
+        )
         return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
 
     async def add_applicant(self, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
@@ -152,4 +153,8 @@ class Database:
             "WHERE tests.directionOfEducation_id = %s AND tests.isActive = %s AND tests.language = %s;"
         )
         return await self.execute_query(query, faculty_id, True, language, fetchall=True)
+
+    async def select_questions_for_test(self, test_id):
+        query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
+        return await self.execute_query(query, test_id, fetchall=True)
 
