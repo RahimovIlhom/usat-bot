@@ -144,6 +144,10 @@ class Database:
         query = "SELECT id, applicant_id, result FROM exam_results WHERE applicant_id = %s"
         return await self.execute_query(query, tgId, fetchone=True)
 
+    async def add_exam_result(self, applicant_id, result):
+        query = "INSERT INTO exam_results (applicant_id, result) VALUES (%s, %s);"
+        await self.execute_query(query, applicant_id, result)
+
     async def select_active_tests_for_faculty(self, faculty_id: int, language: str):
         query = (
             "SELECT tests.id, tests.directionOfEducation_id, tests.science_id, sciences.nameUz, sciences.nameRu, "
