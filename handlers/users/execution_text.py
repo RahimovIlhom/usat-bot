@@ -173,8 +173,7 @@ async def handle_new_test(call, state, simple_user, all_tests, true_responses):
 
 async def finish_test(call, state, language, true_responses, user_responses):
     correct_answers = sum(1 for t, u in zip(true_responses, user_responses) if t == u)
-    print(true_responses)
-    print(user_responses)
+    await db.add_exam_result(call.from_user.id, correct_answers)
     await call.message.answer(
         f"Hozirgi kod uchun test yakunlandi. Natija: {correct_answers}" if language == 'uz'
         else f"Тест для текущего кода завершен. Результат: {correct_answers}",
