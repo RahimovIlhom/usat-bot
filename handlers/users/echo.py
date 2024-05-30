@@ -2,7 +2,7 @@ from aiogram import types
 
 from data.config import ADMINS
 from filters import IsPrivate
-from keyboards.default import admin_menu_markup_uz, menu_markup_uz, menu_markup_ru
+from keyboards.default import admin_menu_markup_uz, menu_markup_uz, menu_markup_ru, exams_menu_markup
 from keyboards.inline import application_callback_data
 from loader import dp, db
 
@@ -10,6 +10,11 @@ from loader import dp, db
 @dp.message_handler(IsPrivate(), state=None, text="◀️ Orqaga", user_id=ADMINS)
 async def bot_echo(message: types.Message):
     await message.answer("Menu", reply_markup=admin_menu_markup_uz)
+
+
+@dp.message_handler(IsPrivate(), state=None, text="⬅️ Orqaga", user_id=ADMINS)
+async def bot_echo(message: types.Message):
+    await message.answer("📚 Imtihon bo'limi", reply_markup=exams_menu_markup)
 
 
 @dp.message_handler(IsPrivate(), state=None, text=["◀️ Orqaga", "◀️ Назад"])

@@ -69,6 +69,7 @@ APPLICATION_STATUS = (
 class Applicant(models.Model):
     tgId = models.BigIntegerField(primary_key=True)
     phoneNumber = models.CharField(max_length=20, unique=True)
+    additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True)
     pinfl = models.CharField(max_length=14, unique=True)
     firstName = models.CharField(max_length=255, null=True, blank=True)
     lastName = models.CharField(max_length=255, null=True, blank=True)
@@ -90,6 +91,7 @@ class Applicant(models.Model):
 
     class Meta:
         db_table = 'applicants'
+        ordering = ['-createdTime']
 
 
 class Olympian(models.Model):

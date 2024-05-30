@@ -20,7 +20,7 @@ settings_markup_ru = ReplyKeyboardMarkup(
             KeyboardButton(text="🌐 Изменение языка")
         ],
         [
-            KeyboardButton(text="◀️ Orqaga"),
+            KeyboardButton(text="◀️ Назад"),
         ],
     ],
     resize_keyboard=True

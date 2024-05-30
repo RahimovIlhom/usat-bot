@@ -45,6 +45,23 @@ exams_menu_markup = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+tests_menu_markup = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="📂 Yo'nalishlar bo'yicha testlar"),
+            KeyboardButton(text="➕ Yangi test qo'shish"),
+        ],
+        [
+            KeyboardButton(text="📚 Fanlar ro'yxati"),
+            KeyboardButton(text="➕ Yangi fan qo'shish"),
+        ],
+        [
+            KeyboardButton(text="⬅️ Orqaga"),
+        ],
+    ],
+    resize_keyboard=True
+)
+
 directions_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [

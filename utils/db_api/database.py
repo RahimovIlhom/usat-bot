@@ -123,22 +123,23 @@ class Database:
 
     async def get_applicant(self, tgId, pinfl=None, phone=None):
         query = (
-            "SELECT tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, directionOfEducation_id, "
-            "typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime FROM applicants WHERE tgId "
-            "= %s OR pinfl = %s OR phoneNumber = %s;"
+            "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
+            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime "
+            "FROM applicants WHERE tgId = %s OR pinfl = %s OR phoneNumber = %s;"
         )
         return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
 
-    async def add_applicant(self, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
-                            directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
+    async def add_applicant(self, tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName,
+                            passport, directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
         query = (
-            "INSERT INTO applicants (tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport, "
-            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, applicationStatus, olympian, "
-            "createdTime, updatedTime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            "INSERT INTO applicants (tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, "
+            "middleName, passport, directionOfEducation_id, typeOfEducation_id, languageOfEducation, "
+            "applicationStatus, olympian, createdTime, updatedTime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+            "%s, %s, %s, %s, %s);"
         )
-        await self.execute_query(query, tgId, phoneNumber, pinfl, firstName, lastName, middleName, passport,
-                                 directionOfEducation_id, typeOfEducation_id, languageOfEducation, 'SUBMITTED',
-                                 olympian, datetime.now(), datetime.now())
+        await self.execute_query(query, tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName,
+                                 middleName, passport, directionOfEducation_id, typeOfEducation_id,
+                                 languageOfEducation, 'SUBMITTED', olympian, datetime.now(), datetime.now())
 
     async def get_exam_result(self, tgId):
         query = "SELECT id, applicant_id, result FROM exam_results WHERE applicant_id = %s"
@@ -161,4 +162,24 @@ class Database:
     async def select_questions_for_test(self, test_id):
         query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
         return await self.execute_query(query, test_id, fetchall=True)
+
+    async def select_sciences(self):
+        query = "SELECT id, nameUz, nameRu FROM sciences;"
+        return await self.execute_query(query, fetchall=True)
+
+    async def select_science(self, sc_id):
+        query = "SELECT id, nameUz, nameRu FROM sciences WHERE id = %s;"
+        return await self.execute_query(query, sc_id, fetchone=True)
+
+    async def add_or_update_science(self, nameUz, nameRu, science_id=None, *args):
+        if science_id is None:
+            query = "INSERT INTO sciences (nameUz, nameRu) VALUES (%s, %s);"
+            await self.execute_query(query, nameUz, nameRu)
+        else:
+            query = "UPDATE sciences SET nameUz = %s, nameRu = %s WHERE id = %s;"
+            await self.execute_query(query, nameUz, nameRu, science_id)
+
+    async def delete_science(self, sc_id):
+        query = "DELETE FROM sciences WHERE id = %s;"
+        await self.execute_query(query, sc_id)
 

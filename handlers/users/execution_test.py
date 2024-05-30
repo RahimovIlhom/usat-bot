@@ -46,7 +46,8 @@ async def check_execution_text(msg: types.Message):
             if exam_result:
                 resp_text = response_texts[language]['already_examined']
             else:
-                active_tests = await db.select_active_tests_for_faculty(applicant[7], applicant[9])
+                active_tests = await db.select_active_tests_for_faculty(applicant[8], applicant[10])
+                # maslahatlashamiz
                 if len(active_tests) != 3:
                     resp_text = response_texts[language]['no_exam_questions']
                 else:
@@ -70,9 +71,9 @@ async def you_are_ready(call: types.CallbackQuery, state: FSMContext):
 
         simple_user = await db.select_simple_user(call.from_user.id)
         applicant = await db.get_applicant(call.from_user.id)
-        direction_id = applicant[7]
+        direction_id = applicant[8]
 
-        tests = await db.select_active_tests_for_faculty(direction_id, applicant[9])
+        tests = await db.select_active_tests_for_faculty(direction_id, applicant[10])
         if not tests:
             await call.message.answer("No active tests available.")
             return
