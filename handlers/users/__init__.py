@@ -5,7 +5,8 @@ from . import application
 from . import execution_test
 from . import profile
 from . import informations
-from . import exam_admin
+from . import science_admin
+from . import tests_admin
 from . import admin
 from . import contract_admin
 from . import echo

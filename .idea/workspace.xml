@@ -4,26 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/usatbot.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/users/models.py" afterDir="false" />
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="science admin">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers/users/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/application.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/echo.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/echo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/execution_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/execution_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/default/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/default/admin_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/admin_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/default/settings_buttons.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/settings_buttons.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/states/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/states/application_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/application_states.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/exam_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/science_admin.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +97,20 @@
       <option name="presentableId" value="Default" />
       <updated>1717048832805</updated>
     </task>
+    <task id="LOCAL-00001" summary="science admin">
+      <option name="closed" value="true" />
+      <created>1717067871697</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1717067871698</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="science admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="science admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
