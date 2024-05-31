@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # local apps
-    "tests.apps.TestsConfig",
+    "test_app.apps.TestAppConfig",
     "users.apps.UsersConfig",
 ]
 

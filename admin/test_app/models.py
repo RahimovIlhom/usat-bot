@@ -1,22 +1,9 @@
 from django.db import models
 
-from users.models import DirectionOdEducation, LANGUAGES, Applicant
-
-
-class Science(models.Model):
-    nameUz = models.CharField(max_length=255)
-    nameRu = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.nameUz}"
-
-    class Meta:
-        db_table = 'sciences'
+from users.models import LANGUAGES, Applicant, Science
 
 
 class Test(models.Model):
-    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                             related_name='tests')
     science = models.ForeignKey(Science, on_delete=models.SET_NULL, null=True, blank=True, related_name='tests')
     questionsCount = models.IntegerField()
     language = models.CharField(max_length=2, choices=LANGUAGES)
@@ -24,7 +11,7 @@ class Test(models.Model):
     createdTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.directionOfEducation}, {self.science} -> {self.language}"
+        return f"{self.science} -> {self.language}"
 
     class Meta:
         db_table = 'tests'

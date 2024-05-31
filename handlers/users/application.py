@@ -58,22 +58,34 @@ async def send_contact(msg: types.Message):
     await msg.answer(info, reply_markup=markup)
 
 
-@dp.message_handler(IsPrivate(), content_types=ContentType.TEXT, state=ApplicantRegisterStates.additional_phone)
+@dp.message_handler(IsPrivate(), regexp=r"^\+?(998)?[0-9]{2}[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{2}[-\s\.]?[0-9]{2}$",
+                    state=ApplicantRegisterStates.additional_phone)
 async def send_contact(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
     simple_user = await db.select_simple_user(msg.from_user.id)
+    user_language = simple_user[2]
+
+    if msg.text in data.get('phone'):
+        message_text = "❗️ Qo'shimcha telefon raqam asosiy raqam bilan bir xil. Iltimos, qayta yuboring." if user_language == 'uz' else "❗️ Дополнительный номер телефона аналогичен основному. Пожалуйста, отправьте повторно."
+        await msg.answer(message_text)
+        return
+
     await state.update_data({'additional_phone': msg.text})
-    if simple_user[2] == 'uz':
-        info = "ID-kartangizdagi Shaxsiy raqamingizni kiriting. "
-        image = InputFile('data/images/pinfl.jpg')
+
+    if user_language == 'uz':
+        info = "ID-kartangizdagi Shaxsiy raqamingizni kiriting."
+        image_path = 'data/images/pinfl.jpg'
         image_url = "http://telegra.ph//file/97b3043fbcdc89ba48360.jpg"
     else:
         info = "Введите персональный идентификационный номер, указанный на ID-карте."
-        image = InputFile('data/images/pinfl_ru.jpg')
+        image_path = 'data/images/pinfl_ru.jpg'
         image_url = "http://telegra.ph//file/e815e58a3c4c08948b617.jpg"
+
     try:
         await msg.answer_photo(image_url, caption=info, reply_markup=ReplyKeyboardRemove())
-    except:
-        await msg.answer_photo(image, caption=info, reply_markup=ReplyKeyboardRemove())
+    except Exception:
+        await msg.answer_photo(InputFile(image_path), caption=info, reply_markup=ReplyKeyboardRemove())
+
     await ApplicantRegisterStates.next()
 
 
@@ -82,12 +94,10 @@ async def send_contact(msg: types.Message):
     await msg.delete()
     simple_user = await db.select_simple_user(msg.from_user.id)
     if simple_user[2] == 'uz':
-        info = "Iltimos, qo'shimcha telefon raqamingizni yuboring."
-        markup = phone_markup_uz
+        info = "❗️ Qo'shimcha telefon raqamingiz xato. Iltimos, qayta yuboring."
     else:
-        info = "Пожалуйста, пришлите дополнительный номер телефона."
-        markup = phone_markup_ru
-    await msg.answer(info, reply_markup=markup)
+        info = "❗️ Ваш дополнительный номер телефона неверен. Пожалуйста, отправьте повторно."
+    await msg.answer(info)
 
 
 @dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.TEXT)

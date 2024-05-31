@@ -6,7 +6,8 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, ContentTy
 from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import tests_menu_markup
-from keyboards.inline import all_faculty_inlines_for_test, all_science_inlines_for_test, lang_inlines_for_test
+from keyboards.inline import all_science_inlines_for_test, lang_inlines_for_test, test_callback_data, \
+    all_sciences_markup
 from loader import dp, db
 from states import AddTestStates
 
@@ -16,35 +17,21 @@ async def add_or_set_test(msg: Union[Message, CallbackQuery], state: FSMContext)
     if isinstance(msg, CallbackQuery):
         call = msg
     else:
-        await msg.answer("Testning ta'lim yo'nalishini tanlang: ", reply_markup=await all_faculty_inlines_for_test())
-    await state.set_state(AddTestStates.faculty)
-
-
-@dp.callback_query_handler(state=AddTestStates.faculty)
-async def choice_faculty(call: CallbackQuery, state: FSMContext):
-    if call.data == 'close':
-        await call.message.delete()
-        await state.finish()
-    else:
-        await state.update_data({'directionOfEducation_id': call.data})
-        await call.message.edit_text("Testning fanini tanlang: ", reply_markup=await all_science_inlines_for_test())
-        await AddTestStates.next()
+        await msg.answer("Testning fanini tanlang: ", reply_markup=await all_science_inlines_for_test())
+    await state.set_state(AddTestStates.science)
 
 
 @dp.callback_query_handler(state=AddTestStates.science)
 async def choice_science(call: CallbackQuery, state: FSMContext):
-    if call.data == 'back':
-        await call.message.edit_text("Testning ta'lim yo'nalishini tanlang: ",
-                                     reply_markup=await all_faculty_inlines_for_test())
-        await AddTestStates.previous()
+    if call.data == 'close':
+        await call.message.edit_text("🗃️ Testlar", reply_markup=tests_menu_markup)
+        await state.finish()
     else:
         await state.update_data({'science_id': call.data})
-        data = await state.get_data()
-        faculty = await db.select_direction(data.get('directionOfEducation_id'))
         science = await db.select_science(call.data)
-        await call.message.edit_text(f"<b>{faculty[1]}</b> ta'lim yo'nalishi, <b>{science[1]}</b> uchun",
-                                     reply_markup=None)
-        await call.message.answer("Testning savollar sonini kiriting: ", reply_markup=ReplyKeyboardRemove())
+        await call.message.edit_text(f"✅ <b>{science[1]}</b>", reply_markup=None)
+        await call.message.answer("Testning nechta savollari abituriyentga uzatiladi? ",
+                                  reply_markup=ReplyKeyboardRemove())
         await AddTestStates.next()
 
 
@@ -70,6 +57,14 @@ async def error_add_test(msg: Message):
     await msg.delete()
 
 
-@dp.message_handler(IsPrivate(), text="📂 Yo'nalishlar bo'yicha testlar", user_id=ADMINS)
-async def show_faculties_for_test(msg: Message):
+@dp.message_handler(IsPrivate(), text="📂 Fanlar bo'yicha testlar", user_id=ADMINS)
+async def show_faculties_for_test(msg: Union[Message, CallbackQuery]):
+    if isinstance(msg, CallbackQuery):
+        call = msg
+    else:
+        await msg.answer(msg.text, reply_markup=await all_sciences_markup())
+
+
+@dp.callback_query_handler(test_callback_data.filter())
+async def select_test_func(call: CallbackQuery, callback_data: dict, state: FSMContext):
     pass

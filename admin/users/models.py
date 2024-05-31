@@ -1,6 +1,5 @@
 from django.db import models
 
-
 LANGUAGES = (
     ('uz', 'Uzbek'),
     ('ru', 'Russian'),
@@ -19,9 +18,10 @@ class SimpleUser(models.Model):
         db_table = 'simple_users'
 
 
-class DirectionOdEducation(models.Model):
+class DirectionOfEducation(models.Model):
     nameUz = models.CharField(max_length=255)
     nameRu = models.CharField(max_length=255)
+    sciences = models.ManyToManyField('Science', blank=True)
 
     def __str__(self):
         return f"{self.nameUz}"
@@ -42,7 +42,7 @@ class TypeOfEducation(models.Model):
 
 
 class ContractPrice(models.Model):
-    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
+    directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='contract_price')
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name="contract_price")
@@ -75,7 +75,7 @@ class Applicant(models.Model):
     lastName = models.CharField(max_length=255, null=True, blank=True)
     middleName = models.CharField(max_length=255, null=True, blank=True)
     passport = models.CharField(max_length=20, null=True, blank=True, unique=True)
-    directionOfEducation = models.ForeignKey(DirectionOdEducation, on_delete=models.SET_NULL, null=True, blank=True,
+    directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='applicants')
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='applicants')
@@ -105,3 +105,14 @@ class Olympian(models.Model):
 
     class Meta:
         db_table = 'olympians'
+
+
+class Science(models.Model):
+    nameUz = models.CharField(max_length=255)
+    nameRu = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.nameUz}"
+
+    class Meta:
+        db_table = 'sciences'

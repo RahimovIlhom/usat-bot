@@ -48,7 +48,7 @@ exams_menu_markup = ReplyKeyboardMarkup(
 tests_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="📂 Yo'nalishlar bo'yicha testlar"),
+            KeyboardButton(text="📂 Fanlar bo'yicha testlar"),
             KeyboardButton(text="➕ Yangi test qo'shish"),
         ],
         [

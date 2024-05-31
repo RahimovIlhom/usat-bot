@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 
-from .models import Science, Test, Question, ExamResult
+from .models import Test, Question, ExamResult
+from users.models import Science
 
 
 class ScienceAdmin(admin.ModelAdmin):
@@ -10,8 +11,8 @@ class ScienceAdmin(admin.ModelAdmin):
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'directionOfEducation', 'science', 'questionsCount', 'language', 'isActive']
-    list_filter = ['directionOfEducation', 'science', 'language']
+    list_display = ['id', 'science', 'questionsCount', 'language', 'isActive']
+    list_filter = ['science', 'language']
     search_fields = ['directionOfEducation__nameUz', 'directionOfEducation__nameRu', 'science__nameUz',
                      'science__nameRu', 'questionsCount', 'language']
 

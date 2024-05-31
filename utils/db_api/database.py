@@ -183,9 +183,9 @@ class Database:
         query = "DELETE FROM sciences WHERE id = %s;"
         await self.execute_query(query, sc_id)
 
-    async def add_test(self, directionOfEducation_id, science_id, questionsCount, language):
-        query = ("INSERT INTO tests (directionOfEducation_id, science_id, questionsCount, language, isActive, "
-                 "createdTime) VALUES (%s, %s, %s, %s, %s, %s);")
-        await self.execute_query(query, directionOfEducation_id, science_id, questionsCount, language, False,
+    async def add_test(self, science_id, questionsCount, language):
+        query = ("INSERT INTO tests (science_id, questionsCount, language, isActive, "
+                 "createdTime) VALUES (%s, %s, %s, %s, %s);")
+        await self.execute_query(query, science_id, questionsCount, language, False,
                                  datetime.now())
 

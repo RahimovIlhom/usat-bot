@@ -6,7 +6,6 @@ class TestExecutionStates(StatesGroup):
 
 
 class AddTestStates(StatesGroup):
-    faculty = State()
     science = State()
     count = State()
     language = State()
