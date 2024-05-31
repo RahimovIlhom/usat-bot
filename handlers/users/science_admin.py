@@ -57,7 +57,7 @@ async def science_name_ru(msg: Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(state=ScienceAddStates.states, content_types=ContentType.ANY)
+@dp.message_handler(state=ScienceAddStates.all_states, content_types=ContentType.ANY)
 async def error_science_add(msg: Message):
     await msg.delete()
 

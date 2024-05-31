@@ -33,5 +33,10 @@ async def bot_echo(message: types.Message):
 
 
 @dp.callback_query_handler(application_callback_data.filter(), state=None)
-async def select_application_func(call: types.CallbackQuery):
+async def delete_call_message_application(call: types.CallbackQuery):
+    await call.message.delete()
+
+
+@dp.callback_query_handler(state=None)
+async def delete_call_message(call: types.CallbackQuery):
     await call.message.delete()

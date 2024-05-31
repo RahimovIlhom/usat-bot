@@ -10,3 +10,4 @@ from .applicant_inlines import (application_callback_data, all_faculties_inlines
 from .you_are_ready import ready_inline_button
 from .question_responses import responses_callback_data, all_responses_inlines
 from .sciences_inlines import science_callback_data, science_list_markup, science_show_markup, request_deletion_markup
+from .tests_inlines import all_faculty_inlines_for_test, all_science_inlines_for_test, lang_inlines_for_test

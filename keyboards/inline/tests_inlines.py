@@ -3,27 +3,50 @@ from aiogram.utils.callback_data import CallbackData
 
 from loader import db
 
-# directions_callback_data = CallbackData('direction', 'id', 'action', 'do')
-#
-#
-# async def make_directions_callback_data(id, action='0', do='0'):
-#     return directions_callback_data.new(id=id, action=action, do=do)
-#
-#
-# async def all_directions_inlines():
-#     all_directions = await db.select_directions()
-#     markup = InlineKeyboardMarkup(row_width=1)
-#     for direction in all_directions:
-#         markup.insert(
-#             InlineKeyboardButton(
-#                 text=direction[1],
-#                 callback_data=await make_directions_callback_data(direction[0], 'read')
-#             )
-#         )
-#     markup.insert(
-#         InlineKeyboardButton(
-#             text="❌ Yopish",
-#             callback_data=await make_directions_callback_data('close')
-#         )
-#     )
-#     return markup
+
+async def all_faculty_inlines_for_test():
+    all_directions = await db.select_directions()
+    markup = InlineKeyboardMarkup(row_width=1)
+    for direction in all_directions:
+        markup.insert(
+            InlineKeyboardButton(
+                text=direction[1],
+                callback_data=direction[0]
+            )
+        )
+    markup.insert(
+        InlineKeyboardButton(
+            text="❌ Yopish",
+            callback_data='close'
+        )
+    )
+    return markup
+
+
+async def all_science_inlines_for_test():
+    sciences = await db.select_sciences()
+    markup = InlineKeyboardMarkup(row_width=2)
+    for sc in sciences:
+        markup.insert(
+            InlineKeyboardButton(
+                text=sc[1],
+                callback_data=sc[0]
+            )
+        )
+    markup.row(
+        InlineKeyboardButton(
+            text="◀️ Orqaga",
+            callback_data='back'
+        )
+    )
+    return markup
+
+
+lang_inlines_for_test = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="O'zbek tili", callback_data='uz'),
+            InlineKeyboardButton(text="Русский язык", callback_data='ru')
+        ]
+    ]
+)

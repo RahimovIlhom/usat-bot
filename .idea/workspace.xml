@@ -4,10 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="science admin">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test admin begin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/exam_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/science_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/echo.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/echo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/science_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/science_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/tests_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/tests_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/states/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/states/test_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/test_states.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,34 +30,34 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "RahimovIlhom"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;RahimovIlhom&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/RahimovIlhom/usat-bot.git",
-    "accountId": "301f7e3f-4d56-4b9a-8503-8ce17f1d93f2"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/RahimovIlhom/usat-bot.git&quot;,
+    &quot;accountId&quot;: &quot;301f7e3f-4d56-4b9a-8503-8ce17f1d93f2&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2hAthzaR5twSuud6DY32jci5TTD" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.app.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="usatbot" />
@@ -105,12 +111,21 @@
       <option name="project" value="LOCAL" />
       <updated>1717067871698</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="test admin begin">
+      <option name="closed" value="true" />
+      <created>1717070853639</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1717070853639</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="science admin" />
-    <option name="LAST_COMMIT_MESSAGE" value="science admin" />
+    <MESSAGE value="test admin begin" />
+    <option name="LAST_COMMIT_MESSAGE" value="test admin begin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
