@@ -183,9 +183,47 @@ class Database:
         query = "DELETE FROM sciences WHERE id = %s;"
         await self.execute_query(query, sc_id)
 
-    async def add_test(self, science_id, questionsCount, language):
+    async def add_test(self, science_id, questionsCount, language, id=None, *args):
         query = ("INSERT INTO tests (science_id, questionsCount, language, isActive, "
                  "createdTime) VALUES (%s, %s, %s, %s, %s);")
         await self.execute_query(query, science_id, questionsCount, language, False,
                                  datetime.now())
+
+    async def update_test(self, science_id, questionsCount, language, id):
+        query = "UPDATE tests SET science_id = %s, questionsCount = %s, language = %s WHERE id = %s;"
+        await self.execute_query(query, science_id, questionsCount, language, id)
+
+    async def select_tests_for_science(self, sc_id):
+        query = ("""
+            SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
+                   COUNT(q.id) AS questions_count
+            FROM tests t
+            LEFT JOIN questions q ON t.id = q.test_id
+            WHERE t.science_id = %s
+            GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime;
+        """)
+        return await self.execute_query(query, sc_id, fetchall=True)
+
+    async def select_test(self, test_id):
+        query = ("""
+            SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
+                   COUNT(q.id) AS questions_count, s.nameUz, s.nameRu
+            FROM tests t
+            LEFT JOIN questions q ON t.id = q.test_id
+            LEFT JOIN sciences s ON t.science_id = s.id
+            WHERE t.id = %s
+            GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, s.nameUz, s.nameRu;
+        """)
+        return await self.execute_query(query, test_id, fetchone=True)
+
+    async def delete_test(self, test_id):
+        # Update questions to set test_id to NULL
+        update_query = "DELETE FROM questions WHERE test_id = %s"
+        await self.execute_query(update_query, test_id)
+
+        # Delete the test
+        delete_query = "DELETE FROM tests WHERE id = %s"
+        await self.execute_query(delete_query, test_id)
+
+
 

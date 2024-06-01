@@ -4,35 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="add test">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="update faculty model and test add">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/migrations/0002_alter_question_test_alter_test_directionofeducation_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/migrations/0003_alter_question_image.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/migrations/0004_alter_test_language.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/tests/views.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/users/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0002_alter_applicant_directionofeducation_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0003_alter_applicant_contractfile_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0004_rename_educationalareas_directionodeducation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0005_applicant_languageofeducation_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0006_applicant_applicationstatus.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/migrations/0007_applicant_additionalphonenumber.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/users/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/application.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/application.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/test_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/test_app/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers/users/tests_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/tests_admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/default/admin_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/admin_menu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/states/test_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/test_states.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -110,7 +87,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
+        <option value="bundled-python-sdk-48aec45f0201-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17011.127" />
       </set>
     </attachedChunks>
   </component>
@@ -147,14 +124,23 @@
       <option name="project" value="LOCAL" />
       <updated>1717141946565</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="update faculty model and test add">
+      <option name="closed" value="true" />
+      <created>1717157814448</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1717157814448</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="science admin" />
     <MESSAGE value="test admin begin" />
     <MESSAGE value="add test" />
-    <option name="LAST_COMMIT_MESSAGE" value="add test" />
+    <MESSAGE value="update faculty model and test add" />
+    <option name="LAST_COMMIT_MESSAGE" value="update faculty model and test add" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -163,6 +149,11 @@
           <url>file://$PROJECT_DIR$/handlers/users/execution_test.py</url>
           <line>50</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/db_api/database.py</url>
+          <line>151</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

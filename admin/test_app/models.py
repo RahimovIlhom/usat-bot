@@ -11,7 +11,7 @@ class Test(models.Model):
     createdTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.science} -> {self.language}"
+        return f"{self.science} -> {self.language}: {self.id}"
 
     class Meta:
         db_table = 'tests'
