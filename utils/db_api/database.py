@@ -225,5 +225,12 @@ class Database:
         delete_query = "DELETE FROM tests WHERE id = %s"
         await self.execute_query(delete_query, test_id)
 
-
-
+    async def add_or_update_question(self, test_id, image, question, trueResponse, question_id=None):
+        if question_id:
+            query = "UPDATE questions SET test_id = %s, image = %s, question = %s, trueResponse = %s WHERE id = %s;"
+            await self.execute_query(query, test_id, image, question, trueResponse, question_id)
+            return 'update'
+        else:
+            query = "INSERT INTO (test_id, image, question, trueResponse) VALUES (%s, %s, %s, %s);"
+            await self.execute_query(query, test_id, image, question, trueResponse)
+            return 'add'

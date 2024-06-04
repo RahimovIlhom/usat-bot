@@ -1,4 +1,5 @@
 from aiogram import types
+from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from data.config import ADMINS
 from filters import IsPrivate
@@ -34,9 +35,15 @@ async def bot_echo(message: types.Message):
 
 @dp.callback_query_handler(application_callback_data.filter(), state=None)
 async def delete_call_message_application(call: types.CallbackQuery):
-    await call.message.delete()
+    try:
+        await call.message.delete()
+    except MessageCantBeDeleted:
+        await call.message.edit_reply_markup(None)
 
 
 @dp.callback_query_handler(state=None)
 async def delete_call_message(call: types.CallbackQuery):
-    await call.message.delete()
+    try:
+        await call.message.delete()
+    except MessageCantBeDeleted:
+        await call.message.edit_reply_markup(None)

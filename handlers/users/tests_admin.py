@@ -9,7 +9,7 @@ from keyboards.default import tests_menu_markup
 from keyboards.inline import all_science_inlines_for_test, lang_inlines_for_test, test_callback_data, \
     all_sciences_markup, tests_for_science_markup, test_markup, question_delete_test_markup
 from loader import dp, db
-from states import AddTestStates
+from states import AddTestStates, AddQuestionStates
 
 
 @dp.message_handler(IsPrivate(), text="➕ Yangi test qo'shish", user_id=ADMINS)
@@ -26,7 +26,8 @@ async def add_or_set_test(msg: Union[Message, CallbackQuery], state: FSMContext,
 @dp.callback_query_handler(state=AddTestStates.science)
 async def choice_science(call: CallbackQuery, state: FSMContext):
     if call.data == 'close':
-        await call.message.edit_text("🗃️ Testlar", reply_markup=tests_menu_markup)
+        await call.message.delete()
+        await call.message.answer("🗃️ Testlar", reply_markup=tests_menu_markup)
         await state.finish()
     else:
         await state.update_data({'science_id': call.data})
@@ -50,7 +51,7 @@ async def handle_lang_for_test(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if data.get('id'):
         await db.update_test(**data)
-        await call.message.edit_text("✅Test muvaffaqiyatli o'zgartirildi!", reply_markup=None)
+        await call.message.answer("✅Test muvaffaqiyatli o'zgartirildi!", reply_markup=tests_menu_markup)
         await show_test(call, data.get('id'))
     else:
         await db.add_test(**data)
@@ -88,7 +89,7 @@ async def select_test_func(call: CallbackQuery, callback_data: dict, state: FSMC
         await show_test(call, test_id)
     elif step == '3':
         if action == 'add':
-            pass
+            await add_or_set_question(call, test_id, state)
         elif action == 'list':
             pass
         elif action == 'edit':
@@ -126,10 +127,18 @@ async def question_delete_test(call, test_id):
             f"Holat: {'✅ Active' if test[6] >= test[2] else '🚫 No active'}\n\n"
             f"Ushbu testni rostdan ham o'chirmoqchimisiz?")
 
-    await call.message.edit_text(info, reply_markup=await question_delete_test_markup(test_id[0]))
+    await call.message.edit_text(info, reply_markup=await question_delete_test_markup(test[0]))
 
 
 async def delete_test_func(call, sc_id, test_id):
     await db.delete_test(test_id)
     await show_tests_for_science(call, sc_id)
     await call.message.answer("✅ Test muvaffaqiyatli o'chirildi!")
+
+
+async def add_or_set_question(call, test_id, state):
+    test = await db.select_test(test_id)
+    await state.set_data({'test_id': test_id})
+    await call.message.edit_text(f"➕ {test[7]} uchun savol qo'shish", reply_markup=None)
+    await call.message.answer("Savol rasmini yuboring:", reply_markup=ReplyKeyboardRemove())
+    await state.set_state(AddQuestionStates.image)

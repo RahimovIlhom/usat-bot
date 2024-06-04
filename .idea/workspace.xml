@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="update faculty model and test add">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test delete and update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/test_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/test_app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/echo.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/echo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers/users/tests_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/tests_admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/tests_inlines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/states/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717157814448</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="test delete and update">
+      <option name="closed" value="true" />
+      <created>1717238899253</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1717238899253</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -140,7 +147,8 @@
     <MESSAGE value="test admin begin" />
     <MESSAGE value="add test" />
     <MESSAGE value="update faculty model and test add" />
-    <option name="LAST_COMMIT_MESSAGE" value="update faculty model and test add" />
+    <MESSAGE value="test delete and update" />
+    <option name="LAST_COMMIT_MESSAGE" value="test delete and update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
