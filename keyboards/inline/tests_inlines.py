@@ -33,11 +33,11 @@ lang_inlines_for_test = InlineKeyboardMarkup(
 )
 
 
-test_callback_data = CallbackData('test', 'science', 'test', 'step', 'action', 'do')
+test_callback_data = CallbackData('test', 'science', 'test', 'step', 'action', 'do', 'ques_id')
 
 
-async def make_test_callback_data(science, test=0, step=0, action='0', do='0'):
-    return test_callback_data.new(science=science, test=test, step=step, action=action, do=do)
+async def make_test_callback_data(science, test=0, step=0, action='0', do='0', ques_id=0):
+    return test_callback_data.new(science=science, test=test, step=step, action=action, do=do, ques_id=ques_id)
 
 
 async def all_sciences_markup():
@@ -67,11 +67,11 @@ async def tests_for_science_markup(sc_id):
     for i in range(len(tests)):
         markup.insert(
             InlineKeyboardButton(
-                text=f"{i+1}-test: {tests[i][3]}, {tests[i][6]}/{tests[i][2]}",
+                text=f"{i+1}-test: {tests[i][3]}, {tests[i][6]}/{tests[i][2]} {'✅ Active' if tests[i][6] >= tests[i][2] else '🚫 No active'}",
                 callback_data=await make_test_callback_data(sc_id, tests[i][0], CURRENT_STEP+1)
             )
         )
-    markup.insert(
+    markup.row(
         InlineKeyboardButton(
             text='◀️ Orqaga',
             callback_data=await make_test_callback_data(sc_id, step=CURRENT_STEP-1)
@@ -131,6 +131,73 @@ async def question_delete_test_markup(test_id):
         InlineKeyboardButton(
             text="◀️ Orqaga",
             callback_data=await make_test_callback_data(test[1], test[0], CURRENT_STEP - 1),
+        )
+    )
+    return markup
+
+
+async def questions_list_markup(science_id, test_id):
+    CURRENT_STEP = 3
+    questions = await db.select_questions_for_test(test_id)
+    markup = InlineKeyboardMarkup(row_width=2)
+    number = 1
+    for ques in questions:
+        markup.insert(
+            InlineKeyboardButton(
+                text=f"{number}-savol",
+                callback_data=await make_test_callback_data(science_id, test_id, CURRENT_STEP + 1, ques_id=ques[0])
+            )
+        )
+        number += 1
+    markup.row(
+        InlineKeyboardButton(
+            text="◀️ Orqaga",
+            callback_data=await make_test_callback_data(science_id, test_id, CURRENT_STEP - 1),
+        )
+    )
+    return markup
+
+
+async def question_markup(sc_id, test_id, question_id):
+    CURRENT_STEP = 4
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.insert(
+        InlineKeyboardButton(
+            text="🗑 O'chirish",
+            callback_data=await make_test_callback_data(
+                sc_id, test_id, CURRENT_STEP + 1, action='delete', ques_id=question_id),
+        )
+    )
+    markup.insert(
+        InlineKeyboardButton(
+            text="✏️ Tahrirlash",
+            callback_data=await make_test_callback_data(
+                sc_id, test_id, CURRENT_STEP + 1, action='edit', ques_id=question_id),
+        )
+    )
+    markup.row(
+        InlineKeyboardButton(
+            text="◀️ Orqaga",
+            callback_data=await make_test_callback_data(sc_id, test_id, CURRENT_STEP - 1, action='list'),
+        )
+    )
+    return markup
+
+
+async def question_delete_question_markup(sc_id, test_id, question_id):
+    CURRENT_STEP = 5
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.insert(
+        InlineKeyboardButton(
+            text="❌ O'chirish",
+            callback_data=await make_test_callback_data(sc_id, test_id, CURRENT_STEP + 1, action='delete',
+                                                        do='yes', ques_id=question_id),
+        )
+    )
+    markup.insert(
+        InlineKeyboardButton(
+            text="◀️ Orqaga",
+            callback_data=await make_test_callback_data(sc_id, test_id, CURRENT_STEP - 1, ques_id=question_id),
         )
     )
     return markup

@@ -10,7 +10,7 @@ class SimpleUserAdmin(admin.ModelAdmin):
 
 
 class EducationalAreasAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nameUz', 'nameRu']
+    list_display = ['id', 'nameUz', 'nameRu', 'examPassPercentage']
     search_fields = ['nameUz', 'nameRu']
 
 
@@ -27,9 +27,9 @@ class ContractPriceAdmin(admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['tgId', 'phoneNumber', 'pinfl', 'firstName', 'passport', 'directionOfEducation', 'typeOfEducation',
-                    'contractFile', 'olympian']
-    list_filter = ['directionOfEducation', 'typeOfEducation']
+    list_display = ['pinfl', 'firstName', 'directionOfEducation', 'typeOfEducation',
+                    'contractFile', 'olympian', 'applicationStatus']
+    list_filter = ['directionOfEducation', 'typeOfEducation', 'applicationStatus']
     search_fields = ['tgId', 'phoneNumber', 'pinfl', 'firstName', 'passport', 'lastName', 'middleName', 'contractFile']
 
 

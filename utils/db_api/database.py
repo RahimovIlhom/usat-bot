@@ -163,6 +163,34 @@ class Database:
         query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
         return await self.execute_query(query, test_id, fetchall=True)
 
+    async def select_question(self, ques_id):
+        query = """
+            SELECT q.id, q.test_id, q.image, q.question, q.trueResponse, t.science_id, t.language, s.nameUz
+            FROM questions q
+            JOIN tests t ON q.test_id = t.id
+            JOIN sciences s ON t.science_id = s.id
+            WHERE q.id = %s;
+            """
+        return await self.execute_query(query, ques_id, fetchone=True)
+
+    async def add_or_update_question(self, test_id, image, question, trueResponse, question_id=None, *args, **kwargs):
+        if question_id:
+            query = "UPDATE questions SET test_id = %s, image = %s, question = %s, trueResponse = %s WHERE id = %s;"
+            await self.execute_query(query, test_id, image, question, trueResponse, question_id)
+            return 'update'
+        else:
+            query = "INSERT INTO questions (test_id, image, question, trueResponse) VALUES (%s, %s, %s, %s);"
+            await self.execute_query(query, test_id, image, question, trueResponse)
+            test_app = await self.select_test(test_id)
+            if test_app[2] == test_app[6]:
+                query_test = "UPDATE tests SET isActive = %s WHERE id = %s"
+                await self.execute_query(query_test, True, test_app[0])
+            return 'add'
+
+    async def delete_question(self, ques_id):
+        query = "DELETE FROM questions WHERE id = %s;"
+        await self.execute_query(query, ques_id)
+
     async def select_sciences(self):
         query = "SELECT id, nameUz, nameRu FROM sciences;"
         return await self.execute_query(query, fetchall=True)
@@ -224,13 +252,3 @@ class Database:
         # Delete the test
         delete_query = "DELETE FROM tests WHERE id = %s"
         await self.execute_query(delete_query, test_id)
-
-    async def add_or_update_question(self, test_id, image, question, trueResponse, question_id=None):
-        if question_id:
-            query = "UPDATE questions SET test_id = %s, image = %s, question = %s, trueResponse = %s WHERE id = %s;"
-            await self.execute_query(query, test_id, image, question, trueResponse, question_id)
-            return 'update'
-        else:
-            query = "INSERT INTO (test_id, image, question, trueResponse) VALUES (%s, %s, %s, %s);"
-            await self.execute_query(query, test_id, image, question, trueResponse)
-            return 'add'

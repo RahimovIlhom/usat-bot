@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, ContentTy
 
 from data.config import ADMINS
 from filters import IsPrivate
-from keyboards.default import tests_menu_markup
+from keyboards.default import tests_menu_markup, sciences_menu_markup
 from keyboards.inline import science_list_markup, science_callback_data, science_show_markup, request_deletion_markup
 from loader import dp, db
 from states import ScienceAddStates
@@ -50,9 +50,9 @@ async def science_name_ru(msg: Message, state: FSMContext):
     data = await state.get_data()
     await db.add_or_update_science(**data)
     if not data.get('science_id'):
-        await msg.answer("✅ Fan muvaffaqiyatli qo'shildi!", reply_markup=tests_menu_markup)
+        await msg.answer("✅ Fan muvaffaqiyatli qo'shildi!", reply_markup=sciences_menu_markup)
     else:
-        await msg.answer("✅ Fan muvaffaqiyatli o'zgartirildi!", reply_markup=tests_menu_markup)
+        await msg.answer("✅ Fan muvaffaqiyatli o'zgartirildi!", reply_markup=sciences_menu_markup)
     await state.reset_data()
     await state.finish()
 

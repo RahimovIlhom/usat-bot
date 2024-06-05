@@ -5,7 +5,10 @@ admin_menu_markup_uz = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="📑 Arizalar bo'limi"),
-            KeyboardButton(text="📚 Imtihon bo'limi"),
+        ],
+        [
+            KeyboardButton(text="👨‍💻 Imtihon bo'limi"),
+            KeyboardButton(text="📚 Fanlar bo'limi"),
         ],
         [
             KeyboardButton(text="👨‍🎓 Yo'nalishlar bo'limi"),
@@ -52,11 +55,20 @@ tests_menu_markup = ReplyKeyboardMarkup(
             KeyboardButton(text="➕ Yangi test qo'shish"),
         ],
         [
+            KeyboardButton(text="⬅️ Orqaga"),
+        ],
+    ],
+    resize_keyboard=True
+)
+
+sciences_menu_markup = ReplyKeyboardMarkup(
+    keyboard=[
+        [
             KeyboardButton(text="📚 Fanlar ro'yxati"),
             KeyboardButton(text="➕ Yangi fan qo'shish"),
         ],
         [
-            KeyboardButton(text="⬅️ Orqaga"),
+            KeyboardButton(text="◀️ Orqaga"),
         ],
     ],
     resize_keyboard=True

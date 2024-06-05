@@ -3,7 +3,8 @@ from aiogram import types
 from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import applications_menu_markup, \
-    exams_menu_markup, directions_menu_markup, types_of_education_menu_markup, contract_menu_markup
+    exams_menu_markup, directions_menu_markup, types_of_education_menu_markup, contract_menu_markup, \
+    sciences_menu_markup
 from loader import dp
 
 
@@ -12,9 +13,14 @@ async def applications_branch(msg: types.Message):
     await msg.answer(msg.text, reply_markup=applications_menu_markup)
 
 
-@dp.message_handler(IsPrivate(), text="📚 Imtihon bo'limi", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="👨‍💻 Imtihon bo'limi", user_id=ADMINS)
 async def exams_branch(msg: types.Message):
     await msg.answer(msg.text, reply_markup=exams_menu_markup)
+
+
+@dp.message_handler(IsPrivate(), text="📚 Fanlar bo'limi", user_id=ADMINS)
+async def exams_branch(msg: types.Message):
+    await msg.answer(msg.text, reply_markup=sciences_menu_markup)
 
 
 @dp.message_handler(IsPrivate(), text="👨‍🎓 Yo'nalishlar bo'limi", user_id=ADMINS)

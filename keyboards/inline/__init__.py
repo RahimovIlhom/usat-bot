@@ -12,4 +12,5 @@ from .question_responses import responses_callback_data, all_responses_inlines
 from .sciences_inlines import science_callback_data, science_list_markup, science_show_markup, request_deletion_markup
 from .tests_inlines import (all_science_inlines_for_test, lang_inlines_for_test, test_markup,
                             test_callback_data, all_sciences_markup, tests_for_science_markup,
-                            question_delete_test_markup)
+                            question_delete_test_markup, questions_list_markup, question_markup,
+                            question_delete_question_markup)

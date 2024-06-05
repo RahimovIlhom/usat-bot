@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 LANGUAGES = (
@@ -7,84 +8,98 @@ LANGUAGES = (
 
 
 class SimpleUser(models.Model):
-    tgId = models.BigIntegerField(primary_key=True)
-    fullname = models.CharField(max_length=255, null=True)
-    language = models.CharField(max_length=2, choices=LANGUAGES)
+    tgId = models.BigIntegerField(primary_key=True, verbose_name="Telegram id")
+    fullname = models.CharField(max_length=255, null=True, verbose_name="Ism-familiya")
+    language = models.CharField(max_length=2, choices=LANGUAGES, verbose_name="Til")
 
     def __str__(self):
         return f"{self.tgId} {self.fullname}"
 
     class Meta:
         db_table = 'simple_users'
+        verbose_name = "Foydalanuvchi"
+        verbose_name_plural = "Foydalanuvchilar"
 
 
 class DirectionOfEducation(models.Model):
-    nameUz = models.CharField(max_length=255)
-    nameRu = models.CharField(max_length=255)
-    sciences = models.ManyToManyField('Science', blank=True)
+    nameUz = models.CharField(max_length=255, verbose_name="Fakultet nomi uz")
+    nameRu = models.CharField(max_length=255, verbose_name="Fakultet nomi ru")
+    sciences = models.ManyToManyField('Science', blank=True, verbose_name="Imtihon fanlari")
+    examPassPercentage = models.PositiveIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Imtihondan o'tish foizi"
+    )
 
     def __str__(self):
         return f"{self.nameUz}"
 
     class Meta:
         db_table = 'educational_areas'
+        verbose_name = "Fakultet"
+        verbose_name_plural = "Fakultetlar"
 
 
 class TypeOfEducation(models.Model):
-    nameUz = models.CharField(max_length=255)
-    nameRu = models.CharField(max_length=255)
+    nameUz = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi uz")
+    nameRu = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi ru")
 
     def __str__(self):
         return f"{self.nameUz}"
 
     class Meta:
         db_table = 'types_of_education'
+        verbose_name = "Ta'lim turi"
+        verbose_name_plural = "Ta'lim turlari"
 
 
 class ContractPrice(models.Model):
     directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                             related_name='contract_price')
+                                             related_name='contract_price', verbose_name="Fakultet")
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name="contract_price")
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+                                        related_name="contract_price", verbose_name="Ta'lim turi")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Kontrakt miqdori")
 
     def __str__(self):
         return f"{self.directionOfEducation}, {self.typeOfEducation} - {self.amount}"
 
     class Meta:
         db_table = 'contract_prices'
+        verbose_name = "Kontrakt miqdori"
+        verbose_name_plural = "Kontrakt miqdorlari"
 
 
 APPLICATION_STATUS = (
-    ('DRAFT', 'DRAFT'),
-    ('SUBMITTED', 'SUBMITTED'),
-    ('REJECTED', 'REJECTED'),
-    ('ACCEPTED', 'ACCEPTED'),
-    ('PASSED', 'PASSED'),
-    ('FAILED', 'FAILED'),
-    ('EXAMINED', 'EXAMINED'),
+    ('DRAFT', 'QORALAMA'),
+    ('SUBMITTED', 'ARIZA YUBORILDI'),
+    ('REJECTED', 'ARIZA RAD ETILDI'),
+    ('ACCEPTED', 'ARIZA QABUL QILINDI'),
+    ('PASSED', 'IMTHONDAN MUVAFFAQIYATLI O\'TDI'),
+    ('FAILED', 'IMTIHON MUVAFFAQIYATSIZ'),
+    ('EXAMINED', 'TEKSHIRILDI'),
 )
 
 
 class Applicant(models.Model):
-    tgId = models.BigIntegerField(primary_key=True)
-    phoneNumber = models.CharField(max_length=20, unique=True)
-    additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    pinfl = models.CharField(max_length=14, unique=True)
-    firstName = models.CharField(max_length=255, null=True, blank=True)
-    lastName = models.CharField(max_length=255, null=True, blank=True)
-    middleName = models.CharField(max_length=255, null=True, blank=True)
-    passport = models.CharField(max_length=20, null=True, blank=True, unique=True)
+    tgId = models.BigIntegerField(primary_key=True, verbose_name="Telegram id")
+    phoneNumber = models.CharField(max_length=20, unique=True, verbose_name="Telefon raqami")
+    additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True,
+                                             verbose_name="Qo'shimcha telefon raqami")
+    pinfl = models.CharField(max_length=14, unique=True, verbose_name="Pinfl")
+    firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
+    lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
+    middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
+    passport = models.CharField(max_length=20, null=True, blank=True, unique=True, verbose_name="Pasport seriya")
     directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                             related_name='applicants')
+                                             related_name='applicants', verbose_name="Fakultet")
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='applicants')
-    languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz')
-    contractFile = models.CharField(max_length=255, null=True, blank=True)
-    olympian = models.BooleanField(default=False)
-    applicationStatus = models.CharField(max_length=20, choices=APPLICATION_STATUS, default='DRAFT')
-    createdTime = models.DateTimeField(auto_now_add=True)
-    updatedTime = models.DateTimeField(auto_now=True)
+                                        related_name='applicants', verbose_name="Ta'lim turi")
+    languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz', verbose_name="Ta'lim tili")
+    contractFile = models.CharField(max_length=255, null=True, blank=True, verbose_name="Kontrakt shartnomasi")
+    olympian = models.BooleanField(default=False, verbose_name="Olimpiadachimi?")
+    applicationStatus = models.CharField(max_length=20, choices=APPLICATION_STATUS, default='DRAFT',
+                                         verbose_name="Arizachi holati")
+    createdTime = models.DateTimeField(auto_now_add=True, verbose_name="Ariza yuborilgan sana")
+    updatedTime = models.DateTimeField(auto_now=True, verbose_name="oxirgi o'zgarish sanasi")
 
     def __str__(self):
         return f"{self.firstName} {self.lastName} - {self.pinfl}"
@@ -92,27 +107,34 @@ class Applicant(models.Model):
     class Meta:
         db_table = 'applicants'
         ordering = ['-createdTime']
+        verbose_name = "Arizachi"
+        verbose_name_plural = "Arizachilar"
 
 
 class Olympian(models.Model):
-    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='olympian_user')
-    result = models.DecimalField(max_digits=5, decimal_places=2)
-    vaucher = models.BigIntegerField(default=0)
-    certificateImage = models.CharField(max_length=255, null=True, blank=True)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='olympian_user',
+                                  verbose_name="Arizachi")
+    result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Imtihon natijasi")
+    vaucher = models.BigIntegerField(default=0, verbose_name="Vaucheri")
+    certificateImage = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sertifikati")
 
     def __str__(self):
         return f"{self.applicant} -> {self.vaucher}"
 
     class Meta:
         db_table = 'olympians'
+        verbose_name = "Olimpiadachi"
+        verbose_name_plural = "Olimpiadachilar"
 
 
 class Science(models.Model):
-    nameUz = models.CharField(max_length=255)
-    nameRu = models.CharField(max_length=255)
+    nameUz = models.CharField(max_length=255, verbose_name="Fan nomi uz")
+    nameRu = models.CharField(max_length=255, verbose_name="Fan nomi ru")
 
     def __str__(self):
         return f"{self.nameUz}"
 
     class Meta:
         db_table = 'sciences'
+        verbose_name = "Fan"
+        verbose_name_plural = "Fanlar"

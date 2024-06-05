@@ -5,3 +5,4 @@ whitenoise==6.6.0
 mysqlclient==2.2.4
 aiomysql==0.2.0
 cryptography==42.0.7
+aiohttp~=3.8.6

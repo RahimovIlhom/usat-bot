@@ -18,7 +18,7 @@ class TestAdmin(admin.ModelAdmin):
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'test', 'trueResponse']
+    list_display = ['id', 'test', 'image', 'trueResponse']
     search_fields = ['test__pk', 'image', 'question', 'trueResponse']
 
 
