@@ -152,7 +152,7 @@ async def question_delete_question(call, question_id):
     result = await db.select_question(question_id)
     text = (f"Fan: {result[7]}\n"
             f"Savol tili: {'🇺🇿 Uz' if result[6] == 'uz' else '🇷🇺 Ru'}\n\n"
-            f"Savol:\n{result[3]}\n\n"
+            f"Savol:\n{result[3].replace('<', '&lt')}\n\n"
             f"To'g'ri javob: {result[4]}")
     try:
         await call.message.edit_caption(text, reply_markup=await question_delete_question_markup(result[5], result[1],
@@ -244,7 +244,7 @@ async def show_question_for_test(call, ques_id):
     result = await db.select_question(ques_id)
     text = (f"Fan: {result[7]}\n"
             f"Savol tili: {'🇺🇿 Uz' if result[6] == 'uz' else '🇷🇺 Ru'}\n\n"
-            f"Savol:\n{result[3]}\n\n"
+            f"Savol:\n{result[3].replace('<', '&lt')}\n\n"
             f"To'g'ri javob: {result[4]}")
     if result[2]:
         try:
