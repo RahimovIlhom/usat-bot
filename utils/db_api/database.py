@@ -55,17 +55,17 @@ class Database:
         return await self.execute_query(query, fetchall=True)
 
     async def select_direction(self, id):
-        query = "SELECT id, nameUz, nameRu FROM educational_areas WHERE id = %s;"
+        query = "SELECT id, nameUz, nameRu, examPassPercentage FROM educational_areas WHERE id = %s;"
         return await self.execute_query(query, id, fetchone=True)
 
-    async def add_or_set_direction(self, nameUz, nameRu, id=None):
+    async def add_or_set_direction(self, nameUz, nameRu, examPassPercentage, id=None):
         if id:
             if await self.select_direction(id):
-                query = "UPDATE educational_areas SET nameUz = %s, nameRu = %s WHERE id = %s;"
-                await self.execute_query(query, nameUz, nameRu, id)
+                query = "UPDATE educational_areas SET nameUz = %s, nameRu = %s, examPassPercentage = %s WHERE id = %s;"
+                await self.execute_query(query, nameUz, nameRu, examPassPercentage, id)
         else:
-            query = "INSERT INTO educational_areas (nameUz, nameRu) VALUES (%s, %s);"
-            await self.execute_query(query, nameUz, nameRu)
+            query = "INSERT INTO educational_areas (nameUz, nameRu, examPassPercentage) VALUES (%s, %s, %s);"
+            await self.execute_query(query, nameUz, nameRu, examPassPercentage)
 
     async def delete_direction(self, id):
         query = "DELETE FROM educational_areas WHERE id = %s"

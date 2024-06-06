@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test and question full" />
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="ignore html tag">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/contract_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/contract_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/states/direction_states.py" beforeDir="false" afterPath="$PROJECT_DIR$/states/direction_states.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -149,7 +154,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717587004238</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="ignore html tag">
+      <option name="closed" value="true" />
+      <created>1717589114954</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1717589114954</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -160,7 +173,8 @@
     <MESSAGE value="test delete and update" />
     <MESSAGE value="add question simple" />
     <MESSAGE value="test and question full" />
-    <option name="LAST_COMMIT_MESSAGE" value="test and question full" />
+    <MESSAGE value="ignore html tag" />
+    <option name="LAST_COMMIT_MESSAGE" value="ignore html tag" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

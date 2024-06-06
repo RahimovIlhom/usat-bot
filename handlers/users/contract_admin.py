@@ -52,6 +52,13 @@ async def add_direction_uz(msg: types.Message, state: FSMContext):
 @dp.message_handler(state=AddDirectionStates.nameRu, user_id=ADMINS)
 async def add_direction_ru(msg: types.Message, state: FSMContext):
     await state.update_data({'nameRu': msg.text})
+    await msg.answer("Bu ta'lim yo'nalishi uchun imtihondan o'tish foizini kiriting:")
+    await AddDirectionStates.next()
+
+
+@dp.message_handler(state=AddDirectionStates.examPassPercentage, regexp=r'^(100|[1-9][0-9]?)$')
+async def add_direction_exam_per(msg: types.Message, state: FSMContext):
+    await state.update_data({'examPassPercentage': msg.text})
     data = await state.get_data()
     await db.add_or_set_direction(**data)
     if data.get('id'):
@@ -60,6 +67,11 @@ async def add_direction_ru(msg: types.Message, state: FSMContext):
         info = "✅ Ta'lim yo'nalishi qo'shildi"
     await msg.answer(info, reply_markup=directions_menu_markup)
     await state.finish()
+
+
+@dp.message_handler(state=AddDirectionStates.examPassPercentage)
+async def err_add_direction_per(msg: types.Message):
+    await msg.reply("Iltimos, imtihondan o'tish foizini 1 dan 100 gacha butun sonda kiriting:")
 
 
 @dp.callback_query_handler(IsPrivate(), directions_callback_data.filter(), user_id=ADMINS)
@@ -90,7 +102,8 @@ async def show_direction_of_edu(call, id):
     direction = await db.select_direction(id)
     info = (f"Ta'lim yo'nalishi:\n\n"
             f"uz: {direction[1]}\n"
-            f"ru: {direction[2]}")
+            f"ru: {direction[2]}\n"
+            f"Imtihondan o'tish foizi: {direction[3]}%")
     await call.message.edit_text(info, reply_markup=await direction_inlines(direction[0]))
 
 
@@ -98,7 +111,8 @@ async def delete_direction_of_edu(call, id):
     direction = await db.select_direction(id)
     info = (f"Bu ta'lim yo'nalishi o'chirishni tasdiqlang?\n\n"
             f"uz: {direction[1]}\n"
-            f"ru: {direction[2]}")
+            f"ru: {direction[2]}\n"
+            f"Imtihondan o'tish foizi: {direction[3]}%")
     await call.message.edit_text(info, reply_markup=await delete_direction_inlines(direction[0]))
 
 
