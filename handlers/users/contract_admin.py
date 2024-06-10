@@ -10,7 +10,7 @@ from keyboards.default import directions_menu_markup, types_of_education_menu_ma
 from keyboards.inline import all_directions_inlines, directions_callback_data, all_types_of_edu_inlines, \
     types_callback_data, type_of_edu_inlines, delete_type_of_edu_inlines, direction_inlines, delete_direction_inlines, \
     contracts_callback_data, all_types_for_contract_inlines, all_contract_prices_inlines, detail_contract_inlines, \
-    delete_contract_inlines
+    delete_contract_inlines, delete_sc_for_dr_inlines, add_sc_for_dr_inlines
 from keyboards.inline import all_directions_for_contract_inlines
 from loader import dp, db
 from states import AddDirectionStates, TypesOfEduStates, AddContractSumma
@@ -34,10 +34,10 @@ async def add_or_set_direction_branch(msg: Union[types.Message, types.CallbackQu
     if isinstance(msg, types.CallbackQuery):
         call = msg
         await call.message.edit_text("❗️ Ta'lim yo'nalishini o'zgartirmoqdasiz!", reply_markup=None)
-        await call.message.answer("Ta'lim yo'nalishi nomini o'zbek tilida kiriting:",
+        await call.message.answer("Ta'lim yo'nalishi nomini 🇺🇿 o'zbek tilida kiriting:",
                                   reply_markup=ReplyKeyboardRemove())
     else:
-        await msg.answer("Ta'lim yo'nalishi nomini o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+        await msg.answer("Ta'lim yo'nalishi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     await state.set_state(AddDirectionStates.nameUz)
     await state.set_data({'id': direction_id})
 
@@ -45,7 +45,7 @@ async def add_or_set_direction_branch(msg: Union[types.Message, types.CallbackQu
 @dp.message_handler(state=AddDirectionStates.nameUz, user_id=ADMINS)
 async def add_direction_uz(msg: types.Message, state: FSMContext):
     await state.update_data({'nameUz': msg.text})
-    await msg.answer("Ta'lim yo'nalishi nomini rus tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+    await msg.answer("Ta'lim yo'nalishi nomini 🇷🇺 rus tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     await AddDirectionStates.next()
 
 
@@ -79,6 +79,7 @@ async def show_direction(call: types.CallbackQuery, callback_data: dict, state: 
     direction_id = callback_data.get('id')
     action = callback_data.get('action')
     do = callback_data.get('do')
+    science_id = callback_data.get('science_id')
     if direction_id == 'close':
         await call.message.delete()
     elif action == 'read':
@@ -96,24 +97,60 @@ async def show_direction(call: types.CallbackQuery, callback_data: dict, state: 
             await delete_direction_of_edu(call, direction_id)
     elif action == 'edit':
         await add_or_set_direction_branch(call, state, direction_id=direction_id)
+    elif action == "delete_sc":
+        if do == 'list':
+            await sciences_list_for_direction(call, direction_id, action)
+        elif do == 'yes':
+            await delete_science_for_dr(call, direction_id, science_id)
+    elif action == 'add_sc':
+        if do == 'list':
+            await sciences_list_for_direction(call, direction_id, action)
+        elif do == 'yes':
+            await add_science_for_dr(call, direction_id, science_id)
 
 
 async def show_direction_of_edu(call, id):
     direction = await db.select_direction(id)
+    sciences = await db.get_sciences_for_direction(id)
+    sciences_info = f"\n📚 Imtihon fanlari:\n"
+    i = 1
+    for sc in sciences:
+        sciences_info += f"{i}. {sc[1]}\n"
+        i += 1
     info = (f"Ta'lim yo'nalishi:\n\n"
-            f"uz: {direction[1]}\n"
-            f"ru: {direction[2]}\n"
-            f"Imtihondan o'tish foizi: {direction[3]}%")
+            f"🇺🇿 uz: {direction[1]}\n"
+            f"🇷🇺 ru: {direction[2]}\n"
+            f"{sciences_info}\n"
+            f"✅ Imtihondan o'tish foizi: {direction[3]}%")
     await call.message.edit_text(info, reply_markup=await direction_inlines(direction[0]))
 
 
 async def delete_direction_of_edu(call, id):
     direction = await db.select_direction(id)
     info = (f"Bu ta'lim yo'nalishi o'chirishni tasdiqlang?\n\n"
-            f"uz: {direction[1]}\n"
-            f"ru: {direction[2]}\n"
-            f"Imtihondan o'tish foizi: {direction[3]}%")
+            f"🇺🇿 uz: {direction[1]}\n"
+            f"🇷🇺 ru: {direction[2]}\n")
     await call.message.edit_text(info, reply_markup=await delete_direction_inlines(direction[0]))
+
+
+async def sciences_list_for_direction(call, dr_id, action):
+    if action == 'delete_sc':
+        await call.message.edit_text("O'chirish uchun fanni tanlang: ",
+                                     reply_markup=await delete_sc_for_dr_inlines(dr_id))
+    elif action == 'add_sc':
+        await call.message.edit_text("Qo'shish uchun fanni tanlang: ", reply_markup=await add_sc_for_dr_inlines(dr_id))
+
+
+async def delete_science_for_dr(call, direction_id, science_id):
+    await db.remove_science_for_direction(direction_id, science_id)
+    await call.message.answer("✅ Fan muvaffaqiyatli yo'nalish imtihonidan olib tashlandi.")
+    await show_direction_of_edu(call, direction_id)
+
+
+async def add_science_for_dr(call, direction_id, science_id):
+    await db.add_science_for_direction(direction_id, science_id)
+    await call.message.answer("✅ Fan muvaffaqiyatli yo'nalish imtihoniga qo'shildi.")
+    await show_direction_of_edu(call, direction_id)
 
 
 @dp.message_handler(IsPrivate(), text="🎓 Barcha ta'lim turlari", user_id=ADMINS)
@@ -134,9 +171,9 @@ async def add_or_set_type_branch(msg: Union[types.Message, types.CallbackQuery],
     if isinstance(msg, types.CallbackQuery):
         call = msg
         await call.message.edit_text("❗️ Ta'lim turini o'zgartirmoqdasiz!", reply_markup=None)
-        await call.message.answer("Ta'lim turi nomini o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer("Ta'lim turi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     else:
-        await msg.answer("Ta'lim turi nomini o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+        await msg.answer("Ta'lim turi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     await state.set_state(TypesOfEduStates.nameUz)
     await state.set_data({'id': type_id})
 
@@ -144,7 +181,7 @@ async def add_or_set_type_branch(msg: Union[types.Message, types.CallbackQuery],
 @dp.message_handler(state=TypesOfEduStates.nameUz, user_id=ADMINS)
 async def add_type_uz(msg: types.Message, state: FSMContext):
     await state.update_data({'nameUz': msg.text})
-    await msg.answer("Ta'lim turi nomini rus tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+    await msg.answer("Ta'lim turi nomini 🇷🇺 rus tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     await TypesOfEduStates.next()
 
 
@@ -188,16 +225,16 @@ async def show_type_of_edu(call: types.CallbackQuery, callback_data: dict, state
 async def show_type_of_education(call, id):
     type_of_edu = await db.select_type_of_education(id)
     info = (f"Ta'lim turi:\n\n"
-            f"uz: {type_of_edu[1]}\n"
-            f"ru: {type_of_edu[2]}")
+            f"🇺🇿 uz: {type_of_edu[1]}\n"
+            f"🇷🇺 ru: {type_of_edu[2]}")
     await call.message.edit_text(info, reply_markup=await type_of_edu_inlines(type_of_edu[0]))
 
 
 async def delete_type_of_edu(call, id):
     type_of_edu = await db.select_type_of_education(id)
     info = (f"Bu ta'lim turini o'chirishni tasdiqlang?\n\n"
-            f"uz: {type_of_edu[1]}\n"
-            f"ru: {type_of_edu[2]}")
+            f"🇺🇿 uz: {type_of_edu[1]}\n"
+            f"🇷🇺 ru: {type_of_edu[2]}")
     await call.message.edit_text(info, reply_markup=await delete_type_of_edu_inlines(type_of_edu[0]))
 
 
@@ -315,11 +352,11 @@ async def show_one_contract_price(call: Union[types.Message, types.CallbackQuery
     type_of_edu = await db.select_type_of_education(type_id)
     direction = await db.select_direction(direction_id)
     info_text = (f"Ta'lim yo'nalishi:\n"
-                 f"uz: {direction[1]}\n"
-                 f"ru: {direction[2]}\n\n"
+                 f"🇺🇿 uz: {direction[1]}\n"
+                 f"🇷🇺 ru: {direction[2]}\n\n"
                  f"Ta'lim turi:\n"
-                 f"uz: {type_of_edu[1]}\n"
-                 f"ru: {type_of_edu[2]}\n\n"
+                 f"🇺🇿 uz: {type_of_edu[1]}\n"
+                 f"🇷🇺 ru: {type_of_edu[2]}\n\n"
                  f"Kontrakt miqdori: {contract[1]}")
     if isinstance(call, types.Message):
         await call.answer(info_text, reply_markup=await detail_contract_inlines(direction_id, type_id, contract_id))
@@ -334,9 +371,9 @@ async def delete_contract_price(call, direction_id, type_id, contract_id):
     direction = await db.select_direction(direction_id)
     question_text = (f"Rostdan ham quyidagi kontrakt miqdorini o'chirmoqchimisiz?\n\n"
                      f"Ta'lim yo'nalishi:\n"
-                     f"uz: {direction[1]}\n\n"
+                     f"🇺🇿 uz: {direction[1]}\n\n"
                      f"Ta'lim turi:\n"
-                     f"uz: {type_of_edu[1]}\n\n"
+                     f"🇺🇿 uz: {type_of_edu[1]}\n\n"
                      f"Kontrakt miqdori: {contract[1]}")
     await call.message.edit_text(question_text,
                                  reply_markup=await delete_contract_inlines(direction_id, type_id, contract_id))

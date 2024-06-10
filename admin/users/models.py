@@ -22,8 +22,8 @@ class SimpleUser(models.Model):
 
 
 class DirectionOfEducation(models.Model):
-    nameUz = models.CharField(max_length=255, verbose_name="Fakultet nomi uz")
-    nameRu = models.CharField(max_length=255, verbose_name="Fakultet nomi ru")
+    nameUz = models.CharField(max_length=255, verbose_name="Ta'lim yo'nalishi nomi uz")
+    nameRu = models.CharField(max_length=255, verbose_name="Ta'lim yo'nalishi ru")
     sciences = models.ManyToManyField('Science', blank=True, verbose_name="Imtihon fanlari")
     examPassPercentage = models.PositiveIntegerField(
         null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)],
@@ -35,8 +35,8 @@ class DirectionOfEducation(models.Model):
 
     class Meta:
         db_table = 'educational_areas'
-        verbose_name = "Fakultet"
-        verbose_name_plural = "Fakultetlar"
+        verbose_name = "Ta'lim yo'nalishi"
+        verbose_name_plural = "Ta'lim yo'nalishlari"
 
 
 class TypeOfEducation(models.Model):

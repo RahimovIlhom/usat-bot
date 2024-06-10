@@ -58,6 +58,41 @@ class Database:
         query = "SELECT id, nameUz, nameRu, examPassPercentage FROM educational_areas WHERE id = %s;"
         return await self.execute_query(query, id, fetchone=True)
 
+    async def get_sciences_for_direction(self, direction_id):
+        query = """
+            SELECT s.id, s.nameUz, s.nameRu
+            FROM sciences s
+            INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
+            WHERE eas.directionofeducation_id = %s;
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
+
+    async def get_sciences_not_for_direction(self, direction_id):
+        query = """
+            SELECT s.id, s.nameUz, s.nameRu
+            FROM sciences s
+            WHERE s.id NOT IN (
+                SELECT science_id
+                FROM educational_areas_sciences
+                WHERE directionofeducation_id = %s
+            );
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
+
+    async def remove_science_for_direction(self, direction_id, science_id):
+        query = """
+            DELETE FROM educational_areas_sciences
+            WHERE directionofeducation_id = %s AND science_id = %s;
+        """
+        await self.execute_query(query, direction_id, science_id)
+
+    async def add_science_for_direction(self, direction_id, science_id):
+        query = """
+            INSERT INTO educational_areas_sciences (directionofeducation_id, science_id)
+            VALUES (%s, %s);
+        """
+        await self.execute_query(query, direction_id, science_id)
+
     async def add_or_set_direction(self, nameUz, nameRu, examPassPercentage, id=None):
         if id:
             if await self.select_direction(id):
