@@ -159,10 +159,15 @@ class Database:
     async def get_applicant(self, tgId, pinfl=None, phone=None):
         query = (
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
-            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime "
+            "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
+            "applicationStatus "
             "FROM applicants WHERE tgId = %s OR pinfl = %s OR phoneNumber = %s;"
         )
         return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
+
+    async def update_application_status(self, tgId, new_status):
+        query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
+        await self.execute_query(query, new_status, tgId)
 
     async def add_applicant(self, tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName,
                             passport, directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
@@ -183,16 +188,6 @@ class Database:
     async def add_exam_result(self, applicant_id, result):
         query = "INSERT INTO exam_results (applicant_id, result) VALUES (%s, %s);"
         await self.execute_query(query, applicant_id, result)
-
-    async def select_active_tests_for_faculty(self, faculty_id: int, language: str):
-        query = (
-            "SELECT tests.id, tests.directionOfEducation_id, tests.science_id, sciences.nameUz, sciences.nameRu, "
-            "tests.questionsCount, tests.language, tests.isActive, tests.createdTime "
-            "FROM tests "
-            "JOIN sciences ON sciences.id = tests.science_id "
-            "WHERE tests.directionOfEducation_id = %s AND tests.isActive = %s AND tests.language = %s;"
-        )
-        return await self.execute_query(query, faculty_id, True, language, fetchall=True)
 
     async def select_questions_for_test(self, test_id):
         query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
@@ -267,6 +262,19 @@ class Database:
         """)
         return await self.execute_query(query, sc_id, fetchall=True)
 
+    async def select_active_last_test_for_science(self, sc_id, language):
+        query = ("""
+            SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
+                   COUNT(q.id) AS questions_count
+            FROM tests t
+            LEFT JOIN questions q ON t.id = q.test_id
+            WHERE t.science_id = %s AND t.language = %s AND t.isActive = TRUE
+            GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime
+            ORDER BY t.createdTime DESC
+            LIMIT 1;
+        """)
+        return await self.execute_query(query, sc_id, language, fetchone=True)
+
     async def select_test(self, test_id):
         query = ("""
             SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
@@ -287,3 +295,17 @@ class Database:
         # Delete the test
         delete_query = "DELETE FROM tests WHERE id = %s"
         await self.execute_query(delete_query, test_id)
+
+    async def get_active_token(self):
+        query = "SELECT id, token, isActive, createdTime, updatedTime FROM tokens WHERE isActive = TRUE;"
+        return await self.execute_query(query, fetchone=True)
+
+    async def add_active_token(self, token):
+        # Deactivate all active tokens
+        await self.execute_query("UPDATE tokens SET isActive = FALSE updatedTime = %s WHERE isActive = TRUE",
+                                 datetime.now())
+        # Insert the new active token
+        query = "INSERT INTO tokens (token, isActive, createdTime, updatedTime) VALUES (%s, TRUE, %s, NULL)"
+        return await self.execute_query(query, token, datetime.now())
+
+

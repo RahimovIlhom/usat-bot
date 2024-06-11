@@ -5,56 +5,74 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, ReplyKeyboardRemove
 from aiogram.utils.exceptions import BadRequest
 
+from data import RESPONSE_TEXTS
 from filters import IsPrivate
 from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines
 from loader import dp, db
 from states import TestExecutionStates
+from utils.db_api import get_application_status_from_api
 
 
 @dp.message_handler(IsPrivate(), text=["🧑‍💻 Imtihon topshirish", "🧑‍💻 Сдать экзамен"])
 async def check_execution_text(msg: types.Message):
     try:
         applicant = await db.get_applicant(msg.from_user.id)
-        simple_user = await db.select_simple_user(msg.from_user.id)
-        language = simple_user[2]
+        language = 'uz' if msg.text == '🧑‍💻 Imtihon topshirish' else 'ru'
         permission = False
 
-        response_texts = {
-            'uz': {
-                'already_examined': "❗️ Siz allaqachon imtihon topshirib bo'lgansiz!",
-                'no_exam_questions': "❗️ Hozirda imtihon savollari mavjud emas!",
-                'welcome_message': ("Fan va texnologiyalar universitetining kirish imtihonlari tizimiga xush kelibsiz! "
-                                    "Siz 2 ta fandan 25 tadan savolga va 10 ta mantiqiy savolga to'g'ri javob "
-                                    "berishingiz kerak bo'ladi. Mummify 60 ta test savollari uchun 4 soat vaqt "
-                                    "beriladi.\nTayyormisiz?"),
-                'need_application': "❗️ Imtihon topshirish uchun avval Universitetga hujjat topshirishingiz kerak!"
-            },
-            'ru': {
-                'already_examined': "❗️ Вы уже сдали экзамен!",
-                'no_exam_questions': "❗️ В настоящее время экзаменационные вопросы отсутствуют!",
-                'welcome_message': ("Добро пожаловать в систему вступительных экзаменов Университета науки и "
-                                    "технологий! Вам нужно будет правильно ответить на 25 вопросов по двум предметам "
-                                    "и на 10 логических вопросов. На выполнение 60 тестовых вопросов дается 4 "
-                                    "часа.\nВы готовы?"),
-                'need_application': "❗️ Для сдачи экзамена вам сначала нужно подать документы в университет!"
-            }
+        status_to_key = {
+            'DRAFT': 'draft',
+            'SUBMITTED': 'submitted',
+            'REJECTED': 'rejected',
+            'PASSED': 'passed',
+            'ACCEPTED': 'welcome_message',
+            'FAILED': 'failed',
+            'EXAMINED': 'examined'
         }
 
-        if applicant:
-            exam_result = await db.get_exam_result(msg.from_user.id)
-            if exam_result:
-                resp_text = response_texts[language]['already_examined']
-            else:
-                active_tests = await db.select_active_tests_for_faculty(applicant[8], applicant[10])
-                # maslahatlashamiz
-                if len(active_tests) != 3:
-                    resp_text = response_texts[language]['no_exam_questions']
-                else:
-                    resp_text = response_texts[language]['welcome_message']
-                    permission = True
+        if not applicant:
+            resp_text = RESPONSE_TEXTS[language]['need_application']
         else:
-            resp_text = response_texts[language]['need_application']
+            status = applicant[14]
+
+            # if status in ('SUBMITTED', 'PASSED'):
+            #     admission_applicant = await get_application_status_from_api(applicant[0])
+            #     if admission_applicant:
+            #         status = admission_applicant.get('applicationStatus')
+            #         await db.update_application_status(applicant[0], status)
+
+            if status in status_to_key:
+                if status in ('ACCEPTED', 'FAILED'):
+                    sciences = await db.get_sciences_for_direction(applicant[8])
+                    direction = await db.select_direction(applicant[8])
+                    if not sciences:
+                        resp_text = RESPONSE_TEXTS[language]['no_exam_questions']
+                    else:
+                        sciences_info = "\nFanlar ro'yxati va savollar soni:\n" \
+                            if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
+                        all_count = 0
+                        ready = True
+                        for i, sc in enumerate(sciences, start=1):
+                            test = await db.select_active_last_test_for_science(sc[0], applicant[10])
+                            if not test:
+                                ready = False
+                                break
+                            all_count += test[2]
+                            if language == 'uz':
+                                sciences_info += f"{i}. {sc[1]} - {test[2]} ta savol\n"
+                            else:
+                                sciences_info += f"{i}. {sc[2]} - {test[2]} вопросов\n"
+                        if ready:
+                            resp_text = RESPONSE_TEXTS[language][status_to_key[status]].format(
+                                len(sciences), all_count, direction[3]) + sciences_info
+                            permission = True
+                        else:
+                            resp_text = RESPONSE_TEXTS[language]['no_exam_questions']
+                else:
+                    resp_text = RESPONSE_TEXTS[language][status_to_key[status]]
+            else:
+                resp_text = RESPONSE_TEXTS[language]['error']
 
         message = await msg.answer(resp_text)
         if permission:
@@ -108,6 +126,7 @@ async def you_are_ready(call: types.CallbackQuery, state: FSMContext):
 
     except Exception as e:
         await call.message.answer(f"An error occurred: {e}")
+        await state.finish()
 
 
 @dp.callback_query_handler(responses_callback_data.filter(), state=TestExecutionStates.science)
@@ -198,7 +217,7 @@ async def ask_next_question(call, state, language, questions, number, true_respo
 async def ask_question(call, language, question, number):
     image = question[2]
     question_text = f"{number}-savol.\n\n{question[3].replace('<', '&lt')}" if language == 'uz' else \
-                    f"{number}-й вопрос.\n\n{question[3].replace('<', '&lt')}"
+        f"{number}-й вопрос.\n\n{question[3].replace('<', '&lt')}"
     try:
         if image:
             await call.message.answer_photo(image, question_text, reply_markup=await all_responses_inlines(language))

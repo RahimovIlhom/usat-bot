@@ -72,7 +72,7 @@ menu_markup_ru = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="⚙️ Настройки"),
-            KeyboardButton(text="👤 Мой профайл"),
+            KeyboardButton(text="👤 Мой профиль"),
         ],
         [
             KeyboardButton(text="📥 Получить контракт"),
@@ -115,7 +115,7 @@ profile_menu_markup_ru = ReplyKeyboardMarkup(
             KeyboardButton(text="📄 Мои заявки")
         ],
         [
-            KeyboardButton(text="📊 Мой результат экзамена"),
+            KeyboardButton(text="📊 Мои результаты экзамена"),
         ],
         [
             KeyboardButton(text="◀️ Назад"),

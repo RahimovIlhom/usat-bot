@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="add faculty exam percentage">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="science for direction">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/users/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/contract_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/contract_admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/directions_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/directions_menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/execution_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/execution_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keyboards/default/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/db_api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/db_api/test_db.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,13 +51,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.admission_login.executor": "Run",
+    "Python.app.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="usatbot" />
@@ -180,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717654248048</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="science for direction">
+      <option name="closed" value="true" />
+      <created>1718021587776</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1718021587776</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -193,20 +205,26 @@
     <MESSAGE value="test and question full" />
     <MESSAGE value="ignore html tag" />
     <MESSAGE value="add faculty exam percentage" />
-    <option name="LAST_COMMIT_MESSAGE" value="add faculty exam percentage" />
+    <MESSAGE value="science for direction" />
+    <option name="LAST_COMMIT_MESSAGE" value="science for direction" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/handlers/users/execution_test.py</url>
-          <line>50</line>
-          <option name="timeStamp" value="1" />
+          <line>93</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/db_api/database.py</url>
-          <line>186</line>
-          <option name="timeStamp" value="2" />
+          <url>file://$PROJECT_DIR$/utils/db_api/admission_get_applicant.py</url>
+          <line>13</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/db_api/admission_get_applicant.py</url>
+          <line>6</line>
+          <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

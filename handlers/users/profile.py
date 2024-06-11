@@ -14,6 +14,6 @@ async def my_profile(msg: types.Message):
     await msg.answer(msg.text, reply_markup=profile_menu_markup_uz)
 
 
-@dp.message_handler(IsPrivate(), text="👤 Мой профайл")
+@dp.message_handler(IsPrivate(), text="👤 Мой профиль")
 async def my_profile(msg: types.Message):
     await msg.answer(msg.text, reply_markup=profile_menu_markup_ru)

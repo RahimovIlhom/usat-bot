@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     # local apps
     "test_app.apps.TestAppConfig",
     "users.apps.UsersConfig",
+    "token_app.apps.TokenAppConfig",
 ]
 
 MIDDLEWARE = [
