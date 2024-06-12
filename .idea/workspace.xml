@@ -4,12 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test execution permission and get admission simple">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test execution version 1">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/test_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/test_app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_texts.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_texts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/application.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/application.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers/users/execution_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/execution_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/tests_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/tests_admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/inline/you_are_ready.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/you_are_ready.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/db_api/admission_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/admission_login.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,14 +53,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.admission_login.executor&quot;: &quot;Run&quot;,
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.admission_login.executor": "Run",
+    "Python.app.executor": "Run",
+    "Python.write_data_excel.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/utils/db_api" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="usatbot" />
@@ -197,7 +208,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718110677121</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="test execution version 1">
+      <option name="closed" value="true" />
+      <created>1718178064522</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1718178064522</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -212,7 +231,8 @@
     <MESSAGE value="add faculty exam percentage" />
     <MESSAGE value="science for direction" />
     <MESSAGE value="test execution permission and get admission simple" />
-    <option name="LAST_COMMIT_MESSAGE" value="test execution permission and get admission simple" />
+    <MESSAGE value="test execution version 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="test execution version 1" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

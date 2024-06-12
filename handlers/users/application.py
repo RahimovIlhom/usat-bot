@@ -3,13 +3,16 @@ import asyncio
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, InputFile, ReplyKeyboardRemove
+from aiogram.utils.exceptions import BadRequest
 
+from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
-    choices_e_edu_language
-from loader import dp, db
+    choices_e_edu_language, accept_applicant_inline
+from loader import dp, db, bot
 from states import ApplicantRegisterStates
+from utils.db_api.write_data_excel import write_applicant_to_excel
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -66,7 +69,9 @@ async def send_contact(msg: types.Message, state: FSMContext):
     user_language = simple_user[2]
 
     if msg.text in data.get('phone'):
-        message_text = "❗️ Qo'shimcha telefon raqam asosiy raqam bilan bir xil. Iltimos, qayta yuboring." if user_language == 'uz' else "❗️ Дополнительный номер телефона аналогичен основному. Пожалуйста, отправьте повторно."
+        message_text = "❗️ Qo'shimcha telefon raqam asosiy raqam bilan bir xil. Iltimos, qayta yuboring." \
+            if user_language == 'uz' \
+            else "❗️ Дополнительный номер телефона аналогичен основному. Пожалуйста, отправьте повторно."
         await msg.answer(message_text)
         return
 
@@ -83,7 +88,7 @@ async def send_contact(msg: types.Message, state: FSMContext):
 
     try:
         await msg.answer_photo(image_url, caption=info, reply_markup=ReplyKeyboardRemove())
-    except Exception:
+    except BadRequest:
         await msg.answer_photo(InputFile(image_path), caption=info, reply_markup=ReplyKeyboardRemove())
 
     await ApplicantRegisterStates.next()
@@ -147,7 +152,8 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
         await msg.answer(TEXTS[language]['one_resp_text'])
         await ApplicantRegisterStates.next()
         await asyncio.sleep(1.5)
-        await msg.answer(TEXTS[language]['question'].format(fullname), reply_markup=await all_faculties_inlines(language))
+        await msg.answer(TEXTS[language]['question'].format(fullname),
+                         reply_markup=await all_faculties_inlines(language))
         return
 
     # Handle invalid PINFL
@@ -251,26 +257,36 @@ async def send_data_admission(call, direction_id, type_id, edu_language, lang, f
     middleName = data.get('middleName')
     passport = data.get('passport')
     olympian = data.get('olympian', False)
-    await db.add_applicant(call.from_user.id, phone, additional_phone, pinfl, firstName, lastName, middleName, passport, direction_id,
-                           type_id, edu_language, olympian)
+    await db.add_applicant(call.from_user.id, phone, additional_phone, pinfl, firstName, lastName, middleName,
+                           passport, direction_id, type_id, edu_language, olympian)
     # shu yerda admissionga barcha datalarni yuborish kerak
     if lang == "uz":
         resp_info = f"✅ Hurmatli {fullname}! Arizangiz qabul qilindi!"
-        question = ("Tayyor bo'lsangiz, pastdagi \"Imtihon topshirish\" tugmasini bosib, test sinovlarini o'tishingiz "
-                    "mumkin.\n\nTest natijasiga ko'ra yetarlicha ball to'plasangiz, sizga o'qishga qabul "
+        question = ("Tayyor bo'lsangiz, pastdagi \"🧑‍💻 Imtihon topshirish\" tugmasini bosib, test sinovlarini "
+                    "o'tishingiz mumkin.\n\n"
+                    "Test natijasiga ko'ra yetarlicha ball to'plasangiz, sizga o'qishga qabul "
                     "qilinganingiz haqida xabar chiqadi. Shu zahotiyoq shartnomangizni ko'chirib olishingiz mumkin "
                     "bo'ladi. Yetarlicha ball to'play olmasangiz, yana bir bor urinib ko'rishingizga imkoniyat "
                     "beriladi. Sizga omad tilaymiz!")
         markup = menu_markup_uz
     else:
         resp_info = f"✅ Уважаемый {fullname}! Ваша заявка принята!"
-        question = ("Когда будете готовы, нажмите кнопку \"Сдать экзамен\" ниже, чтобы пройти тестирование.\n\nЕсли вы "
-                    "наберете достаточное количество баллов по результатам теста, вам будет сообщено о зачислении на "
-                    "учебу. Сразу после этого вы сможете скачать ваш контракт. Если набранных баллов не хватит, "
-                    "вам будет предоставлена возможность попробовать еще раз. Желаем вам удачи!")
+        question = ("Когда будете готовы, нажмите кнопку \"🧑‍💻 Сдать экзамен\" ниже, чтобы пройти тестирование.\n\n"
+                    "Если вы наберете достаточное количество баллов по результатам теста, вам будет сообщено о "
+                    "зачислении на учебу. Сразу после этого вы сможете скачать ваш контракт. Если набранных баллов "
+                    "не хватит, вам будет предоставлена возможность попробовать еще раз. Желаем вам удачи!")
         markup = menu_markup_ru
     await call.message.edit_text(resp_info, reply_markup=None)
     await asyncio.sleep(0.4)
     await call.message.answer(question, reply_markup=markup)
+    applicant_file = await write_applicant_to_excel(call.from_user.id)
+
+    # Send the file to all admins
+    for admin_id in ADMINS:
+        try:
+            await bot.send_document(admin_id, open(applicant_file, 'rb'), caption="Yangi arizachi",
+                                    reply_markup=await accept_applicant_inline(call.from_user.id))
+        except BadRequest:
+            pass
     await state.reset_data()
     await state.finish()

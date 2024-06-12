@@ -47,7 +47,8 @@ class Question(models.Model):
 class ExamResult(models.Model):
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='exam_result',
                                   verbose_name="Arizachi")
-    result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Natijasi")
+    trueResponseCount = models.PositiveIntegerField(verbose_name="To'g'ri yechgan savollar soni")
+    result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Natijasi (%)")
 
     def __str__(self):
         return f"{self.applicant}: {self.result}"

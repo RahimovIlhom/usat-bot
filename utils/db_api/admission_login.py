@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 import warnings
 from environs import Env
@@ -22,3 +24,11 @@ async def get_token():
         async with session.post(CREATE_TOKEN_URL, json=user_login, verify_ssl=False) as resp:
             resp_json = await resp.json()
             return resp_json['token']
+
+
+# async def main():
+#     resp = await get_token()
+#     print(resp)
+#
+#
+# asyncio.run(main())

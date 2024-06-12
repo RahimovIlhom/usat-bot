@@ -21,6 +21,11 @@ async def check_execution_text(msg: types.Message):
         language = 'uz' if msg.text == '🧑‍💻 Imtihon topshirish' else 'ru'
         permission = False
 
+        if not applicant:
+            await msg.answer(RESPONSE_TEXTS[language]['need_application'])
+            return
+
+        status = applicant[14]
         status_to_key = {
             'DRAFT': 'draft',
             'SUBMITTED': 'submitted',
@@ -31,48 +36,52 @@ async def check_execution_text(msg: types.Message):
             'EXAMINED': 'examined'
         }
 
-        if not applicant:
-            resp_text = RESPONSE_TEXTS[language]['need_application']
-        else:
-            status = applicant[14]
+        # if status in ('SUBMITTED', 'PASSED'):
+        #     admission_applicant = await get_application_status_from_api(applicant[0])
+        #     if admission_applicant:
+        #         status = admission_applicant.get('applicationStatus')
+        #         await db.update_application_status(applicant[0], status)
 
-            # if status in ('SUBMITTED', 'PASSED'):
-            #     admission_applicant = await get_application_status_from_api(applicant[0])
-            #     if admission_applicant:
-            #         status = admission_applicant.get('applicationStatus')
-            #         await db.update_application_status(applicant[0], status)
+        if status not in status_to_key:
+            await msg.answer(RESPONSE_TEXTS[language]['error'])
+            return
 
-            if status in status_to_key:
-                if status in ('ACCEPTED', 'FAILED'):
-                    sciences = await db.get_sciences_for_direction(applicant[8])
-                    direction = await db.select_direction(applicant[8])
-                    if not sciences:
-                        resp_text = RESPONSE_TEXTS[language]['no_exam_questions']
-                    else:
-                        sciences_info = "\nFanlar ro'yxati va savollar soni:\n" \
-                            if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
-                        all_count = 0
-                        ready = True
-                        for i, sc in enumerate(sciences, start=1):
-                            test = await db.select_active_last_test_for_science(sc[0], applicant[10])
-                            if not test:
-                                ready = False
-                                break
-                            all_count += test[2]
-                            if language == 'uz':
-                                sciences_info += f"{i}. {sc[1]} - {test[2]} ta savol\n"
-                            else:
-                                sciences_info += f"{i}. {sc[2]} - {test[2]} вопросов\n"
-                        if ready:
-                            resp_text = RESPONSE_TEXTS[language][status_to_key[status]].format(
-                                len(sciences), all_count, direction[3]) + sciences_info
-                            permission = True
-                        else:
-                            resp_text = RESPONSE_TEXTS[language]['no_exam_questions']
+        if status == 'FAILED':
+            results = await db.get_applicant_exam_results(msg.from_user.id)
+            if len(results) >= 2:
+                await msg.answer(RESPONSE_TEXTS[language]['two_failed'])
+                return
+
+        if status in ('ACCEPTED', 'FAILED'):
+            sciences = await db.get_sciences_for_direction(applicant[8])
+            direction = await db.select_direction(applicant[8])
+            if not sciences:
+                await msg.answer(RESPONSE_TEXTS[language]['no_exam_questions'])
+                return
+
+            sciences_info = "\nFanlar ro'yxati va savollar soni:\n" if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
+            all_count = 0
+            ready = True
+
+            for i, sc in enumerate(sciences, start=1):
+                tests = await db.select_active_tests_for_science(sc[0], applicant[10])
+                questions_count = sum(test[2] for test in tests)
+                if not tests:
+                    ready = False
+                    break
+                all_count += questions_count
+                if language == 'uz':
+                    sciences_info += f"{i}. {sc[1]} - {questions_count} ta savol\n"
                 else:
-                    resp_text = RESPONSE_TEXTS[language][status_to_key[status]]
+                    sciences_info += f"{i}. {sc[2]} - {questions_count} вопросов\n"
+
+            if ready:
+                resp_text = RESPONSE_TEXTS[language][status_to_key[status]].format(len(sciences), all_count, direction[3]) + sciences_info
+                permission = True
             else:
-                resp_text = RESPONSE_TEXTS[language]['error']
+                resp_text = RESPONSE_TEXTS[language]['no_exam_questions']
+        else:
+            resp_text = RESPONSE_TEXTS[language][status_to_key[status]]
 
         message = await msg.answer(resp_text)
         if permission:
@@ -96,22 +105,19 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         direction_id = applicant[8]
         sciences = await db.get_sciences_for_direction(direction_id)
 
-        tests = []
-        for sc in sciences:
-            tests.append(await db.select_active_last_test_for_science(sc[0], languageOfEducation))
-
+        science = sciences[0]
+        tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
         if not tests:
             await call.message.answer("No active tests available.")
             return
 
-        science = sciences[0]
-        test = tests[0]
-        questions = await db.select_questions_for_test(test[0], test[2])
+        questions = []
+        for test in tests:
+            questions.extend(await db.select_questions_for_test(test[0], test[2]))
 
         test_data = {
-            'all_tests': tests[1:],
+            'languageOfEducation': languageOfEducation,
             'sciences': sciences[1:],
-            'test': test,
             'questions': questions,
             'number': 0
         }
@@ -144,7 +150,6 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     simple_user = await db.select_simple_user(call.from_user.id)
     language = simple_user[2]
     data = await state.get_data()
-    all_tests = data.get('all_tests')
     sciences = data.get('sciences')
     questions = data.get('questions')
     number = data.get('number')
@@ -167,8 +172,8 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
             )
 
     if not questions:
-        if all_tests:
-            await handle_new_test(call, state, simple_user, all_tests, true_responses, sciences)
+        if sciences:
+            await handle_new_test(call, state, simple_user, true_responses, sciences, data.get('languageOfEducation'))
         else:
             data = await state.get_data()
             user_responses = data.get('user_responses')
@@ -178,9 +183,8 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     await ask_next_question(call, state, language, questions, number, true_responses)
 
 
-async def handle_new_test(call, state, simple_user, all_tests, true_responses, sciences):
+async def handle_new_test(call, state, simple_user, true_responses, sciences, languageOfEducation):
     language = simple_user[2]
-    test = all_tests[0]
     science = sciences[0]
     await call.message.answer(
         f"❕ Tayyorlaning, {science[1]} testi 10 soniyadan keyin boshlanadi." if language == 'uz'
@@ -188,13 +192,19 @@ async def handle_new_test(call, state, simple_user, all_tests, true_responses, s
         reply_markup=ReplyKeyboardRemove()
     )
     # await countdown(call, 10)
-    questions = await db.select_questions_for_test(test[0], test[2])
+    tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
+    if not tests:
+        await call.message.answer("No active tests available.")
+        return
+
+    questions = []
+    for test in tests:
+        questions.extend(await db.select_questions_for_test(test[0], test[2]))
     question = questions[0]
+
     await state.update_data(
         {
-            'all_tests': all_tests[1:],
             'sciences': sciences[1:],
-            'test': test,
             'true_responses': true_responses + question[4],
             'questions': questions[1:],
             'number': 1,
@@ -205,10 +215,36 @@ async def handle_new_test(call, state, simple_user, all_tests, true_responses, s
 
 async def finish_test(call, state, language, true_responses, user_responses):
     correct_answers = sum(1 for t, u in zip(true_responses, user_responses) if t == u)
-    await db.add_exam_result(call.from_user.id, correct_answers)
+    result = round((correct_answers / len(true_responses)) * 100, 2)
+    applicant = await db.get_applicant(call.from_user.id)
+    direction = await db.select_direction(applicant[8])
+    percentage = direction[3]
+    applicantStatus = 'PASSED' if result >= percentage else 'FAILED'
+    await db.add_exam_result(call.from_user.id, result, correct_answers)
+    await db.update_application_status(call.from_user.id, applicantStatus)
+    RESPONSE_RESULT = {
+        'uz': {
+            'PASSED': ("🥳 Tabriklamiz, imtihondan muvaffaqiyatli o'tdingiz!\n"
+                       "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
+                       "Sizni natijangiz tasdiqlangandan so'ng, kontrakt shartnomangizni «📥 Shartnomani olish» "
+                       "bo'limi orqali yuklab olishingiz mumkin."),
+            'FAILED': ("😔 Ufsuski, imtihondan o'ta olmadingiz!\n"
+                       "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
+                       "Lekin shunga qaramay sizga qayta imtihon topshirish imkoniyati berildi. "),
+        },
+        'ru': {
+            'PASSED': ("🥳 Поздравляем, вы успешно сдали экзамен!\n"
+                       "Вы правильно ответили на {} вопросов теста.\n"
+                       "После подтверждения вашего результата, вы можете скачать контракт через раздел «📥 Получить "
+                       "контракт»."),
+            'FAILED': ("😔 К сожалению, вы не сдали экзамен!\n"
+                       "Вы правильно ответили на {} вопросов теста.\n"
+                       "Тем не менее, у вас есть возможность пересдать экзамен. "),
+        }
+    }
+
     await call.message.answer(
-        f"Hozirgi kod uchun test yakunlandi. Natija: {correct_answers}" if language == 'uz'
-        else f"Тест для текущего кода завершен. Результат: {correct_answers}",
+        RESPONSE_RESULT[language][applicantStatus].format(correct_answers),
         reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru
     )
     await state.finish()

@@ -166,6 +166,23 @@ class Database:
         )
         return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
 
+    async def get_applicant_for_excel(self, tgId):
+        query = """
+        SELECT 
+            a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.pinfl, a.firstName, a.lastName, a.middleName, a.passport, 
+            e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation, a.contractFile, 
+            a.olympian, a.createdTime, a.applicationStatus
+        FROM 
+            applicants a
+        LEFT JOIN 
+            educational_areas e ON a.directionOfEducation_id = e.id
+        LEFT JOIN 
+            types_of_education t ON a.typeOfEducation_id = t.id
+        WHERE 
+            a.tgId = %s;
+        """
+        return await self.execute_query(query, tgId, fetchone=True)
+
     async def update_application_status(self, tgId, new_status):
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
         await self.execute_query(query, new_status, tgId)
@@ -182,13 +199,13 @@ class Database:
                                  middleName, passport, directionOfEducation_id, typeOfEducation_id,
                                  languageOfEducation, 'SUBMITTED', olympian, datetime.now(), datetime.now())
 
-    async def get_exam_result(self, tgId):
-        query = "SELECT id, applicant_id, result FROM exam_results WHERE applicant_id = %s"
-        return await self.execute_query(query, tgId, fetchone=True)
+    async def get_applicant_exam_results(self, tgId):
+        query = "SELECT id, applicant_id, result, trueResponseCount FROM exam_results WHERE applicant_id = %s"
+        return await self.execute_query(query, tgId, fetchall=True)
 
-    async def add_exam_result(self, applicant_id, result):
-        query = "INSERT INTO exam_results (applicant_id, result) VALUES (%s, %s);"
-        await self.execute_query(query, applicant_id, result)
+    async def add_exam_result(self, applicant_id, result, trueResponseCount):
+        query = "INSERT INTO exam_results (applicant_id, result, trueResponseCount) VALUES (%s, %s, %s);"
+        await self.execute_query(query, applicant_id, result, trueResponseCount)
 
     async def select_questions_for_test(self, test_id, count=None):
         if count:
@@ -275,7 +292,7 @@ class Database:
         """)
         return await self.execute_query(query, sc_id, fetchall=True)
 
-    async def select_active_last_test_for_science(self, sc_id, language):
+    async def select_active_tests_for_science(self, sc_id, language):
         query = ("""
             SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
                    COUNT(q.id) AS questions_count
@@ -283,10 +300,9 @@ class Database:
             LEFT JOIN questions q ON t.id = q.test_id
             WHERE t.science_id = %s AND t.language = %s AND t.isActive = TRUE
             GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime
-            ORDER BY t.createdTime DESC
-            LIMIT 1;
+            ORDER BY t.createdTime;
         """)
-        return await self.execute_query(query, sc_id, language, fetchone=True)
+        return await self.execute_query(query, sc_id, language, fetchall=True)
 
     async def select_test(self, test_id):
         query = ("""
