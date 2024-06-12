@@ -128,7 +128,7 @@ async def show_test(call: Union[Message, CallbackQuery], test_id):
     info = (f"<b>{test[7]}</b> uchun test:\n\n"
             f"Test tili: {'🇺🇿' if test[3] == 'uz' else '🇷🇺'} {test[3]}\n"
             f"Savollar soni: {test[6]}/{test[2]}\n"
-            f"Holat: {'✅ Active' if test[6] >= test[2] else '🚫 No active'}")
+            f"Holat: {'✅ Active' if test[4] else '🚫 No active'}")
 
     if isinstance(call, Message):
         msg = call
@@ -142,7 +142,7 @@ async def question_delete_test(call, test_id):
     info = (f"<b>{test[7]}</b> uchun test:\n\n"
             f"Test tili: {'🇺🇿' if test[3] == 'uz' else '🇷🇺'} {test[3]}\n"
             f"Savollar soni: {test[6]}/{test[2]}\n"
-            f"Holat: {'✅ Active' if test[6] >= test[2] else '🚫 No active'}\n\n"
+            f"Holat: {'✅ Active' if test[4] else '🚫 No active'}\n\n"
             f"Ushbu testni rostdan ham o'chirmoqchimisiz?")
 
     await call.message.edit_text(info, reply_markup=await question_delete_test_markup(test[0]))
@@ -169,7 +169,7 @@ async def delete_test_func(call, sc_id, test_id):
 
 
 async def delete_question_func(call, sc_id, test_id, ques_id):
-    await db.delete_question(ques_id)
+    await db.delete_question(ques_id, test_id)
     await questions_list_for_test(call, sc_id, test_id)
     await call.message.answer("✅ Savol muvaffaqiyatli o'chirildi!")
 
@@ -178,7 +178,13 @@ async def add_or_set_question(call, test_id, state, question_id=None):
     test = await db.select_test(test_id)
     await state.set_data({'test_id': test_id, 'question_id': question_id, 'language': test[3]})
     lang_text = f"🇺🇿 O'zbek tilida, " if test[3] else f"🇷🇺 Rus tilida, "
-    await call.message.edit_text(lang_text + f"➕ {test[7]} uchun savol qo'shish", reply_markup=None)
+    if question_id:
+        if call.message.text:
+            await call.message.edit_text(call.message.text + "\n\n✏️ Savolni o'zgartirish", reply_markup=None)
+        elif call.message.caption:
+            await call.message.edit_caption(call.message.caption + "\n\n✏️ Savolni o'zgartirish", reply_markup=None)
+    else:
+        await call.message.edit_text(lang_text + f"➕ {test[7]} uchun savol qo'shish", reply_markup=None)
     await call.message.answer("Savol rasmini yuboring:", reply_markup=no_send_image_markup)
     await state.set_state(AddQuestionStates.image)
 
@@ -231,7 +237,7 @@ async def questions_list_for_test(call, science_id, test_id):
     info = (f"<b>{test[7]}</b> uchun test:\n\n"
             f"Test tili: {'🇺🇿' if test[3] == 'uz' else '🇷🇺'} {test[3]}\n"
             f"Savollar soni: {test[6]}/{test[2]}\n"
-            f"Holat: {'✅ Active' if test[6] >= test[2] else '🚫 No active'}\n\n"
+            f"Holat: {'✅ Active' if test[4] else '🚫 No active'}\n\n"
             f"Test savollar ro'yxati:")
     try:
         await call.message.edit_text(info, reply_markup=await questions_list_markup(science_id, test_id))

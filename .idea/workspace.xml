@@ -4,16 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="science for direction">
+    <list default="true" id="b94c8d88-87bf-4876-b4fe-b4a9ef69bb60" name="Changes" comment="test execution permission and get admission simple">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers/users/execution_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/execution_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handlers/users/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/profile.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/keyboards/default/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/default/menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/db_api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/users/tests_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/users/tests_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keyboards/inline/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keyboards/inline/you_are_ready.py" beforeDir="false" afterPath="$PROJECT_DIR$/keyboards/inline/you_are_ready.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/db_api/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_api/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/db_api/test_db.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,14 +48,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.admission_login.executor": "Run",
-    "Python.app.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.admission_login.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="usatbot" />
@@ -192,7 +189,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718021587776</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="test execution permission and get admission simple">
+      <option name="closed" value="true" />
+      <created>1718110677121</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1718110677121</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -206,16 +211,12 @@
     <MESSAGE value="ignore html tag" />
     <MESSAGE value="add faculty exam percentage" />
     <MESSAGE value="science for direction" />
-    <option name="LAST_COMMIT_MESSAGE" value="science for direction" />
+    <MESSAGE value="test execution permission and get admission simple" />
+    <option name="LAST_COMMIT_MESSAGE" value="test execution permission and get admission simple" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/handlers/users/execution_test.py</url>
-          <line>93</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/db_api/admission_get_applicant.py</url>
           <line>13</line>

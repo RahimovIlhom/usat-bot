@@ -8,7 +8,7 @@ from aiogram.utils.exceptions import BadRequest
 from data import RESPONSE_TEXTS
 from filters import IsPrivate
 from keyboards.default import menu_markup_uz, menu_markup_ru
-from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines
+from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines, ready_callback_data
 from loader import dp, db
 from states import TestExecutionStates
 from utils.db_api import get_application_status_from_api
@@ -82,25 +82,35 @@ async def check_execution_text(msg: types.Message):
         await msg.answer(f"An error occurred: {e}")
 
 
-@dp.callback_query_handler(text='ready')
-async def you_are_ready(call: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(ready_callback_data.filter())
+async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    do = callback_data.get('do')
+    language_text = callback_data.get('lang')
+    if not do:
+        await call.message.delete()
+        return
     try:
         await state.set_state(TestExecutionStates.science)
-
-        simple_user = await db.select_simple_user(call.from_user.id)
         applicant = await db.get_applicant(call.from_user.id)
+        languageOfEducation = applicant[10]
         direction_id = applicant[8]
+        sciences = await db.get_sciences_for_direction(direction_id)
 
-        tests = await db.select_active_tests_for_faculty(direction_id, applicant[10])
+        tests = []
+        for sc in sciences:
+            tests.append(await db.select_active_last_test_for_science(sc[0], languageOfEducation))
+
         if not tests:
             await call.message.answer("No active tests available.")
             return
 
+        science = sciences[0]
         test = tests[0]
-        questions = await db.select_questions_for_test(test[0])
+        questions = await db.select_questions_for_test(test[0], test[2])
 
         test_data = {
             'all_tests': tests[1:],
+            'sciences': sciences[1:],
             'test': test,
             'questions': questions,
             'number': 0
@@ -109,19 +119,18 @@ async def you_are_ready(call: types.CallbackQuery, state: FSMContext):
 
         await call.message.edit_reply_markup(None)
 
-        language = simple_user[2]
-        if language == 'uz':
+        if language_text == 'uz':
             await call.message.answer(
-                f"{test[3]} fanidan test savollari. Tayyorlaning, imtixon 10 soniyadan keyin boshlanadi.",
+                f"❕ Tayyorlaning, {science[1]} testi 10 soniyadan keyin boshlanadi.",
                 reply_markup=ReplyKeyboardRemove()
             )
         else:
             await call.message.answer(
-                f"Тестовые вопросы по предмету {test[4]}. Подготовьтесь, экзамен начнется через 10 секунд.",
+                f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
                 reply_markup=ReplyKeyboardRemove()
             )
 
-        await countdown(call, 10)
+        # await countdown(call, 10)
         await science_all_questions(call, {}, state)
 
     except Exception as e:
@@ -136,6 +145,7 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     language = simple_user[2]
     data = await state.get_data()
     all_tests = data.get('all_tests')
+    sciences = data.get('sciences')
     questions = data.get('questions')
     number = data.get('number')
     true_responses = data.get('true_responses')
@@ -158,7 +168,7 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
 
     if not questions:
         if all_tests:
-            await handle_new_test(call, state, simple_user, all_tests, true_responses)
+            await handle_new_test(call, state, simple_user, all_tests, true_responses, sciences)
         else:
             data = await state.get_data()
             user_responses = data.get('user_responses')
@@ -168,20 +178,22 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     await ask_next_question(call, state, language, questions, number, true_responses)
 
 
-async def handle_new_test(call, state, simple_user, all_tests, true_responses):
+async def handle_new_test(call, state, simple_user, all_tests, true_responses, sciences):
     language = simple_user[2]
     test = all_tests[0]
+    science = sciences[0]
     await call.message.answer(
-        f"{test[3]} fanidan test savollari. Tayyorlaning, imtixon 10 soniyadan keyin boshlanadi." if language == 'uz'
-        else f"Тестовые вопросы по предмету {test[4]}. Подготовьтесь, экзамен начнется через 10 секунд.",
+        f"❕ Tayyorlaning, {science[1]} testi 10 soniyadan keyin boshlanadi." if language == 'uz'
+        else f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
         reply_markup=ReplyKeyboardRemove()
     )
-    await countdown(call, 10)
-    questions = await db.select_questions_for_test(test[0])
+    # await countdown(call, 10)
+    questions = await db.select_questions_for_test(test[0], test[2])
     question = questions[0]
     await state.update_data(
         {
             'all_tests': all_tests[1:],
+            'sciences': sciences[1:],
             'test': test,
             'true_responses': true_responses + question[4],
             'questions': questions[1:],

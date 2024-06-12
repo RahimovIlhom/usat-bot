@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 import aiomysql
@@ -189,9 +190,17 @@ class Database:
         query = "INSERT INTO exam_results (applicant_id, result) VALUES (%s, %s);"
         await self.execute_query(query, applicant_id, result)
 
-    async def select_questions_for_test(self, test_id):
-        query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
-        return await self.execute_query(query, test_id, fetchall=True)
+    async def select_questions_for_test(self, test_id, count=None):
+        if count:
+            # Randomly select `count` number of questions
+            query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
+            all_questions = await self.execute_query(query, test_id, fetchall=True)
+            random_questions = random.sample(all_questions, min(count, len(all_questions)))
+            return random_questions
+        else:
+            # Select all questions
+            query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
+            return await self.execute_query(query, test_id, fetchall=True)
 
     async def select_question(self, ques_id):
         query = """
@@ -217,9 +226,13 @@ class Database:
                 await self.execute_query(query_test, True, test_app[0])
             return 'add'
 
-    async def delete_question(self, ques_id):
+    async def delete_question(self, ques_id, test_id):
         query = "DELETE FROM questions WHERE id = %s;"
         await self.execute_query(query, ques_id)
+        test_app = await self.select_test(test_id)
+        if test_app[2] > test_app[6]:
+            query_test = "UPDATE tests SET isActive = %s WHERE id = %s"
+            await self.execute_query(query_test, False, test_id)
 
     async def select_sciences(self):
         query = "SELECT id, nameUz, nameRu FROM sciences;"
