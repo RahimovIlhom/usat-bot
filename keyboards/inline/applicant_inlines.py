@@ -13,7 +13,7 @@ async def make_application_callback_data(direction_id, type_id='0', edu_language
 
 async def all_faculties_inlines(lang='uz'):
     CURRENT_LEVEL = 0
-    all_directions = await db.select_directions()
+    all_directions = await db.select_active_directions()
     markup = InlineKeyboardMarkup(row_width=1)
     for direction in all_directions:
         markup.insert(

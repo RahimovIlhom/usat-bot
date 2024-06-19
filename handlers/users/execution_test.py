@@ -36,7 +36,7 @@ async def check_execution_text(msg: types.Message):
             'EXAMINED': 'examined'
         }
 
-        # if status in ('SUBMITTED', 'PASSED'):
+        # if status in ('SUBMITTED', 'EXAMINED'):
         #     admission_applicant = await get_application_status_from_api(applicant[0])
         #     if admission_applicant:
         #         status = admission_applicant.get('applicationStatus')
@@ -54,12 +54,12 @@ async def check_execution_text(msg: types.Message):
 
         if status in ('ACCEPTED', 'FAILED'):
             sciences = await db.get_sciences_for_direction(applicant[8])
-            direction = await db.select_direction(applicant[8])
             if not sciences:
                 await msg.answer(RESPONSE_TEXTS[language]['no_exam_questions'])
                 return
 
-            sciences_info = "\nFanlar ro'yxati va savollar soni:\n" if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
+            sciences_info = "\nFanlar ro'yxati va savollar soni:\n" \
+                if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
             all_count = 0
             ready = True
 
@@ -76,7 +76,8 @@ async def check_execution_text(msg: types.Message):
                     sciences_info += f"{i}. {sc[2]} - {questions_count} вопросов\n"
 
             if ready:
-                resp_text = RESPONSE_TEXTS[language][status_to_key[status]].format(len(sciences), all_count, direction[3]) + sciences_info
+                resp_text = (RESPONSE_TEXTS[language][status_to_key[status]].format(len(sciences), all_count) +
+                             sciences_info)
                 permission = True
             else:
                 resp_text = RESPONSE_TEXTS[language]['no_exam_questions']

@@ -16,7 +16,7 @@ async def all_directions_inlines():
     for direction in all_directions:
         markup.insert(
             InlineKeyboardButton(
-                text=direction[1],
+                text=f'{direction[1]}: {"♻️ active" if direction[3] else "🚫 no active"}',
                 callback_data=await make_directions_callback_data(direction[0], 'read')
             )
         )
@@ -31,6 +31,14 @@ async def all_directions_inlines():
 
 async def direction_inlines(id):
     markup = InlineKeyboardMarkup(row_width=2)
+    markup.insert(InlineKeyboardButton(
+        text="🚫 Aktivsizlash",
+        callback_data=await make_directions_callback_data(id, 'deactivate')
+    ))
+    markup.insert(InlineKeyboardButton(
+        text="♻️ Aktivlashtirish",
+        callback_data=await make_directions_callback_data(id, 'activate')
+    ))
     markup.insert(InlineKeyboardButton(
         text="🗑 O'chirish",
         callback_data=await make_directions_callback_data(id, 'delete')

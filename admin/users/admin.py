@@ -10,12 +10,12 @@ class SimpleUserAdmin(admin.ModelAdmin):
 
 
 class EducationalAreasAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nameUz', 'nameRu', 'examPassPercentage']
+    list_display = ['nameUz', 'nameRu', 'active']
     search_fields = ['nameUz', 'nameRu']
 
 
 class TypeOfEducationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nameUz', 'nameRu']
+    list_display = ['nameUz', 'nameRu', 'active']
     search_fields = ['nameUz', 'nameRu']
 
 
@@ -27,14 +27,14 @@ class ContractPriceAdmin(admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['pinfl', 'firstName', 'directionOfEducation', 'typeOfEducation',
-                    'contractFile', 'olympian', 'applicationStatus']
+    list_display = ['passport', 'birthDate', 'firstName', 'directionOfEducation', 'typeOfEducation',
+                    'olympian', 'applicationStatus']
     list_filter = ['directionOfEducation', 'typeOfEducation', 'applicationStatus']
     search_fields = ['tgId', 'phoneNumber', 'pinfl', 'firstName', 'passport', 'lastName', 'middleName', 'contractFile']
 
 
 class OlympianAdmin(admin.ModelAdmin):
-    list_display = ['id', 'applicant', 'result', 'vaucher', 'certificateImage']
+    list_display = ['applicant', 'result', 'vaucher', 'certificateImage']
     search_fields = ['applicant__tgId', 'applicant__phoneNumber', 'applicant__pinfl', 'applicant__firstName',
                      'applicant__passport', 'applicant__lastName', 'applicant__middleName']
 

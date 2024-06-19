@@ -22,13 +22,11 @@ class SimpleUser(models.Model):
 
 
 class DirectionOfEducation(models.Model):
+    id = models.PositiveIntegerField(primary_key=True, verbose_name="Qabul jadvalidagi ID")
     nameUz = models.CharField(max_length=255, verbose_name="Ta'lim yo'nalishi nomi uz")
     nameRu = models.CharField(max_length=255, verbose_name="Ta'lim yo'nalishi ru")
     sciences = models.ManyToManyField('Science', blank=True, verbose_name="Imtihon fanlari")
-    examPassPercentage = models.PositiveIntegerField(
-        null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)],
-        verbose_name="Imtihondan o'tish foizi"
-    )
+    active = models.BooleanField(default=True, verbose_name="Ta'lim yo'nalishi aktivligi")
 
     def __str__(self):
         return f"{self.nameUz}"
@@ -40,8 +38,10 @@ class DirectionOfEducation(models.Model):
 
 
 class TypeOfEducation(models.Model):
+    id = models.PositiveIntegerField(primary_key=True, verbose_name="Qabul jadvalidagi ID")
     nameUz = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi uz")
     nameRu = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi ru")
+    active = models.BooleanField(default=True, verbose_name="Ta'lim turi aktivligi")
 
     def __str__(self):
         return f"{self.nameUz}"
@@ -73,9 +73,9 @@ APPLICATION_STATUS = (
     ('SUBMITTED', 'ARIZA YUBORILDI'),
     ('REJECTED', 'ARIZA RAD ETILDI'),
     ('ACCEPTED', 'ARIZA QABUL QILINDI'),
-    ('PASSED', 'IMTHONDAN MUVAFFAQIYATLI O\'TDI'),
+    ('EXAMINED', 'IMTIHON TOPSHIRDI'),
     ('FAILED', 'IMTIHON MUVAFFAQIYATSIZ'),
-    ('EXAMINED', 'TEKSHIRILDI'),
+    ('PASSED', 'IMTHONDAN MUVAFFAQIYATLI O\'TDI'),
 )
 
 
@@ -84,11 +84,13 @@ class Applicant(models.Model):
     phoneNumber = models.CharField(max_length=20, unique=True, verbose_name="Telefon raqami")
     additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True,
                                              verbose_name="Qo'shimcha telefon raqami")
-    pinfl = models.CharField(max_length=14, unique=True, verbose_name="Pinfl")
+    passport = models.CharField(max_length=20, null=True, blank=True, unique=True,
+                                verbose_name="Pasport seriya va raqami")
+    birthDate = models.DateField(null=True, blank=True, verbose_name="Tug'ilgan sanasi")
+    pinfl = models.CharField(max_length=14, unique=True, null=True, blank=True, verbose_name="Pinfl")
     firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
     lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
     middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
-    passport = models.CharField(max_length=20, null=True, blank=True, unique=True, verbose_name="Pasport seriya")
     directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name='applicants', verbose_name="Fakultet")
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
@@ -99,7 +101,7 @@ class Applicant(models.Model):
     applicationStatus = models.CharField(max_length=20, choices=APPLICATION_STATUS, default='DRAFT',
                                          verbose_name="Arizachi holati")
     createdTime = models.DateTimeField(auto_now_add=True, verbose_name="Ariza yuborilgan sana")
-    updatedTime = models.DateTimeField(auto_now=True, verbose_name="oxirgi o'zgarish sanasi")
+    updatedTime = models.DateTimeField(auto_now=True, verbose_name="Oxirgi o'zgarish sanasi")
 
     def __str__(self):
         return f"{self.firstName} {self.lastName} - {self.pinfl}"

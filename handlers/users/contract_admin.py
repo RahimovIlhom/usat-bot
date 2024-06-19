@@ -29,6 +29,13 @@ async def all_directions_branch(msg: Union[types.Message, types.CallbackQuery], 
 
 
 @dp.message_handler(IsPrivate(), text="➕ Yo'nalish qo'shish", user_id=ADMINS)
+async def add_direction_id(msg: types.Message, state: FSMContext):
+    await msg.answer("Ta'lim yo'nalishining qabul ro'yxatidagi ID qiymatini butun sonda yuboring:",
+                     reply_markup=ReplyKeyboardRemove())
+    await state.set_state(AddDirectionStates.newId)
+
+
+@dp.message_handler(state=AddDirectionStates.newId, regexp=r'^[1-9][0-9]*$')
 async def add_or_set_direction_branch(msg: Union[types.Message, types.CallbackQuery], state: FSMContext,
                                       direction_id: int = None):
     if isinstance(msg, types.CallbackQuery):
@@ -36,10 +43,14 @@ async def add_or_set_direction_branch(msg: Union[types.Message, types.CallbackQu
         await call.message.edit_text("❗️ Ta'lim yo'nalishini o'zgartirmoqdasiz!", reply_markup=None)
         await call.message.answer("Ta'lim yo'nalishi nomini 🇺🇿 o'zbek tilida kiriting:",
                                   reply_markup=ReplyKeyboardRemove())
+        await state.set_data({'id': direction_id})
     else:
-        await msg.answer("Ta'lim yo'nalishi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+        if await db.select_direction(msg.text):
+            await msg.answer("⛔️ Bunday ID dagi ta'lim yo'nalishi mavjud. Iltimos, qayta kiriting:")
+            return
+        await msg.answer("Ta'lim yo'nalishi nomini 🇺🇿 o'zbek tilida kiriting:")
+        await state.set_data({'newId': msg.text})
     await state.set_state(AddDirectionStates.nameUz)
-    await state.set_data({'id': direction_id})
 
 
 @dp.message_handler(state=AddDirectionStates.nameUz, user_id=ADMINS)
@@ -52,26 +63,22 @@ async def add_direction_uz(msg: types.Message, state: FSMContext):
 @dp.message_handler(state=AddDirectionStates.nameRu, user_id=ADMINS)
 async def add_direction_ru(msg: types.Message, state: FSMContext):
     await state.update_data({'nameRu': msg.text})
-    await msg.answer("Bu ta'lim yo'nalishi uchun imtihondan o'tish foizini kiriting:")
-    await AddDirectionStates.next()
-
-
-@dp.message_handler(state=AddDirectionStates.examPassPercentage, regexp=r'^(100|[1-9][0-9]?)$')
-async def add_direction_exam_per(msg: types.Message, state: FSMContext):
-    await state.update_data({'examPassPercentage': msg.text})
     data = await state.get_data()
-    await db.add_or_set_direction(**data)
     if data.get('id'):
         info = "✅ Ta'lim yo'nalishi muvaffaqiyatli o'zgartirildi"
+        await db.set_direction(**data)
     else:
         info = "✅ Ta'lim yo'nalishi qo'shildi"
+        resp = await db.add_direction(**data)
+        if resp == 'already_exist':
+            info = "⛔️ Bunday ID dagi ta'lim yo'nalishi mavjud. Iltimos, qayta kiriting:"
     await msg.answer(info, reply_markup=directions_menu_markup)
     await state.finish()
 
 
-@dp.message_handler(state=AddDirectionStates.examPassPercentage)
+@dp.message_handler(state=AddDirectionStates.newId)
 async def err_add_direction_per(msg: types.Message):
-    await msg.reply("Iltimos, imtihondan o'tish foizini 1 dan 100 gacha butun sonda kiriting:")
+    await msg.reply("Iltimos, ta'lim yo'nalishi ID qiymatini 1 dan boshlangan butun sonda kiriting:")
 
 
 @dp.callback_query_handler(IsPrivate(), directions_callback_data.filter(), user_id=ADMINS)
@@ -107,30 +114,33 @@ async def show_direction(call: types.CallbackQuery, callback_data: dict, state: 
             await sciences_list_for_direction(call, direction_id, action)
         elif do == 'yes':
             await add_science_for_dr(call, direction_id, science_id)
+    else:
+        await db.update_active_direction(direction_id, True if action == 'activate' else False)
+        await call.message.edit_text("deactivate")
+        await show_direction_of_edu(call, direction_id)
 
 
 async def show_direction_of_edu(call, id):
     direction = await db.select_direction(id)
     sciences = await db.get_sciences_for_direction(id)
-    sciences_info = f"\n📚 Imtihon fanlari:\n"
-    i = 1
-    for sc in sciences:
-        sciences_info += f"{i}. {sc[1]}\n"
-        i += 1
-    info = (f"Ta'lim yo'nalishi:\n\n"
-            f"🇺🇿 uz: {direction[1]}\n"
-            f"🇷🇺 ru: {direction[2]}\n"
-            f"{sciences_info}\n"
-            f"✅ Imtihondan o'tish foizi: {direction[3]}%")
+
+    sciences_info = "\n📚 Imtihon fanlari:\n"
+    sciences_info += "\n".join([f"{i + 1}. {sc[1]}" for i, sc in enumerate(sciences)])
+
+    info = (
+        f"Ta'lim yo'nalishi:\n\n"
+        f"🇺🇿 uz: {direction[1]}\n"
+        f"🇷🇺 ru: {direction[2]}\n"
+        f"{sciences_info}\n"
+        f"Holat: {'♻️ active' if direction[3] else '🚫 no active'}"
+    )
+
     await call.message.edit_text(info, reply_markup=await direction_inlines(direction[0]))
 
 
 async def delete_direction_of_edu(call, id):
-    direction = await db.select_direction(id)
-    info = (f"Bu ta'lim yo'nalishi o'chirishni tasdiqlang?\n\n"
-            f"🇺🇿 uz: {direction[1]}\n"
-            f"🇷🇺 ru: {direction[2]}\n")
-    await call.message.edit_text(info, reply_markup=await delete_direction_inlines(direction[0]))
+    info = f"❓ Ta'lim yo'nalishi rostdan ham o'chirmoqchimisiz?\n\n"
+    await call.message.edit_text(info + call.message.text, reply_markup=await delete_direction_inlines(id))
 
 
 async def sciences_list_for_direction(call, dr_id, action):

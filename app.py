@@ -13,7 +13,7 @@ async def on_startup(dispatcher):
     await main()
 
 
-# dp.middleware.setup(LoggingMiddleware())
+dp.middleware.setup(LoggingMiddleware())
 
 
 if __name__ == '__main__':

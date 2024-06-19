@@ -52,11 +52,15 @@ class Database:
             await self.execute_query(query, tgId, fullname, language)
 
     async def select_directions(self):
-        query = "SELECT id, nameUz, nameRu FROM educational_areas;"
+        query = "SELECT id, nameUz, nameRu, active FROM educational_areas;"
+        return await self.execute_query(query, fetchall=True)
+
+    async def select_active_directions(self):
+        query = "SELECT id, nameUz, nameRu FROM educational_areas WHERE active = TRUE;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_direction(self, id):
-        query = "SELECT id, nameUz, nameRu, examPassPercentage FROM educational_areas WHERE id = %s;"
+        query = "SELECT id, nameUz, nameRu, active FROM educational_areas WHERE id = %s;"
         return await self.execute_query(query, id, fetchone=True)
 
     async def get_sciences_for_direction(self, direction_id):
@@ -94,14 +98,20 @@ class Database:
         """
         await self.execute_query(query, direction_id, science_id)
 
-    async def add_or_set_direction(self, nameUz, nameRu, examPassPercentage, id=None):
-        if id:
-            if await self.select_direction(id):
-                query = "UPDATE educational_areas SET nameUz = %s, nameRu = %s, examPassPercentage = %s WHERE id = %s;"
-                await self.execute_query(query, nameUz, nameRu, examPassPercentage, id)
-        else:
-            query = "INSERT INTO educational_areas (nameUz, nameRu, examPassPercentage) VALUES (%s, %s, %s);"
-            await self.execute_query(query, nameUz, nameRu, examPassPercentage)
+    async def add_direction(self, newId, nameUz, nameRu, *args, **kwargs):
+        if await self.select_direction(newId):
+            return 'already_exist'
+        query = "INSERT INTO educational_areas (id, nameUz, nameRu, active) VALUES (%s, %s, %s, FALSE);"
+        await self.execute_query(query, newId, nameUz, nameRu)
+
+    async def set_direction(self, id, nameUz, nameRu, *args, **kwargs):
+        if await self.select_direction(id):
+            query = "UPDATE educational_areas SET nameUz = %s, nameRu = %s WHERE id = %s;"
+            await self.execute_query(query, nameUz, nameRu, id)
+
+    async def update_active_direction(self, id, action: bool):
+        query = "UPDATE educational_areas SET active = %s WHERE id = %s;"
+        await self.execute_query(query, action, id)
 
     async def delete_direction(self, id):
         query = "DELETE FROM educational_areas WHERE id = %s"

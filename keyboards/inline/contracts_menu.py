@@ -17,7 +17,7 @@ async def all_directions_for_contract_inlines(action='read'):
     for direction in all_directions:
         markup.insert(
             InlineKeyboardButton(
-                text=direction[1],
+                text=f'{direction[1]}: {"♻️ active" if direction[3] else "🚫 no active"}',
                 callback_data=await make_contracts_callback_data(direction[0], action=action)
             )
         )
