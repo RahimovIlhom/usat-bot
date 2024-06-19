@@ -118,21 +118,27 @@ class Database:
         await self.execute_query(query, id)
 
     async def select_types_of_education(self):
-        query = "SELECT id, nameUz, nameRu FROM types_of_education;"
+        query = "SELECT id, nameUz, nameRu, active FROM types_of_education;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_type_of_education(self, id):
-        query = "SELECT id, nameUz, nameRu FROM types_of_education WHERE id = %s;"
+        query = "SELECT id, nameUz, nameRu, active FROM types_of_education WHERE id = %s;"
         return await self.execute_query(query, id, fetchone=True)
 
-    async def add_or_set_type_of_education(self, nameUz, nameRu, id=None):
-        if id:
-            if await self.select_type_of_education(id):
-                query = "UPDATE types_of_education SET nameUz = %s, nameRu = %s WHERE id = %s;"
-                await self.execute_query(query, nameUz, nameRu, id)
-        else:
-            query = "INSERT INTO types_of_education (nameUz, nameRu) VALUES (%s, %s);"
-            await self.execute_query(query, nameUz, nameRu)
+    async def add_type_of_education(self, newId, nameUz, nameRu, *args, **kwargs):
+        if await self.select_type_of_education(newId):
+            return 'already_exist'
+        query = "INSERT INTO types_of_education (id, nameUz, nameRu, active) VALUES (%s, %s, %s, FALSE);"
+        await self.execute_query(query, newId, nameUz, nameRu)
+
+    async def set_type_of_education(self, id, nameUz, nameRu, *args, **kwargs):
+        if await self.select_type_of_education(id):
+            query = "UPDATE types_of_education SET nameUz = %s, nameRu = %s WHERE id = %s;"
+            await self.execute_query(query, nameUz, nameRu, id)
+
+    async def update_active_type(self, id, action: bool):
+        query = "UPDATE types_of_education SET active = %s WHERE id = %s;"
+        await self.execute_query(query, action, id)
 
     async def delete_type_of_education(self, id):
         query = "DELETE FROM types_of_education WHERE id = %s"

@@ -116,7 +116,7 @@ async def show_direction(call: types.CallbackQuery, callback_data: dict, state: 
             await add_science_for_dr(call, direction_id, science_id)
     else:
         await db.update_active_direction(direction_id, True if action == 'activate' else False)
-        await call.message.edit_text("deactivate")
+        await call.message.edit_text(action)
         await show_direction_of_edu(call, direction_id)
 
 
@@ -129,6 +129,7 @@ async def show_direction_of_edu(call, id):
 
     info = (
         f"Ta'lim yo'nalishi:\n\n"
+        f"ID: {direction[0]}\n"
         f"🇺🇿 uz: {direction[1]}\n"
         f"🇷🇺 ru: {direction[2]}\n"
         f"{sciences_info}\n"
@@ -176,6 +177,13 @@ async def all_types_branch(msg: Union[types.Message, types.CallbackQuery], delet
 
 
 @dp.message_handler(IsPrivate(), text="➕ Ta'lim turi qo'shish", user_id=ADMINS)
+async def add_type_id(msg: types.Message, state: FSMContext):
+    await msg.answer("Ta'lim turini qabul ro'yxatidagi ID qiymatini butun sonda yuboring:",
+                     reply_markup=ReplyKeyboardRemove())
+    await state.set_state(TypesOfEduStates.newId)
+
+
+@dp.message_handler(state=TypesOfEduStates.newId, regexp=r'^[1-9][0-9]*$')
 async def add_or_set_type_branch(msg: Union[types.Message, types.CallbackQuery], state: FSMContext,
                                  type_id: int = None):
     if isinstance(msg, types.CallbackQuery):
@@ -183,9 +191,13 @@ async def add_or_set_type_branch(msg: Union[types.Message, types.CallbackQuery],
         await call.message.edit_text("❗️ Ta'lim turini o'zgartirmoqdasiz!", reply_markup=None)
         await call.message.answer("Ta'lim turi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
     else:
+        if await db.select_type_of_education(msg.text):
+            await msg.answer("⛔️ Bunday ID dagi ta'lim turi mavjud. Iltimos, qayta kiriting:")
+            return
         await msg.answer("Ta'lim turi nomini 🇺🇿 o'zbek tilida kiriting:", reply_markup=ReplyKeyboardRemove())
+        await state.set_data({'newId': msg.text})
     await state.set_state(TypesOfEduStates.nameUz)
-    await state.set_data({'id': type_id})
+    await state.update_data({'id': type_id})
 
 
 @dp.message_handler(state=TypesOfEduStates.nameUz, user_id=ADMINS)
@@ -199,11 +211,14 @@ async def add_type_uz(msg: types.Message, state: FSMContext):
 async def add_direction_ru(msg: types.Message, state: FSMContext):
     await state.update_data({'nameRu': msg.text})
     data = await state.get_data()
-    await db.add_or_set_type_of_education(**data)
     if data.get('id'):
         info = "✅ Ta'lim turi muvaffaqiyatli o'zgartirildi"
+        await db.set_type_of_education(**data)
     else:
         info = "✅ Ta'lim turi qo'shildi"
+        resp = await db.add_type_of_education(**data)
+        if resp == 'already_exist':
+            info = "⛔️ Bunday ID dagi ta'lim turi mavjud. Iltimos, ma'lumotlarni qayta kiriting:"
     await msg.answer(info, reply_markup=types_of_education_menu_markup)
     await state.finish()
 
@@ -230,22 +245,25 @@ async def show_type_of_edu(call: types.CallbackQuery, callback_data: dict, state
             await delete_type_of_edu(call, type_id)
     elif action == 'edit':
         await add_or_set_type_branch(call, state, type_id=type_id)
+    else:
+        await db.update_active_type(type_id, True if action == 'activate' else False)
+        await call.message.edit_text(action)
+        await show_type_of_education(call, type_id)
 
 
 async def show_type_of_education(call, id):
     type_of_edu = await db.select_type_of_education(id)
     info = (f"Ta'lim turi:\n\n"
+            f"ID: {type_of_edu[0]}\n"
             f"🇺🇿 uz: {type_of_edu[1]}\n"
-            f"🇷🇺 ru: {type_of_edu[2]}")
+            f"🇷🇺 ru: {type_of_edu[2]}\n\n"
+            f"Holat: {'♻️ active' if type_of_edu[3] else '🚫 no active'}")
     await call.message.edit_text(info, reply_markup=await type_of_edu_inlines(type_of_edu[0]))
 
 
 async def delete_type_of_edu(call, id):
-    type_of_edu = await db.select_type_of_education(id)
-    info = (f"Bu ta'lim turini o'chirishni tasdiqlang?\n\n"
-            f"🇺🇿 uz: {type_of_edu[1]}\n"
-            f"🇷🇺 ru: {type_of_edu[2]}")
-    await call.message.edit_text(info, reply_markup=await delete_type_of_edu_inlines(type_of_edu[0]))
+    info = f"Ta'lim turini rostdan ham o'chirmoqchimisiz?\n\n"
+    await call.message.edit_text(info + call.message.text, reply_markup=await delete_type_of_edu_inlines(id))
 
 
 @dp.message_handler(IsPrivate(), text="🏷️ Yo'nalishlar bo'yicha kontrakt summalari", user_id=ADMINS)

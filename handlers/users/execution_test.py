@@ -225,19 +225,19 @@ async def finish_test(call, state, language, true_responses, user_responses):
     await db.update_application_status(call.from_user.id, applicantStatus)
     RESPONSE_RESULT = {
         'uz': {
-            'PASSED': ("🥳 Tabriklamiz, imtihondan muvaffaqiyatli o'tdingiz!\n"
-                       "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
-                       "Sizni natijangiz tasdiqlangandan so'ng, kontrakt shartnomangizni «📥 Shartnomani olish» "
-                       "bo'limi orqali yuklab olishingiz mumkin."),
+            'EXAMINED': ("🥳 Tabriklamiz, imtihondan muvaffaqiyatli o'tdingiz!\n"
+                         "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
+                         "Sizni natijangiz tasdiqlangandan so'ng, kontrakt shartnomangizni «📥 Shartnomani olish» "
+                         "bo'limi orqali yuklab olishingiz mumkin."),
             'FAILED': ("😔 Ufsuski, imtihondan o'ta olmadingiz!\n"
                        "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
                        "Lekin shunga qaramay sizga qayta imtihon topshirish imkoniyati berildi. "),
         },
         'ru': {
-            'PASSED': ("🥳 Поздравляем, вы успешно сдали экзамен!\n"
-                       "Вы правильно ответили на {} вопросов теста.\n"
-                       "После подтверждения вашего результата, вы можете скачать контракт через раздел «📥 Получить "
-                       "контракт»."),
+            'EXAMINED': ("🥳 Поздравляем, вы успешно сдали экзамен!\n"
+                         "Вы правильно ответили на {} вопросов теста.\n"
+                         "После подтверждения вашего результата, вы можете скачать контракт через раздел «📥 Получить "
+                         "контракт»."),
             'FAILED': ("😔 К сожалению, вы не сдали экзамен!\n"
                        "Вы правильно ответили на {} вопросов теста.\n"
                        "Тем не менее, у вас есть возможность пересдать экзамен. "),

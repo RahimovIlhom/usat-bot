@@ -16,7 +16,7 @@ async def all_types_of_edu_inlines():
     for type_of_edu in all_types:
         markup.insert(
             InlineKeyboardButton(
-                text=type_of_edu[1],
+                text=f"{type_of_edu[1]}: {'♻️ active' if type_of_edu[3] else '🚫 no active'}",
                 callback_data=await make_types_callback_data(type_of_edu[0], 'read')
             )
         )
@@ -31,6 +31,14 @@ async def all_types_of_edu_inlines():
 
 async def type_of_edu_inlines(id):
     markup = InlineKeyboardMarkup(row_width=2)
+    markup.insert(InlineKeyboardButton(
+        text="🚫 Aktivsizlash",
+        callback_data=await make_types_callback_data(id, 'deactivate')
+    ))
+    markup.insert(InlineKeyboardButton(
+        text="♻️ Aktivlashtirish",
+        callback_data=await make_types_callback_data(id, 'activate')
+    ))
     markup.insert(InlineKeyboardButton(
         text="🗑 O'chirish",
         callback_data=await make_types_callback_data(id, 'delete')

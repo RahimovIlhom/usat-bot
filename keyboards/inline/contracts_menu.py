@@ -36,7 +36,7 @@ async def all_types_for_contract_inlines(direction_id, action='read'):
     for type_of_edu in all_types:
         markup.insert(
             InlineKeyboardButton(
-                text=type_of_edu[1],
+                text=f"{type_of_edu[1]}: {'♻️ active' if type_of_edu[3] else '🚫 no active'}",
                 callback_data=await make_contracts_callback_data(direction_id, type_of_edu[0], action=action)
             )
         )
