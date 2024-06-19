@@ -84,7 +84,7 @@ class Applicant(models.Model):
     phoneNumber = models.CharField(max_length=20, unique=True, verbose_name="Telefon raqami")
     additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True,
                                              verbose_name="Qo'shimcha telefon raqami")
-    passport = models.CharField(max_length=20, null=True, blank=True, unique=True,
+    passport = models.CharField(max_length=20, null=True, blank=True,
                                 verbose_name="Pasport seriya va raqami")
     birthDate = models.DateField(null=True, blank=True, verbose_name="Tug'ilgan sanasi")
     pinfl = models.CharField(max_length=14, unique=True, null=True, blank=True, verbose_name="Pinfl")
