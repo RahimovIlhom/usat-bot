@@ -27,14 +27,16 @@ async def all_faculties_inlines(lang='uz'):
 
 async def types_and_contracts(direction_id, lang='uz'):
     CURRENT_LEVEL = 1
-    all_contracts = await db.select_contract_prices_for_direction(direction_id)
+    all_contracts = await db.select_active_contract_prices_for_direction(direction_id)
     markup = InlineKeyboardMarkup(row_width=1)
     for type_and_contract in all_contracts:
         price = f"{type_and_contract[2]:,.2f}".replace(",", " ")
         markup.insert(
             InlineKeyboardButton(
-                text=f"{type_and_contract[3]} - kontrakt: {price}" if lang == 'uz' else f"{type_and_contract[4]} - контракт: {price}",
-                callback_data=await make_application_callback_data(direction_id, type_and_contract[1], level=CURRENT_LEVEL+1),
+                text=f"{type_and_contract[3]} - kontrakt: {price}"
+                if lang == 'uz' else f"{type_and_contract[4]} - контракт: {price}",
+                callback_data=await make_application_callback_data(direction_id, type_and_contract[1],
+                                                                   level=CURRENT_LEVEL+1),
             )
         )
 

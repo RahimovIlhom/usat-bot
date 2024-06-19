@@ -157,6 +157,15 @@ class Database:
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
+    async def select_active_contract_prices_for_direction(self, direction_id):
+        query = """
+        SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz, te.nameRu 
+        FROM contract_prices cp
+        JOIN types_of_education te ON cp.typeOfEducation_id = te.id
+        WHERE cp.directionOfEducation_id = %s AND te.active = TRUE;
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
+
     async def add_or_set_contract_price(self, summa, direction_id, type_id):
         contract_price = await self.select_contact_price(direction_id, type_id)
         if contract_price:
