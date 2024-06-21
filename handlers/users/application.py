@@ -1,8 +1,9 @@
 import asyncio
+from datetime import datetime
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import ContentType, InputFile, ReplyKeyboardRemove
+from aiogram.types import ContentType, ReplyKeyboardRemove
 from aiogram.utils.exceptions import BadRequest
 
 from data.config import ADMINS
@@ -17,30 +18,43 @@ from utils.db_api.write_data_excel import write_applicant_to_excel
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
 async def submit_application_uz(msg: types.Message, state: FSMContext):
+    simple_user = await db.select_simple_user(msg.from_user.id)
+    await state.set_data({'language': simple_user[2]})
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
+        if applicant[14] == 'DRAFT':
+            await show_faculties(msg, 'uz', f"{applicant[4]} {applicant[5]}")
+            await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            return
         await msg.answer("❗️ Siz allaqachon hujjat topshirib bo'lgansiz!")
     else:
         await msg.answer("Pastdagi tugmani bosib, telefon raqamingizni yuboring.", reply_markup=phone_markup_uz)
         await state.set_state(ApplicantRegisterStates.phone)
+        await state.update_data({'tgId': msg.from_user.id})
 
 
 @dp.message_handler(IsPrivate(), text="📰 Подать документы в университет")
 async def submit_application_ru(msg: types.Message, state: FSMContext):
+    simple_user = await db.select_simple_user(msg.from_user.id)
+    await state.set_data({'language': simple_user[2]})
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
+        if applicant[14] == 'DRAFT':
+            await show_faculties(msg, 'ru', f"{applicant[4]} {applicant[5]}")
+            await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            return
         await msg.answer("❗️ Вы уже подали документы!")
     else:
         await msg.answer("Нажмите кнопку ниже и отправьте свой номер телефона.", reply_markup=phone_markup_ru)
         await state.set_state(ApplicantRegisterStates.phone)
+        await state.update_data({'tgId': msg.from_user.id})
 
 
 @dp.message_handler(IsPrivate(), content_types=ContentType.CONTACT, state=ApplicantRegisterStates.phone)
 async def send_contact(msg: types.Message, state: FSMContext):
-    simple_user = await db.select_simple_user(msg.from_user.id)
-    await state.set_data({'phone': msg.contact.phone_number,
-                          'language': simple_user[2]})
-    if simple_user[2] == 'uz':
+    data = await state.get_data()
+    await state.update_data({'phoneNumber': msg.contact.phone_number})
+    if data.get('language') == 'uz':
         info = "Qo'shimcha telefon raqam yuboring."
     else:
         info = "Отправьте дополнительный номер телефона."
@@ -65,32 +79,23 @@ async def send_contact(msg: types.Message):
                     state=ApplicantRegisterStates.additional_phone)
 async def send_contact(msg: types.Message, state: FSMContext):
     data = await state.get_data()
-    simple_user = await db.select_simple_user(msg.from_user.id)
-    user_language = simple_user[2]
+    user_language = data.get('language')
 
-    if msg.text in data.get('phone'):
+    if msg.text in data.get('phoneNumber'):
         message_text = "❗️ Qo'shimcha telefon raqam asosiy raqam bilan bir xil. Iltimos, qayta yuboring." \
             if user_language == 'uz' \
             else "❗️ Дополнительный номер телефона аналогичен основному. Пожалуйста, отправьте повторно."
         await msg.answer(message_text)
         return
 
-    await state.update_data({'additional_phone': msg.text})
+    await state.update_data({'additionalPhoneNumber': msg.text})
 
     if user_language == 'uz':
-        info = "ID-kartangizdagi Shaxsiy raqamingizni kiriting."
-        image_path = 'data/images/pinfl.jpg'
-        image_url = "http://telegra.ph//file/97b3043fbcdc89ba48360.jpg"
+        info = "Passportingiz seriasi va raqamini yuboring.\n\nMisol uchun: AA1234567"
     else:
-        info = "Введите персональный идентификационный номер, указанный на ID-карте."
-        image_path = 'data/images/pinfl_ru.jpg'
-        image_url = "http://telegra.ph//file/e815e58a3c4c08948b617.jpg"
+        info = "Пожалуйста, отправьте серию и номер вашего паспорта.\n\nПример: AA1234567"
 
-    try:
-        await msg.answer_photo(image_url, caption=info, reply_markup=ReplyKeyboardRemove())
-    except BadRequest:
-        await msg.answer_photo(InputFile(image_path), caption=info, reply_markup=ReplyKeyboardRemove())
-
+    await msg.answer(info, reply_markup=ReplyKeyboardRemove())
     await ApplicantRegisterStates.next()
 
 
@@ -105,70 +110,93 @@ async def send_contact(msg: types.Message):
     await msg.answer(info)
 
 
-@dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.TEXT)
-async def send_pinfl(msg: types.Message, state: FSMContext):
-    pinfl = msg.text
+@dp.message_handler(state=ApplicantRegisterStates.passport, regexp=r'^[A-Z]{2}\d{7}$', content_types=ContentType.TEXT)
+async def send_passport(msg: types.Message, state: FSMContext):
+    TEXTS = {
+        'uz': "Tug'ilgan sanangizni yuboring.\n\nMisol uchun: 01.01.2000 yoki 01-01-2000",
+        'ru': "Пожалуйста, отправьте вашу дату рождения.\n\nПример: 01.01.2000 или 01-01-2000",
+    }
+    passport = msg.text
+    data = await state.get_data()
+    await state.update_data({'passport': passport})
+    await msg.answer(TEXTS[data.get('language')])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport, content_types=ContentType.ANY)
+async def err_send_passport(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    await msg.delete()
+    TEXTS = {
+        'uz': {
+            'err_text': "❗️ Pasport seria va raqam xato. Iltimos, quyidagi tartibda yuboring.\n\n<b>AA1234567</b>",
+        },
+        'ru': {
+            'err_text': "❗️ Серия и номер паспорта неправильные. Пожалуйста, отправьте в следующем "
+                        "формате.\n\n<b>AA1234567</b>",
+        }
+    }
+    await msg.answer(TEXTS[data.get('language')]['err_text'])
+
+
+@dp.message_handler(state=ApplicantRegisterStates.birth_date, content_types=ContentType.TEXT,
+                    regexp=r'^(0[1-9]|[12][0-9]|3[01])[-.](0[1-9]|1[012])[-.](19|20)\d{2}$')
+async def send_birth_date(msg: types.Message, state: FSMContext):
+    birthDateText = msg.text
+    separator = '-' if '-' in birthDateText else '.'
+    birthDate = datetime.strptime(birthDateText, f'%d{separator}%m{separator}%Y').date()
+    await state.update_data({'birthDate': birthDate})
     data = await state.get_data()
     language = data.get('language', 'ru')
     TEXTS = {
         'uz': {
-            'err_text': "❗️ Shaxsiy raqam xato. Iltimos, qayta yuboring.",
             'one_resp_text': (
                 "Talabalik - oltin davr deyishadi. Shu davrni bizning universitetda o'tkazishga ahd qilganingizdan "
                 "xursandmiz. O'z navbatida biz ham sizga sifatli ta'lim berishga, kelajakda yetuk mutaxassis bo'lib "
                 "yetishingizga yordam berishga tayyormiz!"
             ),
-            'question': (
-                "Hurmatli {}! Aytingchi, siz universitetimizdagi qaysi ta'lim yo'nalishiga hujjatlaringizni "
-                "topshirmoqchisiz?"
-            ),
-            'pinfl_exist_text': "❗️ Bunday shaxsiy raqam yoki telefon raqam bilan hujjat topshirilgan. Iltimos, "
-                                "qayta kiriting:"
+            'pinfl_exist_text': ("❗️ Bunday passport ma'lumotlari bilan hujjat topshirilgan. Iltimos, "
+                                 "qayta hujjat topshiring:")
         },
         'ru': {
-            'err_text': "❗️ Персональный номер указан неверно. Пожалуйста, отправьте повторно.",
             'one_resp_text': (
                 "Студенчество называют золотой эпохой. Мы рады, что вы решили провести этот период в нашем "
                 "университете. В свою очередь, мы также готовы предоставить вам качественное образование и помочь вам "
                 "стать квалифицированным специалистом в будущем!"
             ),
-            'question': (
-                "Уважаемый {}! Скажите, пожалуйста, на какое направление обучения в нашем университете вы собираетесь "
-                "подавать документы?"
-            ),
-            'pinfl_exist_text': "❗️ Документы с таким персональным номером или номером телефона уже поданы. "
-                                "Пожалуйста, введите заново:"
+            'pinfl_exist_text': ("❗️ С документами с такими паспортными данными уже была подана заявка. Пожалуйста, "
+                                 "подайте заявку снова.")
         }
     }
-    # Validate PINFL
-    if pinfl.isdigit() and len(pinfl) == 14:
-        if await db.get_applicant(msg.from_user.id, pinfl, data.get('phone')):
-            await msg.answer(TEXTS[language]['pinfl_exist_text'])
-            return
-
-        # pinflni admissionga post qilish kerak
-        fullname = msg.from_user.full_name  # Retrieve fullname from admission data
-        await state.update_data({'pinfl': pinfl, 'fullname': fullname})
-        await msg.answer(TEXTS[language]['one_resp_text'])
-        await ApplicantRegisterStates.next()
-        await asyncio.sleep(1.5)
-        await msg.answer(TEXTS[language]['question'].format(fullname),
-                         reply_markup=await all_faculties_inlines(language))
-        return
-
-    # Handle invalid PINFL
-    await msg.answer(TEXTS[language]['err_text'])
-
-
-@dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.ANY)
-async def err_send_pinfl(msg: types.Message, state: FSMContext):
-    data = await state.get_data()
-    await msg.delete()
-    if data.get('language') == 'uz':
-        err_resp = "Iltimos, ID-kartangizdagi Shaxsiy raqamingizni kiriting."
+    if await db.get_applicant(msg.from_user.id, data.get('passport'), birthDate):
+        await msg.answer(TEXTS[language]['pinfl_exist_text'],
+                         reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+        await state.finish()
     else:
-        err_resp = "Пожалуйста, введите ваш личный номер, указанный на вашей ID-карте."
-    await msg.answer(err_resp)
+        # applicant register for admission and get data
+        await db.add_draft_applicant(**data)
+        fullname = msg.from_user.full_name
+        await msg.answer(TEXTS[language]['one_resp_text'])
+        await asyncio.sleep(1.5)
+        await show_faculties(msg, language, fullname)
+        await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.birth_date, content_types=ContentType.ANY)
+async def err_send_birth_date(msg: types.Message, state: FSMContext):
+    await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': {
+            'err_text': ("❗️ Tug'ilgan sanangizni ko'rsatilgan formatda yuboring.\n\nMisol uchun: 01.01.2000 yoki "
+                         "01-01-2000"),
+        },
+        'ru': {
+            'err_text': "❗️ Отправьте вашу дату рождения в указанном формате.\n\nНапример: 01.01.2000 или 01-01-2000",
+        }
+    }
+    await msg.answer(TEXTS[language]['err_text'])
 
 
 @dp.callback_query_handler(application_callback_data.filter(), state=ApplicantRegisterStates.direction_type_lan)
@@ -187,7 +215,7 @@ async def select_application_func(call: types.CallbackQuery, callback_data: dict
     elif level == '2':
         await show_edu_languages(call, direction_id, type_id, language)
     elif level == '3':
-        await send_data_admission(call, direction_id, type_id, edu_language, language, fullname, state)
+        await save_send_data_admission(call, direction_id, type_id, edu_language, language, fullname, state)
 
 
 async def show_faculties(call, language, fullname):
@@ -201,8 +229,12 @@ async def show_faculties(call, language, fullname):
                          "собираетесь подавать документы?")
         }
     }
-    await call.message.edit_text(resp_texts[language]['question'].format(fullname),
-                                 reply_markup=await all_faculties_inlines(language))
+    if isinstance(call, types.Message):
+        await call.answer(resp_texts[language]['question'].format(fullname),
+                          reply_markup=await all_faculties_inlines(language))
+    else:
+        await call.message.edit_text(resp_texts[language]['question'].format(fullname),
+                                     reply_markup=await all_faculties_inlines(language))
 
 
 async def show_types_and_contracts(call, direction_id, language):
@@ -247,18 +279,8 @@ async def err_direction_type_lan(msg: types.Message, state: FSMContext):
     await message.delete()
 
 
-async def send_data_admission(call, direction_id, type_id, edu_language, lang, fullname, state):
-    data = await state.get_data()
-    phone = data.get('phone')
-    additional_phone = data.get('additional_phone')
-    pinfl = data.get('pinfl')
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    middleName = data.get('middleName')
-    passport = data.get('passport')
-    olympian = data.get('olympian', False)
-    await db.add_applicant(call.from_user.id, phone, additional_phone, pinfl, firstName, lastName, middleName,
-                           passport, direction_id, type_id, edu_language, olympian)
+async def save_send_data_admission(call, direction_id, type_id, edu_language, lang, fullname, state):
+    await db.submit_applicant(call.from_user.id, direction_id, type_id, edu_language)
     # shu yerda admissionga barcha datalarni yuborish kerak
     if lang == "uz":
         resp_info = f"✅ Hurmatli {fullname}! Arizangiz qabul qilindi!"

@@ -95,7 +95,8 @@ class Applicant(models.Model):
                                              related_name='applicants', verbose_name="Fakultet")
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='applicants', verbose_name="Ta'lim turi")
-    languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz', verbose_name="Ta'lim tili")
+    languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz', null=True, blank=True,
+                                           verbose_name="Ta'lim tili")
     contractFile = models.CharField(max_length=255, null=True, blank=True, verbose_name="Kontrakt shartnomasi")
     olympian = models.BooleanField(default=False, verbose_name="Olimpiadachimi?")
     applicationStatus = models.CharField(max_length=20, choices=APPLICATION_STATUS, default='DRAFT',

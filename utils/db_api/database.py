@@ -182,21 +182,21 @@ class Database:
         query = "DELETE FROM contract_prices WHERE directionOfEducation_id = %s AND typeOfEducation_id = %s;"
         await self.execute_query(query, direction_id, type_id)
 
-    async def get_applicant(self, tgId, pinfl=None, phone=None):
+    async def get_applicant(self, tgId, passport=None, birthDate=None):
         query = (
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
             "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
             "applicationStatus "
-            "FROM applicants WHERE tgId = %s OR pinfl = %s OR phoneNumber = %s;"
+            "FROM applicants WHERE tgId = %s OR passport = %s OR birthDate = %s;"
         )
-        return await self.execute_query(query, tgId, pinfl, phone, fetchone=True)
+        return await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
 
     async def get_applicant_for_excel(self, tgId):
         query = """
         SELECT 
-            a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.pinfl, a.firstName, a.lastName, a.middleName, a.passport, 
-            e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation, a.contractFile, 
-            a.olympian, a.createdTime, a.applicationStatus
+            a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.passport, a.birthDate, a.pinfl, a.firstName, a.lastName, 
+            a.middleName, e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation, 
+            a.contractFile, a.olympian, a.createdTime, a.applicationStatus
         FROM 
             applicants a
         LEFT JOIN 
@@ -212,17 +212,28 @@ class Database:
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
         await self.execute_query(query, new_status, tgId)
 
-    async def add_applicant(self, tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName,
-                            passport, directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian):
+    async def add_draft_applicant(self, tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl=None,
+                                  firstName=None, lastName=None, middleName=None, olympian=False, *args, **kwargs):
         query = (
-            "INSERT INTO applicants (tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, "
-            "middleName, passport, directionOfEducation_id, typeOfEducation_id, languageOfEducation, "
-            "applicationStatus, olympian, createdTime, updatedTime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
-            "%s, %s, %s, %s, %s);"
+            "INSERT INTO applicants "
+            "(tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, "
+            "middleName, applicationStatus, olympian, createdTime, updatedTime) "
+            "VALUES "
+            "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
         )
-        await self.execute_query(query, tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName,
-                                 middleName, passport, directionOfEducation_id, typeOfEducation_id,
-                                 languageOfEducation, 'SUBMITTED', olympian, datetime.now(), datetime.now())
+        await self.execute_query(query, tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName,
+                                 lastName, middleName, 'DRAFT', olympian, datetime.now(), datetime.now())
+
+    async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation,
+                               *args, **kwargs):
+        query = (
+            "UPDATE applicants SET "
+            "directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
+            "applicationStatus = %s, updatedTime = %s "
+            "WHERE tgId = %s;"
+        )
+        await self.execute_query(query, directionOfEducation_id, typeOfEducation_id,
+                                 languageOfEducation, 'SUBMITTED', datetime.now(), tgId)
 
     async def get_applicant_exam_results(self, tgId):
         query = "SELECT id, applicant_id, result, trueResponseCount FROM exam_results WHERE applicant_id = %s"
@@ -361,5 +372,3 @@ class Database:
         # Insert the new active token
         query = "INSERT INTO tokens (token, isActive, createdTime, updatedTime) VALUES (%s, TRUE, %s, NULL)"
         return await self.execute_query(query, token, datetime.now())
-
-

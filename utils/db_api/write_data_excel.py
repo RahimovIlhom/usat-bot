@@ -12,8 +12,8 @@ async def write_applicant_to_excel(tgId):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    columns = ["tgId", "phoneNumber", "additionalPhoneNumber", "pinfl", "firstName", "lastName",
-               "middleName", "passport", "directionOfEducation", "typeOfEducation",
+    columns = ["tgId", "phoneNumber", "additionalPhoneNumber", "passport", "birthDate", "pinfl", "firstName",
+               "lastName", "middleName", "directionOfEducation", "typeOfEducation",
                "languageOfEducation", "contractFile", "olympian", "createdTime", "applicationStatus"]
 
     workbook = xlsxwriter.Workbook(filename)
