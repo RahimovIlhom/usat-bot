@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 
 from aiogram import types
@@ -311,4 +312,5 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
         except BadRequest:
             pass
     await state.reset_data()
+    os.remove(applicant_file)
     await state.finish()
