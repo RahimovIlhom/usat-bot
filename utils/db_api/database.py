@@ -187,7 +187,7 @@ class Database:
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
             "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
             "applicationStatus "
-            "FROM applicants WHERE tgId = %s OR passport = %s OR birthDate = %s;"
+            "FROM applicants WHERE tgId = %s OR passport = %s AND birthDate = %s;"
         )
         return await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
 
@@ -372,3 +372,31 @@ class Database:
         # Insert the new active token
         query = "INSERT INTO tokens (token, isActive, createdTime, updatedTime) VALUES (%s, TRUE, %s, NULL)"
         return await self.execute_query(query, token, datetime.now())
+
+    async def get_me(self, tgId):
+        query = (
+            "SELECT tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, "
+            "middleName, birthPlace, birthCountry, nationality, citizenship, gender, photo, createdTime "
+            "FROM applicants WHERE tgId = %s;"
+        )
+        return await self.execute_query(query, tgId, fetchone=True)
+
+    async def get_my_application(self, tgId):
+        query = """
+        SELECT 
+            a.tgId, 
+            e.nameUz AS directionOfEducationUz, e.nameRu AS directionOfEducationRu, 
+            t.nameUz AS typeOfEducationUz, t.nameRu AS typeOfEducationRu,
+            a.languageOfEducation, 
+            a.olympian, a.updatedTime, a.applicationStatus
+        FROM 
+            applicants a
+        LEFT JOIN 
+            educational_areas e ON a.directionOfEducation_id = e.id
+        LEFT JOIN 
+            types_of_education t ON a.typeOfEducation_id = t.id
+        WHERE 
+            a.tgId = %s;
+        """
+        return await self.execute_query(query, tgId, fetchone=True)
+

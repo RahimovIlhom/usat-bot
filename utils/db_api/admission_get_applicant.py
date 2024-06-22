@@ -4,7 +4,7 @@ from environs import Env
 env = Env()
 env.read_env()
 
-GET_STATUS_APPLICANT = env.str('GET_STATUS_APPLICANT')
+GET_STATUS_APPLICANT = env.str('GET_APPLICATION_URL')
 
 
 async def get_application_status_from_api(pinfl):
@@ -28,4 +28,3 @@ async def get_application_status_from_api(pinfl):
                     return None
             else:
                 return None
-

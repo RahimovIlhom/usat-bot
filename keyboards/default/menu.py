@@ -96,7 +96,7 @@ sub_menu_markup_ru = ReplyKeyboardMarkup(
             KeyboardButton(text="🏢 Информация об университете"),
         ],
         [
-            KeyboardButton(text="👨‍🎓 Образовательные направления в университете"),
+            KeyboardButton(text="👨‍🎓 Направления обучения в университете"),
         ],
         [
             KeyboardButton(text="🏷️ Суммы контрактов"),

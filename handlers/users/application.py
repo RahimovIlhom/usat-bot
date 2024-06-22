@@ -146,7 +146,6 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
     birthDateText = msg.text
     separator = '-' if '-' in birthDateText else '.'
     birthDate = datetime.strptime(birthDateText, f'%d{separator}%m{separator}%Y').date()
-    await state.update_data({'birthDate': birthDate})
     data = await state.get_data()
     language = data.get('language', 'ru')
     TEXTS = {
@@ -174,9 +173,13 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                          reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
         await state.finish()
     else:
+        data.update({'birthDate': birthDate})
         # applicant register for admission and get data
+        # data ni olamiz admissiondan
+        # fullname ni data ning ism va familiyasidan olib, statega update qilamiz
         await db.add_draft_applicant(**data)
         fullname = msg.from_user.full_name
+        await state.update_data({'fullname': fullname})
         await msg.answer(TEXTS[language]['one_resp_text'])
         await asyncio.sleep(1.5)
         await show_faculties(msg, language, fullname)

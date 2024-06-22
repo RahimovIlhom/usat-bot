@@ -78,6 +78,11 @@ APPLICATION_STATUS = (
     ('PASSED', 'IMTHONDAN MUVAFFAQIYATLI O\'TDI'),
 )
 
+GENDER_STATUS = (
+    ('MALE', 'Erkak'),
+    ('FEMALE', 'Ayol'),
+)
+
 
 class Applicant(models.Model):
     tgId = models.BigIntegerField(primary_key=True, verbose_name="Telegram id")
@@ -91,8 +96,14 @@ class Applicant(models.Model):
     firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
     lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
     middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
+    birthPlace = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan joyi")
+    birthCountry = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan davlati")
+    nationality = models.CharField(max_length=255, null=True, blank=True, verbose_name="Millati")
+    citizenship = models.CharField(max_length=255, null=True, blank=True, verbose_name="Fuqaroligi")
+    gender = models.CharField(max_length=6, choices=GENDER_STATUS, null=True, blank=True, verbose_name="Jinsi")
+    photo = models.CharField(max_length=255, null=True, blank=True, verbose_name="Rasmi")
     directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
-                                             related_name='applicants', verbose_name="Fakultet")
+                                             related_name='applicants', verbose_name="Ta'lim yo'nalishi")
     typeOfEducation = models.ForeignKey(TypeOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='applicants', verbose_name="Ta'lim turi")
     languageOfEducation = models.CharField(max_length=2, choices=LANGUAGES, default='uz', null=True, blank=True,
