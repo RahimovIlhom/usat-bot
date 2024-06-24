@@ -68,7 +68,8 @@ class Database:
             SELECT s.id, s.nameUz, s.nameRu
             FROM sciences s
             INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
-            WHERE eas.directionofeducation_id = %s;
+            WHERE eas.directionofeducation_id = %s
+            ORDER BY eas.id;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
@@ -120,6 +121,18 @@ class Database:
     async def select_types_of_education(self):
         query = "SELECT id, nameUz, nameRu, active FROM types_of_education;"
         return await self.execute_query(query, fetchall=True)
+
+    async def select_types_no_contract(self, direction_id):
+        query = """
+            SELECT t.id, t.nameUz, t.nameRu, t.active 
+            FROM types_of_education t
+            WHERE t.id NOT IN (
+                SELECT c.typeOfEducation_id 
+                FROM contract_prices c
+                WHERE c.directionOfEducation_id = %s
+            );
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
 
     async def select_type_of_education(self, id):
         query = "SELECT id, nameUz, nameRu, active FROM types_of_education WHERE id = %s;"

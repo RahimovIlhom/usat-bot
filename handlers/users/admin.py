@@ -35,7 +35,7 @@ async def types_of_edu_branch(msg: types.Message):
     await msg.answer(msg.text, reply_markup=types_of_education_menu_markup)
 
 
-@dp.message_handler(IsPrivate(), text="🏷️ Kontrakt summalari", user_id=ADMINS)
+@dp.message_handler(IsPrivate(), text="🏷️ Kontrakt bo'limi", user_id=ADMINS)
 async def contract_branch(msg: types.Message):
     await msg.answer(msg.text, reply_markup=contract_menu_markup)
 

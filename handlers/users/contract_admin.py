@@ -3,6 +3,7 @@ from typing import Union
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardRemove
+from aiogram.utils.exceptions import BadRequest
 
 from data.config import ADMINS
 from filters import IsPrivate
@@ -135,7 +136,6 @@ async def show_direction_of_edu(call, id):
         f"{sciences_info}\n"
         f"Holat: {'♻️ active' if direction[3] else '🚫 no active'}"
     )
-
     await call.message.edit_text(info, reply_markup=await direction_inlines(direction[0]))
 
 

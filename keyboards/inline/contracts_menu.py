@@ -31,7 +31,7 @@ async def all_directions_for_contract_inlines(action='read'):
 
 
 async def all_types_for_contract_inlines(direction_id, action='read'):
-    all_types = await db.select_types_of_education()
+    all_types = await db.select_types_no_contract(direction_id)
     markup = InlineKeyboardMarkup(row_width=1)
     for type_of_edu in all_types:
         markup.insert(
@@ -54,7 +54,7 @@ async def all_contract_prices_inlines(direction_id, action='read'):
     markup = InlineKeyboardMarkup(row_width=1)
     for contract in all_contracts:
         markup.insert(InlineKeyboardButton(
-            text=f"{contract[3]} - {contract[2]}",
+            text=f"{contract[3]} - {'{:,.2f}'.format(contract[2]).replace(',', ' ')}",
             callback_data=await make_contracts_callback_data(direction_id, contract[1], contract[0], action=action)
         ))
     markup.insert(InlineKeyboardButton(
@@ -82,7 +82,7 @@ async def detail_contract_inlines(direction_id, type_id, contract_id):
 
 
 async def delete_contract_inlines(direction_id, type_id, contract_id):
-    markup = InlineKeyboardMarkup(row_width=2)
+    markup = InlineKeyboardMarkup(row_width=1)
     markup.insert(InlineKeyboardButton(
         text="❌ O'chirish",
         callback_data=await make_contracts_callback_data(direction_id, type_id, contract_id, 'delete', 'yes')

@@ -15,7 +15,7 @@ admin_menu_markup_uz = ReplyKeyboardMarkup(
             KeyboardButton(text="🎓 Ta'lim turlari bo'limi"),
         ],
         [
-            KeyboardButton(text="🏷️ Kontrakt summalari"),
+            KeyboardButton(text="🏷️ Kontrakt bo'limi"),
         ],
     ],
     resize_keyboard=True
