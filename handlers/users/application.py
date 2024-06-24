@@ -305,15 +305,15 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     await call.message.edit_text(resp_info, reply_markup=None)
     await asyncio.sleep(0.4)
     await call.message.answer(question, reply_markup=markup)
-    applicant_file = await write_applicant_to_excel(call.from_user.id)
-
-    # Send the file to all admins
-    for admin_id in ADMINS:
-        try:
-            await bot.send_document(admin_id, open(applicant_file, 'rb'), caption="Yangi arizachi",
-                                    reply_markup=await accept_applicant_inline(call.from_user.id))
-        except BadRequest:
-            pass
+    # applicant_file = await write_applicant_to_excel(call.from_user.id)
+    #
+    # # Send the file to all admins
+    # for admin_id in ADMINS:
+    #     try:
+    #         await bot.send_document(admin_id, open(applicant_file, 'rb'), caption="Yangi arizachi",
+    #                                 reply_markup=await accept_applicant_inline(call.from_user.id))
+    #     except BadRequest:
+    #         pass
+    # os.remove(applicant_file)
     await state.reset_data()
-    os.remove(applicant_file)
     await state.finish()

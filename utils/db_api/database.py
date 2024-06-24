@@ -73,6 +73,17 @@ class Database:
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
+    async def get_sciences_for_exam(self, direction_id):
+        query = """
+            SELECT s.id, s.nameUz, s.nameRu
+            FROM sciences s
+            INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
+            WHERE eas.directionofeducation_id = %s
+            ORDER BY eas.id
+            LIMIT 3;
+        """
+        return await self.execute_query(query, direction_id, fetchall=True)
+
     async def get_sciences_not_for_direction(self, direction_id):
         query = """
             SELECT s.id, s.nameUz, s.nameRu
@@ -412,4 +423,3 @@ class Database:
             a.tgId = %s;
         """
         return await self.execute_query(query, tgId, fetchone=True)
-

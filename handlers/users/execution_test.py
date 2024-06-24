@@ -11,7 +11,6 @@ from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines, ready_callback_data
 from loader import dp, db
 from states import TestExecutionStates
-from utils.db_api import get_application_status_from_api
 
 
 @dp.message_handler(IsPrivate(), text=["🧑‍💻 Imtihon topshirish", "🧑‍💻 Сдать экзамен"])
@@ -53,7 +52,7 @@ async def check_execution_text(msg: types.Message):
                 return
 
         if status in ('ACCEPTED', 'FAILED'):
-            sciences = await db.get_sciences_for_direction(applicant[8])
+            sciences = await db.get_sciences_for_exam(applicant[8])
             if not sciences:
                 await msg.answer(RESPONSE_TEXTS[language]['no_exam_questions'])
                 return
@@ -104,7 +103,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         applicant = await db.get_applicant(call.from_user.id)
         languageOfEducation = applicant[10]
         direction_id = applicant[8]
-        sciences = await db.get_sciences_for_direction(direction_id)
+        sciences = await db.get_sciences_for_exam(direction_id)
 
         science = sciences[0]
         tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
@@ -137,7 +136,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
                 reply_markup=ReplyKeyboardRemove()
             )
 
-        # await countdown(call, 10)
+        await countdown(call, 10)
         await science_all_questions(call, {}, state)
 
     except Exception as e:
@@ -160,17 +159,7 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     if user_resp:
         updated_user_responses = user_responses + user_resp if user_responses else f"{user_resp}"
         await state.update_data({'user_responses': updated_user_responses})
-        text_template = "{}\n\nВаш ответ: {}" if language != 'uz' else "{}\n\nSizning javobingiz: {}"
-        try:
-            await call.message.edit_caption(
-                text_template.format(call.message.caption, user_resp).replace('<', '&lt'),
-                reply_markup=None
-            )
-        except BadRequest:
-            await call.message.edit_text(
-                text_template.format(call.message.text, user_resp).replace('<', '&lt'),
-                reply_markup=None
-            )
+        await call.message.delete()
 
     if not questions:
         if sciences:
@@ -192,7 +181,7 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
         else f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
         reply_markup=ReplyKeyboardRemove()
     )
-    # await countdown(call, 10)
+    await countdown(call, 10)
     tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
     if not tests:
         await call.message.answer("No active tests available.")
@@ -217,35 +206,18 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
 async def finish_test(call, state, language, true_responses, user_responses):
     correct_answers = sum(1 for t, u in zip(true_responses, user_responses) if t == u)
     result = round((correct_answers / len(true_responses)) * 100, 2)
-    applicant = await db.get_applicant(call.from_user.id)
-    direction = await db.select_direction(applicant[8])
-    percentage = direction[3]
-    applicantStatus = 'PASSED' if result >= percentage else 'FAILED'
+    applicantStatus = 'EXAMINED'
     await db.add_exam_result(call.from_user.id, result, correct_answers)
     await db.update_application_status(call.from_user.id, applicantStatus)
     RESPONSE_RESULT = {
-        'uz': {
-            'EXAMINED': ("🥳 Tabriklamiz, imtihondan muvaffaqiyatli o'tdingiz!\n"
-                         "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
-                         "Sizni natijangiz tasdiqlangandan so'ng, kontrakt shartnomangizni «📥 Shartnomani olish» "
-                         "bo'limi orqali yuklab olishingiz mumkin."),
-            'FAILED': ("😔 Ufsuski, imtihondan o'ta olmadingiz!\n"
-                       "Siz {} ta test savoliga to'g'ri javob berdingiz.\n"
-                       "Lekin shunga qaramay sizga qayta imtihon topshirish imkoniyati berildi. "),
-        },
-        'ru': {
-            'EXAMINED': ("🥳 Поздравляем, вы успешно сдали экзамен!\n"
-                         "Вы правильно ответили на {} вопросов теста.\n"
-                         "После подтверждения вашего результата, вы можете скачать контракт через раздел «📥 Получить "
-                         "контракт»."),
-            'FAILED': ("😔 К сожалению, вы не сдали экзамен!\n"
-                       "Вы правильно ответили на {} вопросов теста.\n"
-                       "Тем не менее, у вас есть возможность пересдать экзамен. "),
-        }
+        'uz': ("✅ Tabriklaymiz, siz imtihonni tugatdingiz!\n"
+               "Natijangiz tekshirishga yuborildi"),
+        'ru': ("✅ Поздравляем, вы завершили экзамен!\n"
+               "Ваш результат отправлен на проверку")
     }
 
     await call.message.answer(
-        RESPONSE_RESULT[language][applicantStatus].format(correct_answers),
+        RESPONSE_RESULT[language].format(correct_answers),
         reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru
     )
     await state.finish()
