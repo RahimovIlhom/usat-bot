@@ -9,6 +9,7 @@ class Test(models.Model):
     questionsCount = models.IntegerField(verbose_name="Arizachiga fan bo'yicha ko'rinuvchi savollar soni")
     language = models.CharField(max_length=2, choices=LANGUAGES, verbose_name="Test tili")
     isActive = models.BooleanField(default=False, verbose_name="Test aktivmi?")
+    deleted = models.BooleanField(default=False, verbose_name="Test o'chirilganmi?")
     createdTime = models.DateTimeField(auto_now_add=True, verbose_name="Test ochilgan sana")
 
     def __str__(self):
@@ -34,6 +35,7 @@ class Question(models.Model):
     image = models.CharField(max_length=255, null=True, blank=True, verbose_name="Savol rasmi")
     question = models.TextField(verbose_name="Savol matni")
     trueResponse = models.CharField(max_length=1, choices=TEST_RESPONSES, verbose_name="To'g'ri javob")
+    active = models.BooleanField(default=True, verbose_name="Savolning aktivligi")
 
     def __str__(self):
         return f"{self.test}: {self.pk}"

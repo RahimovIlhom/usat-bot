@@ -52,11 +52,11 @@ class Database:
             await self.execute_query(query, tgId, fullname, language)
 
     async def select_directions(self):
-        query = "SELECT id, nameUz, nameRu, active FROM educational_areas;"
+        query = "SELECT id, nameUz, nameRu, active FROM educational_areas WHERE deleted = FALSE;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_active_directions(self):
-        query = "SELECT id, nameUz, nameRu FROM educational_areas WHERE active = TRUE;"
+        query = "SELECT id, nameUz, nameRu FROM educational_areas WHERE active = TRUE AND deleted = FALSE;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_direction(self, id):
@@ -68,7 +68,7 @@ class Database:
             SELECT s.id, s.nameUz, s.nameRu
             FROM sciences s
             INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
-            WHERE eas.directionofeducation_id = %s
+            WHERE eas.directionofeducation_id = %s AND s.deleted = FALSE
             ORDER BY eas.id;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
@@ -78,7 +78,7 @@ class Database:
             SELECT s.id, s.nameUz, s.nameRu
             FROM sciences s
             INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
-            WHERE eas.directionofeducation_id = %s
+            WHERE eas.directionofeducation_id = %s AND s.deleted = FALSE
             ORDER BY eas.id
             LIMIT 3;
         """
@@ -92,7 +92,7 @@ class Database:
                 SELECT science_id
                 FROM educational_areas_sciences
                 WHERE directionofeducation_id = %s
-            );
+            ) AND s.deleted = FALSE;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
@@ -113,7 +113,7 @@ class Database:
     async def add_direction(self, newId, nameUz, nameRu, *args, **kwargs):
         if await self.select_direction(newId):
             return 'already_exist'
-        query = "INSERT INTO educational_areas (id, nameUz, nameRu, active) VALUES (%s, %s, %s, FALSE);"
+        query = "INSERT INTO educational_areas (id, nameUz, nameRu, active, deleted) VALUES (%s, %s, %s, FALSE, FALSE);"
         await self.execute_query(query, newId, nameUz, nameRu)
 
     async def set_direction(self, id, nameUz, nameRu, *args, **kwargs):
@@ -126,11 +126,11 @@ class Database:
         await self.execute_query(query, action, id)
 
     async def delete_direction(self, id):
-        query = "DELETE FROM educational_areas WHERE id = %s"
+        query = "UPDATE educational_areas SET active = FALSE, deleted = TRUE WHERE id = %s;"
         await self.execute_query(query, id)
 
     async def select_types_of_education(self):
-        query = "SELECT id, nameUz, nameRu, active FROM types_of_education;"
+        query = "SELECT id, nameUz, nameRu, active FROM types_of_education WHERE deleted = FALSE;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_types_no_contract(self, direction_id):
@@ -141,7 +141,7 @@ class Database:
                 SELECT c.typeOfEducation_id 
                 FROM contract_prices c
                 WHERE c.directionOfEducation_id = %s
-            );
+            ) AND t.deleted = FALSE;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
@@ -152,7 +152,8 @@ class Database:
     async def add_type_of_education(self, newId, nameUz, nameRu, *args, **kwargs):
         if await self.select_type_of_education(newId):
             return 'already_exist'
-        query = "INSERT INTO types_of_education (id, nameUz, nameRu, active) VALUES (%s, %s, %s, FALSE);"
+        query = ("INSERT INTO types_of_education (id, nameUz, nameRu, active, deleted) "
+                 "VALUES (%s, %s, %s, FALSE, FALSE);")
         await self.execute_query(query, newId, nameUz, nameRu)
 
     async def set_type_of_education(self, id, nameUz, nameRu, *args, **kwargs):
@@ -165,7 +166,7 @@ class Database:
         await self.execute_query(query, action, id)
 
     async def delete_type_of_education(self, id):
-        query = "DELETE FROM types_of_education WHERE id = %s"
+        query = "UPDATE types_of_education SET active = FALSE, deleted = TRUE WHERE id = %s;"
         await self.execute_query(query, id)
 
     async def select_contact_price(self, direction_id, type_id):
@@ -177,7 +178,7 @@ class Database:
         SELECT cp.id, cp.typeOfEducation_id, cp.amount, te.nameUz, te.nameRu 
         FROM contract_prices cp
         JOIN types_of_education te ON cp.typeOfEducation_id = te.id
-        WHERE cp.directionOfEducation_id = %s;
+        WHERE cp.directionOfEducation_id = %s AND te.deleted = FALSE;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 
@@ -270,13 +271,15 @@ class Database:
     async def select_questions_for_test(self, test_id, count=None):
         if count:
             # Randomly select `count` number of questions
-            query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
+            query = ("SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s AND active = "
+                     "TRUE;")
             all_questions = await self.execute_query(query, test_id, fetchall=True)
             random_questions = random.sample(all_questions, min(count, len(all_questions)))
             return random_questions
         else:
             # Select all questions
-            query = "SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s;"
+            query = ("SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s AND active = "
+                     "TRUE;")
             return await self.execute_query(query, test_id, fetchall=True)
 
     async def select_question(self, ques_id):
@@ -295,7 +298,8 @@ class Database:
             await self.execute_query(query, test_id, image, question, trueResponse, question_id)
             return 'update'
         else:
-            query = "INSERT INTO questions (test_id, image, question, trueResponse) VALUES (%s, %s, %s, %s);"
+            query = ("INSERT INTO questions (test_id, image, question, trueResponse, active) "
+                     "VALUES (%s, %s, %s, %s, TRUE);")
             await self.execute_query(query, test_id, image, question, trueResponse)
             test_app = await self.select_test(test_id)
             if test_app[2] == test_app[6]:
@@ -304,15 +308,18 @@ class Database:
             return 'add'
 
     async def delete_question(self, ques_id, test_id):
-        query = "DELETE FROM questions WHERE id = %s;"
+        # Update the question to set active to FALSE
+        query = "UPDATE questions SET active = FALSE WHERE id = %s;"
         await self.execute_query(query, ques_id)
+
+        # Check the status of the test and update if necessary
         test_app = await self.select_test(test_id)
         if test_app[2] > test_app[6]:
             query_test = "UPDATE tests SET isActive = %s WHERE id = %s"
             await self.execute_query(query_test, False, test_id)
 
     async def select_sciences(self):
-        query = "SELECT id, nameUz, nameRu FROM sciences;"
+        query = "SELECT id, nameUz, nameRu FROM sciences WHERE deleted = FALSE;"
         return await self.execute_query(query, fetchall=True)
 
     async def select_science(self, sc_id):
@@ -321,19 +328,24 @@ class Database:
 
     async def add_or_update_science(self, nameUz, nameRu, science_id=None, *args):
         if science_id is None:
-            query = "INSERT INTO sciences (nameUz, nameRu) VALUES (%s, %s);"
+            query = "INSERT INTO sciences (nameUz, nameRu, deleted) VALUES (%s, %s, FALSE);"
             await self.execute_query(query, nameUz, nameRu)
         else:
             query = "UPDATE sciences SET nameUz = %s, nameRu = %s WHERE id = %s;"
             await self.execute_query(query, nameUz, nameRu, science_id)
 
     async def delete_science(self, sc_id):
-        query = "DELETE FROM sciences WHERE id = %s;"
+        # Update the science to set deleted to TRUE
+        query = "UPDATE sciences SET deleted = TRUE WHERE id = %s;"
         await self.execute_query(query, sc_id)
+
+        # Update all tests related to this science to set deleted to TRUE
+        update_tests_query = "UPDATE tests SET deleted = TRUE isActive = FALSE WHERE science_id = %s;"
+        await self.execute_query(update_tests_query, sc_id)
 
     async def add_test(self, science_id, questionsCount, language, id=None, *args):
         query = ("INSERT INTO tests (science_id, questionsCount, language, isActive, "
-                 "createdTime) VALUES (%s, %s, %s, %s, %s);")
+                 "createdTime, deleted) VALUES (%s, %s, %s, %s, %s, FALSE);")
         await self.execute_query(query, science_id, questionsCount, language, False,
                                  datetime.now())
 
@@ -346,8 +358,8 @@ class Database:
             SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
                    COUNT(q.id) AS questions_count
             FROM tests t
-            LEFT JOIN questions q ON t.id = q.test_id
-            WHERE t.science_id = %s
+            LEFT JOIN questions q ON t.id = q.test_id AND q.active = TRUE
+            WHERE t.science_id = %s AND t.deleted = FALSE
             GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime;
         """)
         return await self.execute_query(query, sc_id, fetchall=True)
@@ -357,8 +369,8 @@ class Database:
             SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
                    COUNT(q.id) AS questions_count
             FROM tests t
-            LEFT JOIN questions q ON t.id = q.test_id
-            WHERE t.science_id = %s AND t.language = %s AND t.isActive = TRUE
+            LEFT JOIN questions q ON t.id = q.test_id AND q.active = TRUE
+            WHERE t.science_id = %s AND t.language = %s AND t.isActive = TRUE AND t.deleted = FALSE
             GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime
             ORDER BY t.createdTime;
         """)
@@ -369,21 +381,21 @@ class Database:
             SELECT t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, 
                    COUNT(q.id) AS questions_count, s.nameUz, s.nameRu
             FROM tests t
-            LEFT JOIN questions q ON t.id = q.test_id
+            LEFT JOIN questions q ON t.id = q.test_id AND q.active = TRUE
             LEFT JOIN sciences s ON t.science_id = s.id
-            WHERE t.id = %s
+            WHERE t.id = %s AND t.deleted = FALSE
             GROUP BY t.id, t.science_id, t.questionsCount, t.language, t.isActive, t.createdTime, s.nameUz, s.nameRu;
         """)
         return await self.execute_query(query, test_id, fetchone=True)
 
     async def delete_test(self, test_id):
-        # Update questions to set test_id to NULL
-        update_query = "DELETE FROM questions WHERE test_id = %s"
-        await self.execute_query(update_query, test_id)
-
-        # Delete the test
-        delete_query = "DELETE FROM tests WHERE id = %s"
+        # Update the test to set deleted to TRUE and isActive to FALSE
+        delete_query = "UPDATE tests SET deleted = TRUE, isActive = FALSE WHERE id = %s"
         await self.execute_query(delete_query, test_id)
+
+        # Update all questions related to this test to set active to FALSE
+        update_questions_query = "UPDATE questions SET active = FALSE WHERE test_id = %s"
+        await self.execute_query(update_questions_query, test_id)
 
     async def get_active_token(self):
         query = "SELECT id, token, isActive, createdTime, updatedTime FROM tokens WHERE isActive = TRUE;"

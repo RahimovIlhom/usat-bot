@@ -6,19 +6,19 @@ from users.models import Science
 
 
 class ScienceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nameUz', 'nameRu']
+    list_display = ['id', 'nameUz', 'nameRu', 'deleted']
     search_fields = ['nameUz', 'nameRu']
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'science', 'questionsCount', 'language', 'isActive']
+    list_display = ['id', 'science', 'questionsCount', 'language', 'isActive', 'deleted']
     list_filter = ['science', 'language']
     search_fields = ['directionOfEducation__nameUz', 'directionOfEducation__nameRu', 'science__nameUz',
                      'science__nameRu', 'questionsCount', 'language']
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'test', 'image', 'trueResponse']
+    list_display = ['id', 'test', 'image', 'trueResponse', 'active']
     search_fields = ['test__pk', 'image', 'question', 'trueResponse']
 
 

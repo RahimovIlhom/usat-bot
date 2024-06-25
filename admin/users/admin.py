@@ -10,12 +10,12 @@ class SimpleUserAdmin(admin.ModelAdmin):
 
 
 class EducationalAreasAdmin(admin.ModelAdmin):
-    list_display = ['nameUz', 'nameRu', 'active']
+    list_display = ['nameUz', 'nameRu', 'active', 'deleted']
     search_fields = ['nameUz', 'nameRu']
 
 
 class TypeOfEducationAdmin(admin.ModelAdmin):
-    list_display = ['nameUz', 'nameRu', 'active']
+    list_display = ['nameUz', 'nameRu', 'active', 'deleted']
     search_fields = ['nameUz', 'nameRu']
 
 

@@ -27,6 +27,7 @@ class DirectionOfEducation(models.Model):
     nameRu = models.CharField(max_length=255, verbose_name="Ta'lim yo'nalishi ru")
     sciences = models.ManyToManyField('Science', blank=True, verbose_name="Imtihon fanlari")
     active = models.BooleanField(default=True, verbose_name="Ta'lim yo'nalishi aktivligi")
+    deleted = models.BooleanField(default=False, verbose_name="O'chirilganmi?")
 
     def __str__(self):
         return f"{self.nameUz}"
@@ -42,6 +43,7 @@ class TypeOfEducation(models.Model):
     nameUz = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi uz")
     nameRu = models.CharField(max_length=255, verbose_name="Ta'lim turi nomi ru")
     active = models.BooleanField(default=True, verbose_name="Ta'lim turi aktivligi")
+    deleted = models.BooleanField(default=False, verbose_name="O'chirilganmi?")
 
     def __str__(self):
         return f"{self.nameUz}"
@@ -144,6 +146,7 @@ class Olympian(models.Model):
 class Science(models.Model):
     nameUz = models.CharField(max_length=255, verbose_name="Fan nomi uz")
     nameRu = models.CharField(max_length=255, verbose_name="Fan nomi ru")
+    deleted = models.BooleanField(default=False, verbose_name="Fan o'chirilganmi?")
 
     def __str__(self):
         return f"{self.nameUz}"

@@ -55,7 +55,7 @@ async def type_of_edu_inlines(id):
 
 
 async def delete_type_of_edu_inlines(id):
-    markup = InlineKeyboardMarkup(row_width=2)
+    markup = InlineKeyboardMarkup(row_width=1)
     markup.insert(InlineKeyboardButton(
         text="❌ O'chirish",
         callback_data=await make_types_callback_data(id, 'delete', 'yes')
