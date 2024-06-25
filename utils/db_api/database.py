@@ -4,6 +4,8 @@ from datetime import datetime
 import aiomysql
 from environs import Env
 
+from utils.db_api.encrypt_data import encrypt_data, decrypt_data
+
 env = Env()
 env.read_env()
 
@@ -212,9 +214,23 @@ class Database:
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
             "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
             "applicationStatus "
-            "FROM applicants WHERE tgId = %s OR passport = %s AND birthDate = %s;"
+            "FROM applicants WHERE tgId = %s OR (passport = %s AND birthDate = %s);"
         )
-        return await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
+        result = await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
+
+        if result:
+            result = (
+                result[0],
+                decrypt_data(result[1]),
+                decrypt_data(result[2]),
+                decrypt_data(result[3]) if result[3] else None,
+                decrypt_data(result[4]) if result[4] else None,
+                decrypt_data(result[5]) if result[5] else None,
+                decrypt_data(result[6]) if result[6] else None,
+                decrypt_data(result[7]),
+                result[8],  result[9], result[10], result[11], result[12], result[13], result[14]
+            )
+        return result
 
     async def get_applicant_for_excel(self, tgId):
         query = """
@@ -231,7 +247,29 @@ class Database:
         WHERE 
             a.tgId = %s;
         """
-        return await self.execute_query(query, tgId, fetchone=True)
+        result = await self.execute_query(query, tgId, fetchone=True)
+
+        if result:
+            # Decrypt sensitive data
+            result = (
+                result[0],
+                decrypt_data(result[1]),
+                decrypt_data(result[2]),
+                decrypt_data(result[3]),
+                decrypt_data(result[4]),
+                decrypt_data(result[5]) if result[5] else None,
+                decrypt_data(result[6]) if result[6] else None,
+                decrypt_data(result[7]) if result[7] else None,
+                decrypt_data(result[8]) if result[8] else None,
+                result[9],
+                result[10],
+                result[11],
+                result[12],
+                result[13],
+                result[14],
+                result[15]
+            )
+        return result
 
     async def update_application_status(self, tgId, new_status):
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
@@ -239,6 +277,17 @@ class Database:
 
     async def add_draft_applicant(self, tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl=None,
                                   firstName=None, lastName=None, middleName=None, olympian=False, *args, **kwargs):
+
+        # Encrypt sensitive data
+        phoneNumber_encrypted = encrypt_data(phoneNumber)
+        additionalPhoneNumber_encrypted = encrypt_data(additionalPhoneNumber)
+        passport_encrypted = encrypt_data(passport)
+        birthDate_encrypted = encrypt_data(birthDate)
+        pinfl_encrypted = encrypt_data(pinfl) if pinfl else None
+        firstName_encrypted = encrypt_data(firstName) if firstName else None
+        lastName_encrypted = encrypt_data(lastName) if lastName else None
+        middleName_encrypted = encrypt_data(middleName) if middleName else None
+
         query = (
             "INSERT INTO applicants "
             "(tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, "
@@ -246,8 +295,10 @@ class Database:
             "VALUES "
             "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
         )
-        await self.execute_query(query, tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName,
-                                 lastName, middleName, 'DRAFT', olympian, datetime.now(), datetime.now())
+        await self.execute_query(query, tgId, phoneNumber_encrypted, additionalPhoneNumber_encrypted,
+                                 passport_encrypted, birthDate_encrypted,
+                                 pinfl_encrypted, firstName_encrypted, lastName_encrypted, middleName_encrypted,
+                                 'DRAFT', olympian, datetime.now(), datetime.now())
 
     async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation,
                                *args, **kwargs):
@@ -415,7 +466,28 @@ class Database:
             "middleName, birthPlace, birthCountry, nationality, citizenship, gender, photo, createdTime "
             "FROM applicants WHERE tgId = %s;"
         )
-        return await self.execute_query(query, tgId, fetchone=True)
+        result = await self.execute_query(query, tgId, fetchone=True)
+
+        if result:
+            result = (
+                result[0],
+                decrypt_data(result[1]),
+                decrypt_data(result[2]),
+                decrypt_data(result[3]),
+                decrypt_data(result[4]),
+                decrypt_data(result[5]) if result[5] else None,
+                decrypt_data(result[6]) if result[6] else None,
+                decrypt_data(result[7]) if result[7] else None,
+                decrypt_data(result[8]) if result[8] else None,
+                result[9],
+                result[10],
+                result[11],
+                result[12],
+                result[13],  # Gender, assuming it's not encrypted
+                result[14],  # Photo, assuming it's not encrypted
+                result[15]  # CreatedTime, assuming it's not encrypted
+            )
+        return result
 
     async def get_my_application(self, tgId):
         query = """

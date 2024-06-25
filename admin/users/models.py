@@ -88,13 +88,13 @@ GENDER_STATUS = (
 
 class Applicant(models.Model):
     tgId = models.BigIntegerField(primary_key=True, verbose_name="Telegram id")
-    phoneNumber = models.CharField(max_length=20, unique=True, verbose_name="Telefon raqami")
-    additionalPhoneNumber = models.CharField(max_length=20, unique=True, null=True, blank=True,
+    phoneNumber = models.CharField(max_length=255, unique=True, verbose_name="Telefon raqami")
+    additionalPhoneNumber = models.CharField(max_length=255, unique=True, null=True, blank=True,
                                              verbose_name="Qo'shimcha telefon raqami")
-    passport = models.CharField(max_length=20, null=True, blank=True,
+    passport = models.CharField(max_length=255, null=True, blank=True,
                                 verbose_name="Pasport seriya va raqami")
-    birthDate = models.DateField(null=True, blank=True, verbose_name="Tug'ilgan sanasi")
-    pinfl = models.CharField(max_length=14, unique=True, null=True, blank=True, verbose_name="Pinfl")
+    birthDate = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan sanasi")
+    pinfl = models.CharField(max_length=255, unique=True, null=True, blank=True, verbose_name="Pinfl")
     firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
     lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
     middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
