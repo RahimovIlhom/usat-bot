@@ -1,5 +1,7 @@
+import json
 import random
 from datetime import datetime
+from typing import Optional, List, Dict, Any
 
 import aiomysql
 from environs import Env
@@ -315,9 +317,34 @@ class Database:
         query = "SELECT id, applicant_id, result, trueResponseCount FROM exam_results WHERE applicant_id = %s"
         return await self.execute_query(query, tgId, fetchall=True)
 
-    async def add_exam_result(self, applicant_id, result, trueResponseCount):
-        query = "INSERT INTO exam_results (applicant_id, result, trueResponseCount) VALUES (%s, %s, %s);"
-        await self.execute_query(query, applicant_id, result, trueResponseCount)
+    async def add_exam_result(
+            self,
+            applicant_id: int,
+            true_response_count: int,
+            result: float,
+            total_score: int,
+            user_responses: Optional[List[Dict[str, Any]]] = None,
+            interval_time: Optional[float] = None
+    ) -> None:
+        query = """
+        INSERT INTO exam_results 
+        (applicant_id, userResponses, trueResponseCount, result, totalScore, intervalTime, createdTime)
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
+        """
+
+        user_responses_json = json.dumps(user_responses) if user_responses else None
+        created_time = datetime.now()
+
+        await self.execute_query(
+            query,
+            applicant_id,
+            user_responses_json,
+            true_response_count,
+            result,
+            total_score,
+            interval_time,
+            created_time
+        )
 
     async def select_questions_for_test(self, test_id, count=None):
         if count:
@@ -461,14 +488,19 @@ class Database:
         return await self.execute_query(query, token, datetime.now())
 
     async def get_me(self, tgId):
-        query = (
-            "SELECT tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, "
-            "middleName, birthPlace, birthCountry, nationality, citizenship, gender, photo, createdTime "
-            "FROM applicants WHERE tgId = %s;"
-        )
+        query = """
+        SELECT 
+            tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, 
+            middleName, olympian, createdTime, photo
+        FROM 
+            applicants
+        WHERE 
+            tgId = %s;
+        """
         result = await self.execute_query(query, tgId, fetchone=True)
 
         if result:
+            # Decrypt sensitive data
             result = (
                 result[0],
                 decrypt_data(result[1]),
@@ -482,10 +514,6 @@ class Database:
                 result[9],
                 result[10],
                 result[11],
-                result[12],
-                result[13],  # Gender, assuming it's not encrypted
-                result[14],  # Photo, assuming it's not encrypted
-                result[15]  # CreatedTime, assuming it's not encrypted
             )
         return result
 

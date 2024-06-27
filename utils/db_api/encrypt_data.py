@@ -1,8 +1,12 @@
 import datetime
 
+from environs import Env
 from cryptography.fernet import Fernet
 
-key = Fernet.generate_key()
+env = Env()
+env.read_env()
+
+key = env.str('CRIPT_KEY')
 cipher_suite = Fernet(key)
 
 

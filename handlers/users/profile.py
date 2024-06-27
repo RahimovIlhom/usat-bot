@@ -30,15 +30,15 @@ async def my_profile(msg: types.Message):
         return
 
     # Format the createdTime
-    created_time = applicant[15]  # Assuming applicant[15] is a datetime object
+    created_time = applicant[10]  # Assuming applicant[10] is a datetime object
     formatted_created_time = created_time.strftime("%H:%M %d.%m.%Y")
 
-    # Gender mapping
-    gender_map = {
-        'uz': {'MALE': 'Erkak', 'FEMALE': 'Ayol'},
-        'ru': {'MALE': 'Мужчина', 'FEMALE': 'Женщина'}
+    # Olimpiada ishtirokchisi (boolean)
+    olympian_text = {
+        'uz': 'Ha' if applicant[9] else 'Yo\'q',
+        'ru': 'Да' if applicant[9] else 'Нет'
     }
-    gender = gender_map[lang].get(applicant[13], 'N/A')
+    olympian = olympian_text[lang]
 
     GET_ME_TEXT = {
         'uz': (f"👤 Ism: {applicant[6]}\n"
@@ -48,11 +48,7 @@ async def my_profile(msg: types.Message):
                f"🛂 Pasport: {applicant[3]}\n"
                f"🎂 Tug'ilgan sana: {applicant[4]}\n"
                f"🆔 PINFL: {applicant[5]}\n"
-               f"🌍 Tug'ilgan joyi: {applicant[9]}\n"
-               f"🏳️ Tug'ilgan mamlakat: {applicant[10]}\n"
-               f"🌐 Millati: {applicant[11]}\n"
-               f"🏳️ Fuqarolik: {applicant[12]}\n"
-               f"🚻 Jins: {gender}\n"
+               f"🏆 Olimpiada ishtirokchisi: {olympian}\n"
                f"🗓️ Ro'yxatdan o'tilgan sana: {formatted_created_time}\n"),
         'ru': (f"👤 Имя: {applicant[6]}\n"
                f"👤 Фамилия: {applicant[7]}\n"
@@ -61,16 +57,12 @@ async def my_profile(msg: types.Message):
                f"🛂 Паспорт: {applicant[3]}\n"
                f"🎂 Дата рождения: {applicant[4]}\n"
                f"🆔 PINFL: {applicant[5]}\n"
-               f"🌍 Место рождения: {applicant[9]}\n"
-               f"🏳️ Страна рождения: {applicant[10]}\n"
-               f"🌐 Национальность: {applicant[11]}\n"
-               f"🏳️ Гражданство: {applicant[12]}\n"
-               f"🚻 Пол: {gender}\n"
+               f"🏆 Участник олимпиады: {olympian}\n"
                f"🗓️ Дата регистрации: {formatted_created_time}\n")
     }
 
-    if applicant[14]:  # Check if photo exists
-        await msg.answer_photo(applicant[14], caption=GET_ME_TEXT[lang])
+    if applicant[11]:  # Check if photo exists
+        await msg.answer_photo(applicant[11], caption=GET_ME_TEXT[lang])
     else:
         await msg.answer(GET_ME_TEXT[lang])
 

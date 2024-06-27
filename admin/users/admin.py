@@ -27,8 +27,7 @@ class ContractPriceAdmin(admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['passport', 'birthDate', 'firstName', 'directionOfEducation', 'typeOfEducation',
-                    'olympian', 'applicationStatus']
+    list_display = ['tgId', 'directionOfEducation', 'typeOfEducation', 'olympian', 'applicationStatus', 'updatedTime']
     list_filter = ['directionOfEducation', 'typeOfEducation', 'applicationStatus']
     search_fields = ['tgId', 'phoneNumber', 'pinfl', 'firstName', 'passport', 'lastName', 'middleName', 'contractFile']
 

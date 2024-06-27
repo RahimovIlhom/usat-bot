@@ -49,8 +49,13 @@ class Question(models.Model):
 class ExamResult(models.Model):
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='exam_result',
                                   verbose_name="Arizachi")
+    userResponses = models.JSONField(null=True, blank=True, verbose_name="Foydalanuvchi javoblari")
     trueResponseCount = models.PositiveIntegerField(verbose_name="To'g'ri yechgan savollar soni")
     result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Natijasi (%)")
+    totalScore = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,verbose_name="Umumiy ball")
+    intervalTime = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                       verbose_name="Interval (daqiqa)")
+    createdTime = models.DateTimeField(auto_now_add=True, verbose_name="Natijaga ochilgan sana")
 
     def __str__(self):
         return f"{self.applicant}: {self.result}"

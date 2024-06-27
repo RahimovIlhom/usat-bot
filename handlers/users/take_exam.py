@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, ReplyKeyboardRemove
@@ -9,6 +10,13 @@ from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines, ready_callback_data
 from loader import dp, db
 from states import TestExecutionStates
+
+SCORE_MAP = {
+    1: 3.1,
+    2: 2.1,
+    3: 1.1,
+    4: 0
+}
 
 
 @dp.message_handler(IsPrivate(), text=["🧑‍💻 Imtihon topshirish", "🧑‍💻 Сдать экзамен"])
@@ -32,12 +40,6 @@ async def check_execution_text(msg: types.Message):
             'FAILED': 'failed',
             'EXAMINED': 'examined'
         }
-
-        # if status in ('SUBMITTED', 'EXAMINED'):
-        #     admission_applicant = await get_application_status_from_api(applicant[0])
-        #     if admission_applicant:
-        #         status = admission_applicant.get('applicationStatus')
-        #         await db.update_application_status(applicant[0], status)
 
         if status not in status_to_key:
             await msg.answer(RESPONSE_TEXTS[language]['error'])
@@ -97,6 +99,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         await call.message.delete()
         return
     try:
+        start_time = datetime.now()  # Imtihon boshlanish vaqti
         await state.set_state(TestExecutionStates.science)
         applicant = await db.get_applicant(call.from_user.id)
         languageOfEducation = applicant[10]
@@ -116,11 +119,15 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         test_data = {
             'languageOfEducation': languageOfEducation,
             'sciences': sciences[1:],
+            'science_id': science[0],
+            'science_number': 1,
             'questions': questions,
+            'question_id': questions[0][0],
             'number': 0,
             'true_responses': [],
             'user_responses': [],
-            'scores': []
+            'scores': [],
+            'start_time': start_time
         }
         await state.update_data(test_data)
 
@@ -132,7 +139,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
             reply_markup=ReplyKeyboardRemove()
         )
 
-        await countdown(call, 10)
+        # await countdown(call, 10)
         await msg.delete()
         await science_all_questions(call, {}, state)
 
@@ -148,30 +155,57 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     language = simple_user[2]
     data = await state.get_data()
     sciences = data.get('sciences')
+    science_id = data.get('science_id')
+    science_number = data.get('science_number')
     questions = data.get('questions')
+    question_id = data.get('question_id')
     number = data.get('number')
     true_responses = data.get('true_responses')
     user_responses = data.get('user_responses')
     scores = data.get('scores')
+    start_time = data.get('start_time')
+    elapsed_time = (datetime.now() - start_time).total_seconds() / 60  # minutes
+
+    if elapsed_time > 240:
+        await call.message.answer(RESPONSE_TEXTS[language]['time_up'])
+        await finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time)
+        return
 
     if user_resp:
-        updated_user_responses = user_responses + [user_resp] if user_responses else [user_resp]
-        await state.update_data({'user_responses': updated_user_responses})
+        score = SCORE_MAP.get(science_number, 4)
+
+        user_response_data = {
+            "science_id": science_id,
+            "question_id": question_id,
+            "true_response": true_responses[number-1],
+            "user_response": user_resp,
+            "score": score
+        }
+
+        if user_resp == true_responses[number-1]:
+            scores.append(score)
+        else:
+            scores.append(0)
+
+        updated_user_responses = user_responses + [user_response_data] if user_responses else [user_response_data]
+        await state.update_data({'user_responses': updated_user_responses,
+                                 'scores': scores})
         await call.message.delete()
 
     if not questions:
         if sciences:
-            await handle_new_test(call, state, simple_user, true_responses, sciences, data.get('languageOfEducation'))
+            await handle_new_test(call, state, simple_user, true_responses, sciences, data.get('languageOfEducation'),
+                                  science_number)
         else:
             data = await state.get_data()
             user_responses = data.get('user_responses')
-            await finish_test(call, state, language, true_responses, user_responses, scores)
+            await finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time)
         return
 
-    await ask_next_question(call, state, language, questions, number, true_responses, scores)
+    await ask_next_question(call, state, language, questions, number, true_responses)
 
 
-async def handle_new_test(call, state, simple_user, true_responses, sciences, languageOfEducation):
+async def handle_new_test(call, state, simple_user, true_responses, sciences, languageOfEducation, science_number):
     language = simple_user[2]
     science = sciences[0]
     msg = await call.message.answer(
@@ -179,7 +213,7 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
         else f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
         reply_markup=ReplyKeyboardRemove()
     )
-    await countdown(call, 10)
+    # await countdown(call, 10)
     await msg.delete()
     tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
     if not tests:
@@ -193,7 +227,9 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
 
     await state.update_data(
         {
+            'science_id': science[0],
             'sciences': sciences[1:],
+            'science_number': science_number + 1,
             'true_responses': true_responses + [question[4]],
             'questions': questions[1:],
             'number': 1,
@@ -202,12 +238,15 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
     await ask_question(call, language, question, 1)
 
 
-async def finish_test(call, state, language, true_responses, user_responses, scores):
-    correct_answers = sum(1 for t, u in zip(true_responses, user_responses) if t == u)
+async def finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time):
+    user_defined_options = ''.join(item['user_response'] for item in user_responses)
+    correct_answers = sum(1 for t, u in zip(true_responses, user_defined_options) if t == u)
     result = round((correct_answers / len(true_responses)) * 100, 2)
     applicantStatus = 'EXAMINED'
-    total_score = sum(scores)
-    await db.add_exam_result(call.from_user.id, result, correct_answers, total_score)
+    total_score = round(sum(scores), 1)
+    interval_time = round(elapsed_time, 2)
+
+    await db.add_exam_result(call.from_user.id, correct_answers, result, total_score, user_responses, interval_time)
     await db.update_application_status(call.from_user.id, applicantStatus)
     RESPONSE_RESULT = {
         'uz': ("✅ Tabriklaymiz, siz imtihonni tugatdingiz!\n"
@@ -223,10 +262,11 @@ async def finish_test(call, state, language, true_responses, user_responses, sco
     await state.finish()
 
 
-async def ask_next_question(call, state, language, questions, number, true_responses, scores):
+async def ask_next_question(call, state, language, questions, number, true_responses):
     question = questions[0]
     await state.update_data(
         {
+            'question_id': question[0],
             'true_responses': true_responses + [question[4]],
             'questions': questions[1:],
             'number': number + 1,
