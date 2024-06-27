@@ -118,6 +118,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
 
         test_data = {
             'languageOfEducation': languageOfEducation,
+            'language_text': language_text,
             'sciences': sciences[1:],
             'science_id': science[0],
             'science_number': 1,
@@ -151,9 +152,8 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
 @dp.callback_query_handler(responses_callback_data.filter(), state=TestExecutionStates.science)
 async def science_all_questions(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     user_resp = callback_data.get('response')
-    simple_user = await db.select_simple_user(call.from_user.id)
-    language = simple_user[2]
     data = await state.get_data()
+    language_text = data.get('language_text')
     sciences = data.get('sciences')
     science_id = data.get('science_id')
     science_number = data.get('science_number')
@@ -167,8 +167,8 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     elapsed_time = (datetime.now() - start_time).total_seconds() / 60  # minutes
 
     if elapsed_time > 240:
-        await call.message.answer(RESPONSE_TEXTS[language]['time_up'])
-        await finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time)
+        await call.message.answer(RESPONSE_TEXTS[language_text]['time_up'])
+        await finish_test(call, state, language_text, true_responses, user_responses, scores, elapsed_time)
         return
 
     if user_resp:
@@ -194,22 +194,21 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
 
     if not questions:
         if sciences:
-            await handle_new_test(call, state, simple_user, true_responses, sciences, data.get('languageOfEducation'),
+            await handle_new_test(call, state, language_text, true_responses, sciences, data.get('languageOfEducation'),
                                   science_number)
         else:
             data = await state.get_data()
             user_responses = data.get('user_responses')
-            await finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time)
+            await finish_test(call, state, language_text, true_responses, user_responses, scores, elapsed_time)
         return
 
-    await ask_next_question(call, state, language, questions, number, true_responses)
+    await ask_next_question(call, state, language_text, questions, number, true_responses)
 
 
-async def handle_new_test(call, state, simple_user, true_responses, sciences, languageOfEducation, science_number):
-    language = simple_user[2]
+async def handle_new_test(call, state, language_text, true_responses, sciences, languageOfEducation, science_number):
     science = sciences[0]
     msg = await call.message.answer(
-        f"❕ Tayyorlaning, {science[1]} testi 10 soniyadan keyin boshlanadi." if language == 'uz'
+        f"❕ Tayyorlaning, {science[1]} testi 10 soniyadan keyin boshlanadi." if language_text == 'uz'
         else f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
         reply_markup=ReplyKeyboardRemove()
     )
@@ -235,7 +234,7 @@ async def handle_new_test(call, state, simple_user, true_responses, sciences, la
             'number': 1,
         }
     )
-    await ask_question(call, language, question, 1)
+    await ask_question(call, language_text, question, 1)
 
 
 async def finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time):

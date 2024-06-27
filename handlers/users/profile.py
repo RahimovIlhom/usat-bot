@@ -1,9 +1,12 @@
+import asyncio
+import json
+
 from aiogram import types
+from aiogram.dispatcher.filters import Text
 
 from filters import IsPrivate
 from keyboards.default import profile_menu_markup_uz, profile_menu_markup_ru
 from loader import dp, db
-from states import SimpleRegisterStates
 
 
 @dp.message_handler(IsPrivate(), text="👤 Profilim")
@@ -129,6 +132,67 @@ async def my_applications(msg: types.Message):
     await msg.answer(resp_text[lang] + GET_APPLICATION_TEXT[lang])
 
 
-@dp.message_handler(IsPrivate(), text=["📊 Imtihon natijam", "📊 Мои результаты экзамена"])
-async def my_applications(msg: types.Message):
-    pass
+async def get_science_name_by_id(science_id, lang):
+    science = await db.select_science(science_id)
+    return science[1] if lang == 'uz' else science[2]
+
+
+async def format_user_responses(user_responses, lang='uz'):
+    responses = json.loads(user_responses)
+    grouped_responses = {}
+
+    for response in responses:
+        science_id = response['science_id']
+        question_info = {
+            "question_id": response["question_id"],
+            "true_response": response["true_response"],
+            "user_response": response["user_response"],
+            "correct": response["true_response"] == response["user_response"]
+        }
+        if science_id not in grouped_responses:
+            grouped_responses[science_id] = []
+        grouped_responses[science_id].append(question_info)
+
+    # Prepare formatted responses by sciences
+    max_questions = max(len(questions) for questions in grouped_responses.values())
+
+    # Fetch science names concurrently
+    science_names = await asyncio.gather(*(get_science_name_by_id(science_id, lang) for science_id in grouped_responses.keys()))
+
+    # Header with science names
+    headers = " | ".join(science_names)
+    formatted_responses = f"<pre>{headers}\n"
+
+    # Prepare question-response lines
+    for i in range(max_questions):
+        line = ""
+        for science_id, questions in grouped_responses.items():
+            if i < len(questions):
+                question = questions[i]
+                status = "✅" if question["correct"] else "❌"
+                line += f"{i + 1}. {question['user_response']} {status} | "
+            else:
+                line += " " * 15 + " | "  # Add empty space for alignment
+        formatted_responses += line.rstrip(' | ') + "\n"
+
+    formatted_responses += "</pre>"
+    return formatted_responses
+
+
+@dp.message_handler(Text(equals=["📊 Imtihon natijam", "📊 Мои результаты экзамена"]), IsPrivate())
+async def my_latest_application(msg: types.Message):
+    applicant_id = msg.from_user.id  # Assuming tg_id is the Telegram user ID
+    result = await db.get_exam_result_last(applicant_id)
+    if result:
+        user_responses = await format_user_responses(result[2])
+        minutes = int(result[6])
+        seconds = int((result[6] - minutes) * 60)
+        message = (f"Arizachi ID: {result[1]}\n"
+                   f"Umumiy ball: {result[5]}\n"
+                   f"Imtihon topshirgan vaqt: {result[7].strftime('%H:%M %d-%m-%Y')}\n"
+                   f"Imtihon uchun sarflangan vaqt: {minutes} daqiqa {seconds} soniya\n\n"
+                   f"Foydalanuvchi javoblari:\n\n{user_responses}")
+    else:
+        message = "Natija topilmadi."
+
+    await msg.reply(message)

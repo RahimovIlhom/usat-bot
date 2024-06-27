@@ -313,9 +313,23 @@ class Database:
         await self.execute_query(query, directionOfEducation_id, typeOfEducation_id,
                                  languageOfEducation, 'SUBMITTED', datetime.now(), tgId)
 
-    async def get_applicant_exam_results(self, tgId):
-        query = "SELECT id, applicant_id, result, trueResponseCount FROM exam_results WHERE applicant_id = %s"
-        return await self.execute_query(query, tgId, fetchall=True)
+    async def get_applicant_exam_results(self, applicant_id):
+        query = """
+        SELECT id, applicant_id
+        FROM exam_results 
+        WHERE applicant_id = %s
+        """
+        return await self.execute_query(query, applicant_id, fetchall=True)
+
+    async def get_exam_result_last(self, applicant_id):
+        query = """
+            SELECT id, applicant_id, userResponses, trueResponseCount, result, totalScore, intervalTime, createdTime 
+            FROM exam_results 
+            WHERE applicant_id = %s
+            ORDER BY createdTime DESC
+            LIMIT 1
+            """
+        return await self.execute_query(query, applicant_id, fetchone=True)
 
     async def add_exam_result(
             self,

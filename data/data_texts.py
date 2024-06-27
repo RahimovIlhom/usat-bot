@@ -18,6 +18,7 @@ RESPONSE_TEXTS = {
         'need_application': "❗️ Imtihon topshirish uchun avval universitetga hujjat topshirishingiz kerak!",
         'two_failed': "Siz ikkinchi imkoniyatda ham imtihondan o'ta olmagansiz!",
         'error': "😬 Noma'lum xatolik!",
+        'time_up': "❗️ Imtihon uchun berilgan 4 soat vaqt yakunlandi.",
     },
     'ru': {
         'draft': "❗️ Ваша заявка еще не готова. Пожалуйста, отправьте вашу заявку.",
@@ -38,5 +39,6 @@ RESPONSE_TEXTS = {
         'need_application': "❗️ Для сдачи экзамена необходимо сначала подать документы в университет!",
         'two_failed': "Вы не смогли сдать экзамен даже со второй попытки!",
         'error': "😬 Неизвестная ошибка!",
+        'time_up': "❗️ Для экзамена отведенные 4 часа завершились.",
     }
 }

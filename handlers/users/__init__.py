@@ -2,7 +2,6 @@ from . import help
 from . import start
 from . import settings
 from . import application
-# from . import execution_test
 from . import take_exam
 from . import profile
 from . import informations
