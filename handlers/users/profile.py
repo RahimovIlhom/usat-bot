@@ -157,7 +157,8 @@ async def format_user_responses(user_responses, lang='uz'):
     max_questions = max(len(questions) for questions in grouped_responses.values())
 
     # Fetch science names concurrently
-    science_names = await asyncio.gather(*(get_science_name_by_id(science_id, lang) for science_id in grouped_responses.keys()))
+    science_names = await asyncio.gather(*(get_science_name_by_id(science_id, lang)
+                                           for science_id in grouped_responses.keys()))
 
     # Header with science names
     headers = " | ".join(science_names)
@@ -181,18 +182,30 @@ async def format_user_responses(user_responses, lang='uz'):
 
 @dp.message_handler(Text(equals=["📊 Imtihon natijam", "📊 Мои результаты экзамена"]), IsPrivate())
 async def my_latest_application(msg: types.Message):
+    lang = 'uz' if msg.text == "📊 Imtihon natijam" else 'ru'
     applicant_id = msg.from_user.id  # Assuming tg_id is the Telegram user ID
     result = await db.get_exam_result_last(applicant_id)
     if result:
-        user_responses = await format_user_responses(result[2])
+        user_responses = await format_user_responses(result[2], lang)
         minutes = int(result[6])
         seconds = int((result[6] - minutes) * 60)
-        message = (f"Arizachi ID: {result[1]}\n"
-                   f"Umumiy ball: {result[5]}\n"
-                   f"Imtihon topshirgan vaqt: {result[7].strftime('%H:%M %d-%m-%Y')}\n"
-                   f"Imtihon uchun sarflangan vaqt: {minutes} daqiqa {seconds} soniya\n\n"
-                   f"Foydalanuvchi javoblari:\n\n{user_responses}")
+        if lang == 'uz':
+            message = (f"Arizachi ID: {result[1]}\n"
+                       f"Umumiy ball: {result[5]}\n"
+                       f"Imtihon topshirgan vaqt: {result[7].strftime('%H:%M %d-%m-%Y')}\n"
+                       f"Imtihon uchun sarflangan vaqt: {minutes} daqiqa {seconds} soniya\n\n"
+                       f"Foydalanuvchi javoblari:\n\n{user_responses}")
+        else:
+            message = (f"ID заявителя: {result[1]}\n"
+                       f"Общий балл: {result[5]}\n"
+                       f"Время сдачи экзамена: {result[7].strftime('%H:%M %d-%m-%Y')}\n"
+                       f"Время, затраченное на экзамен: {minutes} минут {seconds} секунд\n\n"
+                       f"Ответы пользователя:\n\n{user_responses}")
     else:
-        message = "Natija topilmadi."
+        if lang == 'uz':
+            message = "Natija topilmadi."
+        else:
+            message = "Результат не найден."
 
     await msg.reply(message)
+
