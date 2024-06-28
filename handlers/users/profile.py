@@ -171,7 +171,8 @@ async def format_user_responses(user_responses, lang='uz'):
             if i < len(questions):
                 question = questions[i]
                 status = "✅" if question["correct"] else "❌"
-                line += f"{i + 1}. {question['user_response']} {status} | "
+                resp = question['user_response'] if question['user_response'] else '-'
+                line += f"{i + 1}. {resp} {status} | "
             else:
                 line += " " * 15 + " | "  # Add empty space for alignment
         formatted_responses += line.rstrip(' | ') + "\n"

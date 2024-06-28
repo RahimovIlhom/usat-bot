@@ -167,8 +167,10 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
     elapsed_time = (datetime.now() - start_time).total_seconds() / 60  # minutes
 
     if elapsed_time > 240:
+        await call.message.delete()
         await call.message.answer(RESPONSE_TEXTS[language_text]['time_up'])
-        await finish_test(call, state, language_text, true_responses, user_responses, scores, elapsed_time)
+        await finish_test(call, state, language_text, true_responses, user_responses, scores, elapsed_time,
+                          science_id, questions, sciences)
         return
 
     if user_resp:
@@ -177,12 +179,12 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
         user_response_data = {
             "science_id": science_id,
             "question_id": question_id,
-            "true_response": true_responses[number-1],
+            "true_response": true_responses[number - 1],
             "user_response": user_resp,
             "score": score
         }
 
-        if user_resp == true_responses[number-1]:
+        if user_resp == true_responses[number - 1]:
             scores.append(score)
         else:
             scores.append(0)
@@ -237,7 +239,33 @@ async def handle_new_test(call, state, language_text, true_responses, sciences, 
     await ask_question(call, language_text, question, 1)
 
 
-async def finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time):
+async def finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time,
+                      science_id=None, questions=None, sciences=None):
+    data = await state.get_data()
+    languageOfEducation = data.get('languageOfEducation')
+    if science_id:
+        for question in questions:
+            user_responses.append({
+                "science_id": science_id,
+                "question_id": question[0],
+                "true_response": question[4],
+                "user_response": '',
+                "score": 0
+            })
+        if sciences:
+            for science in sciences:
+                tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
+                questions = []
+                for test in tests:
+                    questions.extend(await db.select_questions_for_test(test[0], test[2]))
+                for question in questions:
+                    user_responses.append({
+                        "science_id": science[0],
+                        "question_id": question[0],
+                        "true_response": question[4],
+                        "user_response": '',
+                        "score": 0
+                    })
     user_defined_options = ''.join(item['user_response'] for item in user_responses)
     correct_answers = sum(1 for t, u in zip(true_responses, user_defined_options) if t == u)
     result = round((correct_answers / len(true_responses)) * 100, 2)
