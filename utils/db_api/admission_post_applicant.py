@@ -7,9 +7,6 @@ from utils.db_api import get_token
 env = Env()
 env.read_env()
 
-url = env.str('SUBMIT_APPLICATION_URL')
-print(url.format('1234567'))
-
 
 async def post_request_with_bearer_token(url, data, token):
     from loader import db
@@ -20,14 +17,14 @@ async def post_request_with_bearer_token(url, data, token):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
             if response.status == 200:
-                return response
+                return await response.json()
             elif response.status == 401:
                 active_token = await get_token()
                 await db.add_active_token(active_token)
                 headers = {"Authorization": f"Bearer {active_token}"}
                 async with session.get(url, headers=headers) as resp:
                     if resp.status == 200:
-                        return resp
+                        return await resp.json()
                     return None
             else:
                 return None
@@ -38,7 +35,7 @@ async def submit_applicant(tgId, firstName, lastName, middleName, phoneNumber, b
                            typeOfEducationId, typeOfEducationName, languageOfEducationId, languageOfEducationName,
                            photo=None, *args, **kwargs):
     from loader import db
-    url = env.str('SUBMIT_APPLICATION_URL')
+    url = env.str('SUBMIT_APPLICATION_URL').format(telegramm_id=tgId)
     active_token = await db.get_active_token()
     data = {
         "firstName": firstName,
@@ -75,5 +72,5 @@ async def submit_applicant(tgId, firstName, lastName, middleName, phoneNumber, b
 
 if __name__ == "__main__":
     pass
-    # asyncio.run(submit_applicant("Ilxomjon", "Raximov", "Nikolaevich", "+998909090909", "1990-01-01", "MALE",
+    # asyncio.run(submit_applicant('1234567', "Ilxomjon", "Raximov", "Nikolaevich", "+998909090909", "1990-01-01", "MALE",
     # "UZBEK", "AA1234567", "12345678912345", "+998916589340", 1, "Turizm", 1, "Kunduzgi ta'lim", 1, "uz"))
