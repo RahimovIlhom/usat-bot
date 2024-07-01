@@ -66,11 +66,10 @@ async def submit_applicant(tgId, firstName, lastName, middleName, phoneNumber, b
     }
 
     response = await post_request_with_bearer_token(url, data, active_token)
-    print(response.status)
-    print(response)
+    return response
 
 
 if __name__ == "__main__":
     pass
-    # asyncio.run(submit_applicant('1234567', "Ilxomjon", "Raximov", "Nikolaevich", "+998909090909", "1990-01-01", "MALE",
-    # "UZBEK", "AA1234567", "12345678912345", "+998916589340", 1, "Turizm", 1, "Kunduzgi ta'lim", 1, "uz"))
+    # asyncio.run(submit_applicant('1234567', "Ilxomjon", "Raximov", "Nikolaevich", "+998909090909", "1990-01-01",
+    # "MALE", "UZBEK", "AA1234567", "12345678912345", "+998916589340", 1, "Turizm", 1, "Kunduzgi ta'lim", 1, "uz"))
