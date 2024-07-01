@@ -5,6 +5,8 @@ from . import application
 from . import take_exam
 from . import profile
 from . import informations
+from . import download_contract
+from . import contact_admin
 from . import science_admin
 from . import tests_admin
 from . import admin

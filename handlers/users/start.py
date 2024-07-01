@@ -9,7 +9,7 @@ from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import menu_markup_uz, menu_markup_ru, language_markup, admin_menu_markup_uz
 from loader import dp, db
-from states import SimpleRegisterStates
+from states import SimpleRegisterStates, TestExecutionStates
 
 
 @dp.message_handler(IsPrivate(), CommandStart(), state='*', user_id=ADMINS)
@@ -22,6 +22,15 @@ async def bot_start(message: types.Message, state: FSMContext):
 async def bot_start(message: types.Message, state: FSMContext):
     simple_user = await db.select_simple_user(message.from_user.id)
     if simple_user:
+        if await state.get_state() == TestExecutionStates.science.state:
+            await message.delete()
+            if simple_user[2] == 'uz':
+                msg = await message.answer("‼️ Imtihon vaqtida hech qanday buyruq ishlamaydi!")
+            else:
+                msg = await message.answer("‼️ Во время экзамена никакие команды не работают!")
+            await asyncio.sleep(2)
+            await msg.delete()
+            return
         if simple_user[2] == 'uz':
             await message.answer("Bosh menyu:", reply_markup=menu_markup_uz)
         else:

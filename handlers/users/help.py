@@ -5,7 +5,7 @@ from filters import IsPrivate
 from loader import dp
 
 
-@dp.message_handler(IsPrivate(), CommandHelp(), state='*')
+@dp.message_handler(IsPrivate(), CommandHelp())
 async def bot_help(message: types.Message):
     text = (
         "Buyruqlar / Команды: ",

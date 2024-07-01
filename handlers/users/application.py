@@ -11,10 +11,9 @@ from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
-    choices_e_edu_language, accept_applicant_inline
-from loader import dp, db, bot
+    choices_e_edu_language
+from loader import dp, db
 from states import ApplicantRegisterStates
-from utils.db_api.write_data_excel import write_applicant_to_excel
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -234,6 +233,7 @@ async def show_faculties(call, language, fullname):
         }
     }
     if isinstance(call, types.Message):
+        await call.answer("Arizangiz to'liq yuborilmagan!", reply_markup=ReplyKeyboardRemove())
         await call.answer(resp_texts[language]['question'].format(fullname),
                           reply_markup=await all_faculties_inlines(language))
     else:

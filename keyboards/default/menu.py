@@ -79,7 +79,7 @@ menu_markup_ru = ReplyKeyboardMarkup(
             KeyboardButton(text="ℹ️ Информация"),
         ],
         [
-            KeyboardButton(text="🔗  Связаться с администратором"),
+            KeyboardButton(text="🔗 Связаться с администратором"),
         ],
         [
 
