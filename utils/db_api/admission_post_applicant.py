@@ -1,5 +1,4 @@
 import aiohttp
-import asyncio
 from environs import Env
 
 from utils.db_api import get_token
@@ -21,8 +20,11 @@ async def post_request_with_bearer_token(url, data, token):
             elif response.status == 401:
                 active_token = await get_token()
                 await db.add_active_token(active_token)
-                headers = {"Authorization": f"Bearer {active_token}"}
-                async with session.get(url, headers=headers) as resp:
+                headers = {
+                    'Authorization': f'Bearer {token}',
+                    'Content-Type': 'application/json'
+                }
+                async with session.post(url, json=data, headers=headers) as resp:
                     if resp.status == 200:
                         return await resp.json()
                     return None
