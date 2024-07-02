@@ -64,10 +64,7 @@ async def my_profile(msg: types.Message):
                f"🗓️ Дата регистрации: {formatted_created_time}\n")
     }
 
-    if applicant[11]:  # Check if photo exists
-        await msg.answer_photo(applicant[11], caption=GET_ME_TEXT[lang])
-    else:
-        await msg.answer(GET_ME_TEXT[lang])
+    await msg.answer(GET_ME_TEXT[lang])
 
 
 @dp.message_handler(IsPrivate(), text=["📄 Arizalarim", "📄 Мои заявки"])

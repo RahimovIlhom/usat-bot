@@ -9,7 +9,7 @@ env.read_env()
 REGISTER_URL = env.str('USER_REGISTER_URL')
 
 
-async def signup_applicant(tgId, additionalPhoneNumber, passport, birthDate, *args, **kwargs):
+async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = REGISTER_URL
@@ -28,7 +28,7 @@ async def signup_applicant(tgId, additionalPhoneNumber, passport, birthDate, *ar
     birth_date = birthDate.isoformat() + "T00:00:00Z"
     data = {
         "telegrammId": tgId,
-        "phone": additionalPhoneNumber,
+        "phone": phoneNumber.replace("+", ""),
         "passportNumber": passport,
         "birthDate": birth_date
     }

@@ -1,4 +1,7 @@
+import warnings
+
 import aiohttp
+import requests
 from environs import Env
 
 from utils.db_api import get_token
@@ -15,42 +18,35 @@ async def post_request_with_bearer_token(url, data, token):
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            elif response.status == 401:
-                active_token = await get_token()
-                await db.add_active_token(active_token)
-                headers = {
-                    'Authorization': f'Bearer {token}',
-                    'Content-Type': 'application/json'
-                }
-                async with session.post(url, json=data, headers=headers) as resp:
-                    if resp.status == 200:
-                        return await resp.json()
-                    return None
-            else:
-                return None
+
+    response = requests.post(url, json=data, headers=headers, verify=False)
+    if response.status_code == 401:
+        new_token = await get_token()
+        headers["Authorization"] = f"Bearer {new_token}"
+        await db.add_active_token(new_token)
+        resp = requests.post(url, json=data, headers=headers, verify=False)
+        return resp
 
 
-async def submit_applicant(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender, passport,
-                           pinfl, additionalPhoneNumber, directionOfEducationId, directionOfEducationName,
-                           typeOfEducationId, typeOfEducationName, languageOfEducationId, languageOfEducationName,
-                           photo=None, *args, **kwargs):
+async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender,
+                                         passport, pinfl, additionalPhoneNumber, directionOfEducationId,
+                                         directionOfEducationName, typeOfEducationId, typeOfEducationName,
+                                         languageOfEducationId, languageOfEducationName, photo=None, *args, **kwargs):
+    warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
     active_token = await db.get_active_token()
+    birth_date = birthDate.isoformat() + "T00:00:00Z"
     data = {
         "firstName": firstName,
         "lastName": lastName,
         "middleName": middleName,
         "applicantNumber": applicantNumber,
-        "birthDate": birthDate,
+        "birthDate": birth_date,
         "gender": gender,
         "passportNumber": passport,
         "jshir": pinfl,
-        "homePhone": additionalPhoneNumber,
+        "homePhone": additionalPhoneNumber.replace("+", ""),
         "educationType": {
             "id": typeOfEducationId,
             "name": typeOfEducationName
@@ -66,6 +62,7 @@ async def submit_applicant(tgId, firstName, lastName, middleName, applicantNumbe
         "photo": photo,
         "status": "SUBMITTED",
         "typeAbiturient": "ABITURIENT",
+        "stage": "COURSE_OF_STUDY"
     }
 
     response = await post_request_with_bearer_token(url, data, active_token)

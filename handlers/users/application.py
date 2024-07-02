@@ -1,20 +1,17 @@
 import asyncio
-import os
 from datetime import datetime
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, ReplyKeyboardRemove
-from aiogram.utils.exceptions import BadRequest
 
-from data.config import ADMINS
 from filters import IsPrivate
 from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
     choices_e_edu_language
 from loader import dp, db
 from states import ApplicantRegisterStates
-from utils.db_api import signup_applicant, get_applicant_in_admission
+from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -26,6 +23,21 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
         if applicant[14] == 'DRAFT':
             await show_faculties(msg, 'uz', f"{applicant[4]} {applicant[5]}")
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await state.update_data({
+                'fullname': applicant[4] + ' ' + applicant[5],
+                'tgId': applicant[0],
+                'firstName': applicant[4],
+                'lastName': applicant[5],
+                'middleName': applicant[6],
+                'applicantNumber': applicant[15],
+                'birthDate': applicant[16],
+                'gender': applicant[17],
+                'passport': applicant[7],
+                'pinfl': applicant[3],
+                'additionalPhoneNumber': applicant[2],
+                'photo': applicant[18],
+                'applicantId': applicant[19],
+            })
             return
         await msg.answer("❗️ Siz allaqachon hujjat topshirib bo'lgansiz!")
     else:
@@ -43,6 +55,20 @@ async def submit_application_ru(msg: types.Message, state: FSMContext):
         if applicant[14] == 'DRAFT':
             await show_faculties(msg, 'ru', f"{applicant[4]} {applicant[5]}")
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await state.update_data({
+                'fullname': applicant[4] + ' ' + applicant[5],
+                'tgId': applicant[0],
+                'firstName': applicant[4],
+                'lastName': applicant[5],
+                'middleName': applicant[6],
+                'applicantNumber': applicant[15],
+                'birthDate': applicant[16],
+                'gender': applicant[17],
+                'passport': applicant[7],
+                'pinfl': applicant[3],
+                'additionalPhoneNumber': applicant[2],
+                'photo': applicant[18]
+            })
             return
         await msg.answer("❗️ Вы уже подали документы!")
     else:
@@ -148,6 +174,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
     birthDate = datetime.strptime(birthDateText, f'%d{separator}%m{separator}%Y').date()
     data = await state.get_data()
     language = data.get('language', 'ru')
+
     TEXTS = {
         'uz': {
             'one_resp_text': (
@@ -160,7 +187,8 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             'checking': "♻️ Ma'lumotlar tekshirilmoqda",
             'data_error': "❗️ Passport ma'lumotlari xato bo'lishi mumkin. Iltimos, tekshirib qayta kiriting.",
             'unknown_error': "❗️ Noma'lum xatolik. Iltimos, qayta kiriting.",
-            'exists_phone': "❗️ Bunday raqam bilan 👉 qabul.usat.uz sayti orqali ro'yxatdan o'tgansiz.",
+            'exists_phone': ("❗️ Siz telegram kontakt raqamingiz bilan 👉 qabul.usat.uz sayti orqali ro'yxatdan "
+                             "o'tgansiz."),
         },
         'ru': {
             'one_resp_text': (
@@ -173,26 +201,52 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             'checking': "♻️ Данные проверяются",
             'data_error': "❗️ В паспортных данных может быть ошибка. Пожалуйста, проверьте и введите заново.",
             'unknown_error': "❗️ Неизвестная ошибка. Пожалуйста, проверьте и введите заново.",
-            'exists_phone': "❗️ Вы уже зарегистрировались на сайте 👉 qabul.usat.uz с таким номером.",
+            'exists_phone': ("❗️ Вы уже зарегистрировались на сайте 👉 qabul.usat.uz с вашим номером контакта "
+                             "Telegram."),
+
         }
     }
-    if await db.get_applicant(msg.from_user.id, data.get('passport'), birthDate):
-        await msg.answer(TEXTS[language]['pinfl_exist_text'],
-                         reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+
+    async def handle_error(message, error_key):
+        await message.answer(TEXTS[language][error_key],
+                             reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
         await state.finish()
+
+    applicant_exists = await db.get_applicant(msg.from_user.id, data.get('passport'), birthDate)
+    if applicant_exists:
+        await handle_error(msg, 'pinfl_exist_text')
+        return
+
+    user_data_resp = await get_applicant_in_admission(msg.from_user.id)
+    if user_data_resp.status_code == 200:
+        user_data = user_data_resp.json()
+        if user_data.get('jshir'):
+            data.update({
+                'applicantId': user_data.get('id'),
+                'applicantNumber': user_data.get('applicantNumber'),
+                'pinfl': user_data.get('jshir'),
+                'firstName': user_data.get('firstName'),
+                'lastName': user_data.get('lastName'),
+                'middleName': user_data.get('middleName'),
+                'gender': user_data.get('gender'),
+                'photo': user_data.get('photo'),
+                'birthDate': datetime.strptime(user_data.get('birthDate'), '%Y-%m-%dT%H:%M:%SZ').date(),
+                'passport': user_data.get('passportNumber'),
+                'phoneNumber': user_data.get('mobilePhone')
+            })
+        else:
+            await handle_error(msg, 'data_error')
+            return
     else:
         data.update({'birthDate': birthDate})
-        # birinchi tekshiramiz borlikka
         resp = await signup_applicant(**data)
-        print(resp)
-        if resp.status_code in [201, 400]:
+        if resp.status_code == 201:
             await msg.answer(TEXTS[language]['checking'])
             await asyncio.sleep(2)
             user_data_resp = await get_applicant_in_admission(msg.from_user.id)
-            print(user_data_resp)
             if user_data_resp.status_code == 200:
                 user_data = user_data_resp.json()
-                if user_data.get('jshir', None):
+                if user_data.get('jshir'):
                     data.update({
                         'applicantId': user_data.get('id'),
                         'applicantNumber': user_data.get('applicantNumber'),
@@ -204,38 +258,32 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                         'photo': user_data.get('photo')
                     })
                 else:
-                    await msg.answer(TEXTS[language]['data_error'],
-                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
-                    await state.finish()
-                    return
-            elif resp.status_code == 400:
-                if 'phone' in resp.json()['meta']:
-                    await msg.answer(TEXTS[language]['exists_phone'],
-                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
-                    await state.finish()
-                    return
-                else:
-                    await msg.answer(resp.json()['meta']['general_errors'][0],
-                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
-                    await state.finish()
+                    await handle_error(msg, 'data_error')
                     return
             else:
-                await msg.answer(TEXTS[language]['unknown_error'],
+                await handle_error(msg, 'unknown_error')
+                return
+        elif resp.status_code == 400:
+            error_meta = resp.json().get('meta', {})
+            if 'phone' in error_meta:
+                await handle_error(msg, 'exists_phone')
+                return
+            else:
+                await msg.answer(error_meta.get('general_errors', [TEXTS[language]['unknown_error']])[0],
                                  reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
                 await state.finish()
                 return
         else:
-            await msg.answer(TEXTS[language]['unknown_error'],
-                             reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
-            await state.finish()
+            await handle_error(msg, 'unknown_error')
             return
-        await db.add_draft_applicant(**data)
-        fullname = data.get('firstName')
-        await state.update_data(data)
-        await msg.answer(TEXTS[language]['one_resp_text'])
-        await asyncio.sleep(0.5)
-        await show_faculties(msg, language, fullname)
-        await ApplicantRegisterStates.next()
+
+    await db.add_draft_applicant(**data)
+    fullname = data.get('firstName') + ' ' + data.get('lastName')
+    await state.update_data(data)
+    await msg.answer(TEXTS[language]['one_resp_text'])
+    await asyncio.sleep(0.5)
+    await show_faculties(msg, language, fullname)
+    await ApplicantRegisterStates.next()
 
 
 @dp.message_handler(state=ApplicantRegisterStates.birth_date, content_types=ContentType.ANY)
@@ -286,7 +334,8 @@ async def show_faculties(call, language, fullname):
         }
     }
     if isinstance(call, types.Message):
-        await call.answer("Arizangiz to'liq yuborilmagan!", reply_markup=ReplyKeyboardRemove())
+        await call.answer("✅ Tasdiqlangan foydalanuvchi!" if language == 'uz' else "✅ Подтвержденный пользователь!",
+                          reply_markup=ReplyKeyboardRemove())
         await call.answer(resp_texts[language]['question'].format(fullname),
                           reply_markup=await all_faculties_inlines(language))
     else:
@@ -338,7 +387,25 @@ async def err_direction_type_lan(msg: types.Message, state: FSMContext):
 
 async def save_send_data_admission(call, direction_id, type_id, edu_language, lang, fullname, state):
     await db.submit_applicant(call.from_user.id, direction_id, type_id, edu_language)
-    # shu yerda admissionga barcha datalarni yuborish kerak
+
+    data = await state.get_data()
+    data.update({
+        'directionOfEducationId': direction_id,
+        'directionOfEducationName': (await db.select_direction(direction_id))[1 if edu_language == 'uz' else 2],
+        'typeOfEducationId': type_id,
+        'typeOfEducationName': (await db.select_type_of_education(type_id))[1 if edu_language == 'uz' else 2],
+        'languageOfEducationId': 1 if edu_language == 'uz' else 2,
+        'languageOfEducationName': edu_language
+    })
+    resp = await submit_applicant_for_admission(**data)
+    if resp.status_code == 404:
+        if lang == "uz":
+            resp_info = "Siz ariza topshirib bo'lgansiz! Ariza ma'lumotlarini Profilim bo'limida ko'rishingiz mumkin."
+        else:
+            resp_info = "Вы уже подали заявку! Вы можете увидеть информацию о заявке в разделе Профиль."
+        await call.message.answer(resp_info)
+        return
+
     if lang == "uz":
         resp_info = f"✅ Hurmatli {fullname}! Arizangiz qabul qilindi!"
         question = ("Tayyor bo'lsangiz, pastdagi \"🧑‍💻 Imtihon topshirish\" tugmasini bosib, test sinovlarini "

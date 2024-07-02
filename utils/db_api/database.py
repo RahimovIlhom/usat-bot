@@ -215,7 +215,7 @@ class Database:
         query = (
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
             "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
-            "applicationStatus "
+            "applicationStatus, applicantNumber, birthDate, gender, photo, applicantId "
             "FROM applicants WHERE tgId = %s OR (passport = %s AND birthDate = %s);"
         )
         result = await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
@@ -223,14 +223,17 @@ class Database:
         if result:
             result = (
                 result[0],
-                decrypt_data(result[1]),
-                decrypt_data(result[2]),
+                result[1],
+                result[2],
                 decrypt_data(result[3]) if result[3] else None,
-                decrypt_data(result[4]) if result[4] else None,
-                decrypt_data(result[5]) if result[5] else None,
-                decrypt_data(result[6]) if result[6] else None,
+                result[4],
+                result[5],
+                result[6],
                 decrypt_data(result[7]),
-                result[8],  result[9], result[10], result[11], result[12], result[13], result[14]
+                result[8],  result[9], result[10], result[11], result[12], result[13], result[14],
+                result[15],
+                decrypt_data(result[16]),
+                result[17], result[18], result[19],
             )
         return result
 
@@ -291,7 +294,7 @@ class Database:
             "(tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, "
             "firstName, lastName, middleName, gender, photo, applicationStatus, olympian, createdTime, updatedTime) "
             "VALUES "
-            "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
         )
         await self.execute_query(query, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
                                  passport_encrypted, birthDate_encrypted, pinfl_encrypted, firstName, lastName,
@@ -512,14 +515,14 @@ class Database:
             # Decrypt sensitive data
             result = (
                 result[0],
-                decrypt_data(result[1]),
-                decrypt_data(result[2]),
+                result[1],
+                result[2],
                 decrypt_data(result[3]),
                 decrypt_data(result[4]),
                 decrypt_data(result[5]) if result[5] else None,
-                decrypt_data(result[6]) if result[6] else None,
-                decrypt_data(result[7]) if result[7] else None,
-                decrypt_data(result[8]) if result[8] else None,
+                result[6],
+                result[7],
+                result[8],
                 result[9],
                 result[10],
                 result[11],

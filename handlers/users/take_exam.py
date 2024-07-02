@@ -10,6 +10,7 @@ from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines, ready_callback_data
 from loader import dp, db
 from states import TestExecutionStates
+from utils.db_api import get_applicant_in_admission
 
 SCORE_MAP = {
     1: 3.1,
@@ -44,6 +45,12 @@ async def check_execution_text(msg: types.Message):
         if status not in status_to_key:
             await msg.answer(RESPONSE_TEXTS[language]['error'])
             return
+
+        if status in ['SUBMITTED', 'EXAMINED', 'REJECTED']:
+            user_data_resp = await get_applicant_in_admission(msg.from_user.id)
+            if user_data_resp.status_code == 200:
+                status = user_data_resp.json().get('status')
+                await db.update_application_status(msg.from_user.id, status)
 
         if status == 'FAILED':
             results = await db.get_applicant_exam_results(msg.from_user.id)
