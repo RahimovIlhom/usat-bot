@@ -277,30 +277,25 @@ class Database:
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
         await self.execute_query(query, new_status, tgId)
 
-    async def add_draft_applicant(self, tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl=None,
-                                  firstName=None, lastName=None, middleName=None, olympian=False, *args, **kwargs):
+    async def add_draft_applicant(self, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
+                                  passport, birthDate, pinfl, firstName, lastName, middleName, gender=None, photo=None,
+                                  olympian=False, *args, **kwargs):
 
-        # Encrypt sensitive data
-        phoneNumber_encrypted = encrypt_data(phoneNumber)
-        additionalPhoneNumber_encrypted = encrypt_data(additionalPhoneNumber)
         passport_encrypted = encrypt_data(passport)
         birthDate_encrypted = encrypt_data(birthDate)
         pinfl_encrypted = encrypt_data(pinfl) if pinfl else None
-        firstName_encrypted = encrypt_data(firstName) if firstName else None
-        lastName_encrypted = encrypt_data(lastName) if lastName else None
-        middleName_encrypted = encrypt_data(middleName) if middleName else None
+        gender = gender if gender in ['MALE', 'FEMALE'] else None
 
         query = (
             "INSERT INTO applicants "
-            "(tgId, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, firstName, lastName, "
-            "middleName, applicationStatus, olympian, createdTime, updatedTime) "
+            "(tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, "
+            "firstName, lastName, middleName, gender, photo, applicationStatus, olympian, createdTime, updatedTime) "
             "VALUES "
             "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
         )
-        await self.execute_query(query, tgId, phoneNumber_encrypted, additionalPhoneNumber_encrypted,
-                                 passport_encrypted, birthDate_encrypted,
-                                 pinfl_encrypted, firstName_encrypted, lastName_encrypted, middleName_encrypted,
-                                 'DRAFT', olympian, datetime.now(), datetime.now())
+        await self.execute_query(query, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
+                                 passport_encrypted, birthDate_encrypted, pinfl_encrypted, firstName, lastName,
+                                 middleName, gender, photo, 'DRAFT', olympian, datetime.now(), datetime.now())
 
     async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation,
                                *args, **kwargs):
@@ -495,7 +490,7 @@ class Database:
 
     async def add_active_token(self, token):
         # Deactivate all active tokens
-        await self.execute_query("UPDATE tokens SET isActive = FALSE updatedTime = %s WHERE isActive = TRUE",
+        await self.execute_query("UPDATE tokens SET isActive = FALSE, updatedTime = %s WHERE isActive = TRUE",
                                  datetime.now())
         # Insert the new active token
         query = "INSERT INTO tokens (token, isActive, createdTime, updatedTime) VALUES (%s, TRUE, %s, NULL)"

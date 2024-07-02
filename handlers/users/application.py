@@ -14,6 +14,7 @@ from keyboards.inline import all_faculties_inlines, application_callback_data, t
     choices_e_edu_language
 from loader import dp, db
 from states import ApplicantRegisterStates
+from utils.db_api import signup_applicant, get_applicant_in_admission
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -118,7 +119,7 @@ async def send_passport(msg: types.Message, state: FSMContext):
     }
     passport = msg.text
     data = await state.get_data()
-    await state.update_data({'passport': passport})
+    await state.update_data({'passport': passport.upper()})
     await msg.answer(TEXTS[data.get('language')])
     await ApplicantRegisterStates.next()
 
@@ -155,7 +156,11 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 "yetishingizga yordam berishga tayyormiz!"
             ),
             'pinfl_exist_text': ("❗️ Bunday passport ma'lumotlari bilan hujjat topshirilgan. Iltimos, "
-                                 "qayta hujjat topshiring:")
+                                 "qayta hujjat topshiring:"),
+            'checking': "♻️ Ma'lumotlar tekshirilmoqda",
+            'data_error': "❗️ Passport ma'lumotlari xato bo'lishi mumkin. Iltimos, tekshirib qayta kiriting.",
+            'unknown_error': "❗️ Noma'lum xatolik. Iltimos, qayta kiriting.",
+            'exists_phone': "❗️ Bunday raqam bilan 👉 qabul.usat.uz sayti orqali ro'yxatdan o'tgansiz.",
         },
         'ru': {
             'one_resp_text': (
@@ -164,7 +169,11 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 "стать квалифицированным специалистом в будущем!"
             ),
             'pinfl_exist_text': ("❗️ С документами с такими паспортными данными уже была подана заявка. Пожалуйста, "
-                                 "подайте заявку снова.")
+                                 "подайте заявку снова."),
+            'checking': "♻️ Данные проверяются",
+            'data_error': "❗️ В паспортных данных может быть ошибка. Пожалуйста, проверьте и введите заново.",
+            'unknown_error': "❗️ Неизвестная ошибка. Пожалуйста, проверьте и введите заново.",
+            'exists_phone': "❗️ Вы уже зарегистрировались на сайте 👉 qabul.usat.uz с таким номером.",
         }
     }
     if await db.get_applicant(msg.from_user.id, data.get('passport'), birthDate):
@@ -173,14 +182,58 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
         await state.finish()
     else:
         data.update({'birthDate': birthDate})
-        # applicant register for admission and get data
-        # data ni olamiz admissiondan
-        # fullname ni data ning ism va familiyasidan olib, statega update qilamiz
+        # birinchi tekshiramiz borlikka
+        resp = await signup_applicant(**data)
+        print(resp)
+        if resp.status_code in [201, 400]:
+            await msg.answer(TEXTS[language]['checking'])
+            await asyncio.sleep(2)
+            user_data_resp = await get_applicant_in_admission(msg.from_user.id)
+            print(user_data_resp)
+            if user_data_resp.status_code == 200:
+                user_data = user_data_resp.json()
+                if user_data.get('jshir', None):
+                    data.update({
+                        'applicantId': user_data.get('id'),
+                        'applicantNumber': user_data.get('applicantNumber'),
+                        'pinfl': user_data.get('jshir'),
+                        'firstName': user_data.get('firstName'),
+                        'lastName': user_data.get('lastName'),
+                        'middleName': user_data.get('middleName'),
+                        'gender': user_data.get('gender'),
+                        'photo': user_data.get('photo')
+                    })
+                else:
+                    await msg.answer(TEXTS[language]['data_error'],
+                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+                    await state.finish()
+                    return
+            elif resp.status_code == 400:
+                if 'phone' in resp.json()['meta']:
+                    await msg.answer(TEXTS[language]['exists_phone'],
+                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+                    await state.finish()
+                    return
+                else:
+                    await msg.answer(resp.json()['meta']['general_errors'][0],
+                                     reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+                    await state.finish()
+                    return
+            else:
+                await msg.answer(TEXTS[language]['unknown_error'],
+                                 reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+                await state.finish()
+                return
+        else:
+            await msg.answer(TEXTS[language]['unknown_error'],
+                             reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru)
+            await state.finish()
+            return
         await db.add_draft_applicant(**data)
-        fullname = msg.from_user.full_name
-        await state.update_data({'fullname': fullname})
+        fullname = data.get('firstName')
+        await state.update_data(data)
         await msg.answer(TEXTS[language]['one_resp_text'])
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(0.5)
         await show_faculties(msg, language, fullname)
         await ApplicantRegisterStates.next()
 

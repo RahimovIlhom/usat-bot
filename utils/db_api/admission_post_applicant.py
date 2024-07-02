@@ -6,6 +6,8 @@ from utils.db_api import get_token
 env = Env()
 env.read_env()
 
+SUBMIT_URL = env.str('SUBMIT_APPLICATION_URL')
+
 
 async def post_request_with_bearer_token(url, data, token):
     from loader import db
@@ -32,21 +34,20 @@ async def post_request_with_bearer_token(url, data, token):
                 return None
 
 
-async def submit_applicant(tgId, firstName, lastName, middleName, phoneNumber, birthDate, gender, nationality, passport,
+async def submit_applicant(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender, passport,
                            pinfl, additionalPhoneNumber, directionOfEducationId, directionOfEducationName,
                            typeOfEducationId, typeOfEducationName, languageOfEducationId, languageOfEducationName,
                            photo=None, *args, **kwargs):
     from loader import db
-    url = env.str('SUBMIT_APPLICATION_URL').format(telegramm_id=tgId)
+    url = SUBMIT_URL.format(telegramm_id=tgId)
     active_token = await db.get_active_token()
     data = {
         "firstName": firstName,
         "lastName": lastName,
         "middleName": middleName,
-        "applicantNumber": phoneNumber,
+        "applicantNumber": applicantNumber,
         "birthDate": birthDate,
         "gender": gender,
-        "nationality": nationality,
         "passportNumber": passport,
         "jshir": pinfl,
         "homePhone": additionalPhoneNumber,

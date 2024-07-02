@@ -87,6 +87,8 @@ GENDER_STATUS = (
 
 
 class Applicant(models.Model):
+    applicantId = models.IntegerField(null=True, blank=True, verbose_name="Arizachi ID")
+    applicantNumber = models.CharField(max_length=50, null=True, blank=True, verbose_name="Ariza raqami")
     tgId = models.BigIntegerField(primary_key=True, verbose_name="Telegram id")
     phoneNumber = models.CharField(max_length=255, unique=True, verbose_name="Telefon raqami")
     additionalPhoneNumber = models.CharField(max_length=255, unique=True, null=True, blank=True,

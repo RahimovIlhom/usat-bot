@@ -48,7 +48,7 @@ async def bot_start(message: types.Message, state: FSMContext):
         choice_lan = "Iltimos tilni tanlang / Выберите пожалуйста язык:"
         await message.answer(answer)
         await state.set_state(SimpleRegisterStates.language)
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
         await message.answer(choice_lan, reply_markup=language_markup)
 
 
