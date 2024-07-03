@@ -233,7 +233,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 'photo': user_data.get('photo'),
                 'birthDate': datetime.strptime(user_data.get('birthDate'), '%Y-%m-%dT%H:%M:%SZ').date(),
                 'passport': user_data.get('passportNumber'),
-                'phoneNumber': user_data.get('homePhone')
+                'phoneNumber': user_data.get('mobilePhone')
             })
             no_data = False
     if no_data:
