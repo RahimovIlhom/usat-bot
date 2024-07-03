@@ -217,6 +217,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
         await handle_error(msg, 'pinfl_exist_text')
         return
 
+    no_data = True
     user_data_resp = await get_applicant_in_admission(msg.from_user.id)
     if user_data_resp.status_code == 200:
         user_data = user_data_resp.json()
@@ -234,10 +235,8 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 'passport': user_data.get('passportNumber'),
                 'phoneNumber': user_data.get('mobilePhone')
             })
-        else:
-            await handle_error(msg, 'data_error')
-            return
-    else:
+            no_data = False
+    if no_data:
         data.update({'birthDate': birthDate})
         resp = await signup_applicant(**data)
         if resp.status_code == 201:
