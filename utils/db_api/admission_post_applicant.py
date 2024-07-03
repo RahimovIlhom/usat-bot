@@ -46,7 +46,7 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
         "gender": gender,
         "passportNumber": passport,
         "jshir": pinfl,
-        "homePhone": additionalPhoneNumber.replace("+", ""),
+        "mobilePhone": additionalPhoneNumber.replace("+", ""),
         "educationType": {
             "id": typeOfEducationId,
             "name": typeOfEducationName
