@@ -6,11 +6,12 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentType, ReplyKeyboardRemove
 
 from filters import IsPrivate
-from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru
+from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru, no_olympian_markup
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
     choices_e_edu_language, regions_buttons, region_callback_data, cities_buttons, city_callback_data
-from loader import dp, db
+from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
+from utils import certificate_photo_link
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
 
 
@@ -395,7 +396,67 @@ async def error_city_send(msg: types.Message, state: FSMContext):
 
 
 async def check_olympian(call, state):
-    pass
+    OLYMPIAN_TEXTS = {
+        'uz': {
+            'olympian': "Siz \"Fan javohirlari\" olimpiadasi ishtirok etib, {science} fanidan {vaucher} so'mlik "
+                        "vaucherga egasiz!",
+            'no_olympian': "Agar olimpiada sertifikatingiz bo'lsa uni yuboring. Sertifikatingiz mavjud bo'lmasa "
+                           "quyidagi \"Mavjud emas\" tugmasini bosing.",
+        },
+        'ru': {
+            'olympian': "Вы являетесь участником олимпиады \"Fan javohirlari\" и обладателем ваучера на {vaucher} "
+                        "сум по предмету {science}!",
+            'no_olympian': "Если у вас есть сертификат об участии в олимпиаде, отправьте его. Если у вас нет "
+                           "сертификата, нажмите кнопку \"Не имеется\".",
+        },
+    }
+    data = await state.get_data()
+    pinfl = data.get('pinfl')
+    lang = data.get('language')
+    olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
+    if olympian_result:
+        science = olympian_result[3]
+        result = olympian_result[8]
+        vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
+        if vaucher > 0:
+            await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+            await state.update_data({
+                'vaucher': vaucher,
+                'certificateImage': olympian_result[7],
+                'result': result
+            })
+            await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await show_faculties(call, lang, data.get('fullname'), answer_text=True)
+            return
+    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup())
+
+
+@dp.message_handler(state=ApplicantRegisterStates.certificate, text='Mavjud emas')
+async def no_certificate(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    await state.set_state(ApplicantRegisterStates.direction_type_lan)
+    await show_faculties(msg, data.get('language'), data.get('fullname'), answer_text=True)
+
+
+@dp.message_handler(state=ApplicantRegisterStates.certificate, content_types=ContentType.PHOTO)
+async def send_certificate(msg: types.Message, state: FSMContext):
+    photo = msg.photo[-1]
+    image_url = await certificate_photo_link(photo)
+    await state.update_data({'certificateImage': image_url})
+    data = await state.get_data()
+    await state.set_state(ApplicantRegisterStates.direction_type_lan)
+    await show_faculties(msg, data.get('language'), data.get('fullname'), answer_text=True)
+
+
+@dp.message_handler(state=ApplicantRegisterStates.certificate, content_types=ContentType.ANY)
+async def send_certificate(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get('language')
+    ERR_TEXTS = {
+        'uz': "Iltimos, quyidagi tugmadan foydalaning yoki sertifikatingiz rasmini yuboring!",
+        'ru': "Пожалуйста, воспользуйтесь кнопкой ниже или отправьте фото вашего сертификата!",
+    }
+    await msg.answer(ERR_TEXTS[lang])
 
 
 @dp.callback_query_handler(application_callback_data.filter(), state=ApplicantRegisterStates.direction_type_lan)
@@ -417,7 +478,7 @@ async def select_application_func(call: types.CallbackQuery, callback_data: dict
         await save_send_data_admission(call, direction_id, type_id, edu_language, language, fullname, state)
 
 
-async def show_faculties(call, language, fullname):
+async def show_faculties(call, language, fullname, answer_text=False):
     resp_texts = {
         'uz': {
             'question': ("Hurmatli {}! Aytingchi, siz universitetimizdagi qaysi ta'lim yo'nalishiga hujjatlaringizni "
@@ -428,8 +489,11 @@ async def show_faculties(call, language, fullname):
                          "собираетесь подавать документы?")
         }
     }
-    await call.message.edit_text(resp_texts[language]['question'].format(fullname),
-                                 reply_markup=await all_faculties_inlines(language))
+    if answer_text:
+        await call.message.answer(resp_texts[language]['question'].format(fullname))
+    else:
+        await call.message.edit_text(resp_texts[language]['question'].format(fullname),
+                                     reply_markup=await all_faculties_inlines(language))
 
 
 async def show_types_and_contracts(call, direction_id, language):

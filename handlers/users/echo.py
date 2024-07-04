@@ -6,7 +6,7 @@ from filters import IsPrivate
 from keyboards.default import admin_menu_markup_uz, menu_markup_uz, menu_markup_ru, exams_menu_markup, \
     sub_menu_markup_uz, sub_menu_markup_ru
 from keyboards.inline import application_callback_data
-from loader import dp, db
+from loader import dp, db, db_olympian
 from utils.misc.send_photo_telegraph import question_photo_link
 
 
@@ -39,6 +39,9 @@ async def bot_echo(message: types.Message):
 
 @dp.message_handler(IsPrivate(), state=None)
 async def bot_echo(message: types.Message):
+    if message.text == 'test_olympian_user_ilhomjon':
+        applicant = await db.get_applicant(message.from_user.id)
+        await message.answer(f"{await db_olympian.get_olympian(message.from_user.id, applicant[3])}")
     await message.answer(message.text)
 
 

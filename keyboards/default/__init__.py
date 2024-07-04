@@ -7,3 +7,4 @@ from .send_phone import phone_markup_uz, phone_markup_ru
 from .settings_buttons import settings_markup_uz, settings_markup_ru
 from .no_send_image_buttons import no_send_image_markup
 from .information_buttons import directions_uz_markup, directions_ru_markup
+from .no_olympian_buttons import no_olympian_markup

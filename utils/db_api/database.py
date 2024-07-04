@@ -239,44 +239,44 @@ class Database:
             )
         return result
 
-    async def get_applicant_for_excel(self, tgId):
-        query = """
-        SELECT 
-            a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.passport, a.birthDate, a.pinfl, a.firstName, a.lastName, 
-            a.middleName, e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation, 
-            a.contractFile, a.olympian, a.createdTime, a.applicationStatus
-        FROM 
-            applicants a
-        LEFT JOIN 
-            educational_areas e ON a.directionOfEducation_id = e.id
-        LEFT JOIN 
-            types_of_education t ON a.typeOfEducation_id = t.id
-        WHERE 
-            a.tgId = %s;
-        """
-        result = await self.execute_query(query, tgId, fetchone=True)
-
-        if result:
-            # Decrypt sensitive data
-            result = (
-                result[0],
-                decrypt_data(result[1]),
-                decrypt_data(result[2]),
-                decrypt_data(result[3]),
-                decrypt_data(result[4]),
-                decrypt_data(result[5]) if result[5] else None,
-                decrypt_data(result[6]) if result[6] else None,
-                decrypt_data(result[7]) if result[7] else None,
-                decrypt_data(result[8]) if result[8] else None,
-                result[9],
-                result[10],
-                result[11],
-                result[12],
-                result[13],
-                result[14],
-                result[15]
-            )
-        return result
+    # async def get_applicant_for_excel(self, tgId):
+    #     query = """
+    #     SELECT
+    #         a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.passport, a.birthDate, a.pinfl, a.firstName, a.lastName,
+    #         a.middleName, e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation,
+    #         a.contractFile, a.olympian, a.createdTime, a.applicationStatus
+    #     FROM
+    #         applicants a
+    #     LEFT JOIN
+    #         educational_areas e ON a.directionOfEducation_id = e.id
+    #     LEFT JOIN
+    #         types_of_education t ON a.typeOfEducation_id = t.id
+    #     WHERE
+    #         a.tgId = %s;
+    #     """
+    #     result = await self.execute_query(query, tgId, fetchone=True)
+    #
+    #     if result:
+    #         # Decrypt sensitive data
+    #         result = (
+    #             result[0],
+    #             decrypt_data(result[1]),
+    #             decrypt_data(result[2]),
+    #             decrypt_data(result[3]),
+    #             decrypt_data(result[4]),
+    #             decrypt_data(result[5]) if result[5] else None,
+    #             decrypt_data(result[6]) if result[6] else None,
+    #             decrypt_data(result[7]) if result[7] else None,
+    #             decrypt_data(result[8]) if result[8] else None,
+    #             result[9],
+    #             result[10],
+    #             result[11],
+    #             result[12],
+    #             result[13],
+    #             result[14],
+    #             result[15]
+    #         )
+    #     return result
 
     async def update_application_status(self, tgId, new_status):
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"

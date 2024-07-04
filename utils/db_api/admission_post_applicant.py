@@ -31,7 +31,8 @@ async def post_request_with_bearer_token(url, data, token):
 async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender,
                                          passport, pinfl, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
-                                         languageOfEducationId, languageOfEducationName, photo=None, *args, **kwargs):
+                                         languageOfEducationId, languageOfEducationName, regionId, regionName,
+                                         cityId, cityName, vaucher, certificateImage, result, photo=None, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
@@ -47,6 +48,14 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
         "passportNumber": passport,
         "jshir": pinfl,
         "mobilePhone": additionalPhoneNumber.replace("+", ""),
+        "region": {
+            "id": regionId,
+            "name": regionName
+        },
+        "city": {
+            "id": cityId,
+            "name": cityName
+        },
         "educationType": {
             "id": typeOfEducationId,
             "name": typeOfEducationName
@@ -67,9 +76,3 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
 
     response = await post_request_with_bearer_token(url, data, active_token)
     return response
-
-
-if __name__ == "__main__":
-    pass
-    # asyncio.run(submit_applicant('1234567', "Ilxomjon", "Raximov", "Nikolaevich", "+998909090909", "1990-01-01",
-    # "MALE", "UZBEK", "AA1234567", "12345678912345", "+998916589340", 1, "Turizm", 1, "Kunduzgi ta'lim", 1, "uz"))
