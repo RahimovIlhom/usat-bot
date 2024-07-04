@@ -8,7 +8,7 @@ from aiogram.types import ContentType, ReplyKeyboardRemove
 from filters import IsPrivate
 from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
-    choices_e_edu_language
+    choices_e_edu_language, regions_buttons, region_callback_data, cities_buttons, city_callback_data
 from loader import dp, db
 from states import ApplicantRegisterStates
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
@@ -21,8 +21,6 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
         if applicant[14] == 'DRAFT':
-            await show_faculties(msg, 'uz', f"{applicant[4]} {applicant[5]}")
-            await state.set_state(ApplicantRegisterStates.direction_type_lan)
             await state.update_data({
                 'fullname': applicant[4] + ' ' + applicant[5],
                 'tgId': applicant[0],
@@ -37,7 +35,14 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
                 'additionalPhoneNumber': applicant[2],
                 'photo': applicant[18],
                 'applicantId': applicant[19],
+                'regionId': applicant[20],
+                'regionName': applicant[21],
+                'cityId': applicant[22],
+                'cityName': applicant[23],
             })
+
+            await show_regions(msg, simple_user[2])
+            await state.set_state(ApplicantRegisterStates.region)
             return
         await msg.answer("❗️ Siz allaqachon hujjat topshirib bo'lgansiz!")
     else:
@@ -53,8 +58,6 @@ async def submit_application_ru(msg: types.Message, state: FSMContext):
     applicant = await db.get_applicant(msg.from_user.id)
     if applicant:
         if applicant[14] == 'DRAFT':
-            await show_faculties(msg, 'ru', f"{applicant[4]} {applicant[5]}")
-            await state.set_state(ApplicantRegisterStates.direction_type_lan)
             await state.update_data({
                 'fullname': applicant[4] + ' ' + applicant[5],
                 'tgId': applicant[0],
@@ -67,8 +70,16 @@ async def submit_application_ru(msg: types.Message, state: FSMContext):
                 'passport': applicant[7],
                 'pinfl': applicant[3],
                 'additionalPhoneNumber': applicant[2],
-                'photo': applicant[18]
+                'photo': applicant[18],
+                'applicantId': applicant[19],
+                'regionId': applicant[20],
+                'regionName': applicant[21],
+                'cityId': applicant[22],
+                'cityName': applicant[23],
             })
+
+            await show_regions(msg, simple_user[2])
+            await state.set_state(ApplicantRegisterStates.region)
             return
         await msg.answer("❗️ Вы уже подали документы!")
     else:
@@ -118,7 +129,7 @@ async def send_contact(msg: types.Message, state: FSMContext):
     await state.update_data({'additionalPhoneNumber': msg.text})
 
     if user_language == 'uz':
-        info = "Passportingiz seriasi va raqamini yuboring.\n\nMisol uchun: AA1234567"
+        info = "Pasportingiz seriyasini va raqamini yuboring.\n\nMisol uchun: AA1234567"
     else:
         info = "Пожалуйста, отправьте серию и номер вашего паспорта.\n\nПример: AA1234567"
 
@@ -156,7 +167,8 @@ async def err_send_passport(msg: types.Message, state: FSMContext):
     await msg.delete()
     TEXTS = {
         'uz': {
-            'err_text': "❗️ Pasport seria va raqam xato. Iltimos, quyidagi tartibda yuboring.\n\n<b>AA1234567</b>",
+            'err_text': ("❗️ Pasport seriyasi yoki raqami xato kiritildi. Iltimos, quyidagi tartibda yuboring:"
+                         "\n\n<b>AA1234567</b>"),
         },
         'ru': {
             'err_text': "❗️ Серия и номер паспорта неправильные. Пожалуйста, отправьте в следующем "
@@ -185,25 +197,30 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             'pinfl_exist_text': ("❗️ Bunday passport ma'lumotlari bilan hujjat topshirilgan. Iltimos, "
                                  "qayta hujjat topshiring:"),
             'checking': "♻️ Ma'lumotlar tekshirilmoqda",
-            'data_error': "❗️ Passport ma'lumotlari xato bo'lishi mumkin. Iltimos, tekshirib qayta kiriting.",
-            'unknown_error': "❗️ Noma'lum xatolik. Iltimos, qayta kiriting.",
-            'exists_phone': ("❗️ Siz telegram kontakt raqamingiz bilan 👉 qabul.usat.uz sayti orqali ro'yxatdan "
-                             "o'tgansiz."),
+            'data_error': ("❗️ Pasport ma'lumotlaringiz yoki tug'ilgan kuningiz xato kiritilgan bo'lishi mumkin. "
+                           "Iltimos, tekshirib qayta kiriting."),
+            'unknown_error': "❗️ Noma'lum xatolik. Iltimos, qayta hujjat topshiring.",
+            'exists_phone': ("❗️ Siz ushbu telefon raqamingiz bilan qabul.usat.uz sayti orqali ro'yxatdan o'tgansiz. "
+                             "Shaxsiy kabinetga kirish uchun qabul.usat.uz saytida \"Kirish\" tugmasini bosib, "
+                             "telefon raqamingizga SMS orqali yuborilgan parolni kiriting. Parolni yo'qotgan "
+                             "bo'lsangiz, \"Parolni unutdingizmi?\" tugmasini bosing va parolingizni tiklang."),
         },
         'ru': {
             'one_resp_text': (
-                "Студенчество называют золотой эпохой. Мы рады, что вы решили провести этот период в нашем "
-                "университете. В свою очередь, мы также готовы предоставить вам качественное образование и помочь вам "
-                "стать квалифицированным специалистом в будущем!"
+                "Студенческая жизнь - золотой век, как говорят. Мы рады, что вы решили провести это время в нашем "
+                "университете. Со своей стороны, мы готовы предоставить вам качественное образование и помочь стать "
+                "выдающимся специалистом в будущем!"
             ),
-            'pinfl_exist_text': ("❗️ С документами с такими паспортными данными уже была подана заявка. Пожалуйста, "
-                                 "подайте заявку снова."),
+            'pinfl_exist_text': (
+                "❗️ С такими паспортными данными уже поданы документы. Пожалуйста, подайте документы повторно:"),
             'checking': "♻️ Данные проверяются",
-            'data_error': "❗️ В паспортных данных может быть ошибка. Пожалуйста, проверьте и введите заново.",
-            'unknown_error': "❗️ Неизвестная ошибка. Пожалуйста, проверьте и введите заново.",
-            'exists_phone': ("❗️ Вы уже зарегистрировались на сайте 👉 qabul.usat.uz с вашим номером контакта "
-                             "Telegram."),
-
+            'data_error': ("❗️ Возможно, вы неправильно ввели паспортные данные или дату рождения. "
+                           "Пожалуйста, проверьте и введите заново."),
+            'unknown_error': "❗️ Неизвестная ошибка. Пожалуйста, подайте документы повторно.",
+            'exists_phone': ("❗️ Вы уже зарегистрированы на сайте qabul.usat.uz с этим номером телефона. "
+                             "Для входа в личный кабинет на сайте qabul.usat.uz нажмите кнопку \"Вход\" и введите "
+                             "пароль, отправленный по SMS на ваш номер телефона. Если вы потеряли пароль, нажмите "
+                             "кнопку \"Забыли пароль?\" и восстановите его."),
         }
     }
 
@@ -258,6 +275,13 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                     })
                 else:
                     await handle_error(msg, 'data_error')
+                    if language == 'uz':
+                        info = "Pasportingiz seriyasini va raqamini yuboring.\n\nMisol uchun: AA1234567"
+                    else:
+                        info = "Пожалуйста, отправьте серию и номер вашего паспорта.\n\nПример: AA1234567"
+
+                    await msg.answer(info, reply_markup=ReplyKeyboardRemove())
+                    await state.set_state(ApplicantRegisterStates.passport)
                     return
             else:
                 await handle_error(msg, 'unknown_error')
@@ -277,11 +301,11 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             return
 
     await db.add_draft_applicant(**data)
-    fullname = data.get('firstName') + ' ' + data.get('lastName')
+    data.update({'fullname': data.get('firstName') + ' ' + data.get('lastName')})
     await state.update_data(data)
     await msg.answer(TEXTS[language]['one_resp_text'])
     await asyncio.sleep(0.5)
-    await show_faculties(msg, language, fullname)
+    await show_regions(msg, language)
     await ApplicantRegisterStates.next()
 
 
@@ -300,6 +324,78 @@ async def err_send_birth_date(msg: types.Message, state: FSMContext):
         }
     }
     await msg.answer(TEXTS[language]['err_text'])
+
+
+async def show_regions(msg, lang):
+    resp_texts = {
+        'uz': {
+            'question': "O’zbekistonning qaysi hududidansiz?"
+        },
+        'ru': {
+            'question': "В каком регионе Узбекистана вы проживаете?"
+        }
+    }
+    if isinstance(msg, types.CallbackQuery):
+        await msg.message.edit_text(resp_texts[lang]['question'], reply_markup=await regions_buttons(lang))
+    else:
+        await msg.answer("✅ Tasdiqlangan foydalanuvchi!" if lang == 'uz' else "✅ Подтвержденный пользователь!",
+                         reply_markup=ReplyKeyboardRemove())
+        await msg.answer(resp_texts[lang]['question'], reply_markup=await regions_buttons(lang))
+
+
+@dp.callback_query_handler(region_callback_data.filter(), state=ApplicantRegisterStates.region)
+async def send_region(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    region_name = callback_data.get('name')
+    region_id = callback_data.get('id')
+    cities_texts = {
+        'uz': f"{region_name}ning qaysi tumanidansiz?",
+        'ru': f"В каком районе {region_name} вы проживаете?"
+    }
+    await state.update_data({
+        'regionName': region_name,
+        'regionId': region_id
+    })
+    await call.message.edit_text(cities_texts[language], reply_markup=await cities_buttons(region_id, language))
+    await ApplicantRegisterStates.next()
+
+
+@dp.callback_query_handler(city_callback_data.filter(), state=ApplicantRegisterStates.city)
+async def show_cities_for_reg(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    city_name = callback_data.get('name')
+    city_id = callback_data.get('id')
+    if city_id == 'back':
+        await show_regions(call, language)
+        await state.set_state(ApplicantRegisterStates.region)
+        return
+    else:
+        await state.update_data({
+            'cityName': city_name,
+            'cityId': city_id
+        })
+    await ApplicantRegisterStates.next()
+    await check_olympian(call, state)
+
+
+@dp.message_handler(state=[ApplicantRegisterStates.city, ApplicantRegisterStates.region], content_types=ContentType.ANY)
+async def error_city_send(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get('language')
+    await msg.delete()
+    TEXTS = {
+        'uz': "‼️ Iltimos, yuqoridagi tugmalardan foydalaning!",
+        'ru': "‼️ Пожалуйста, используйте кнопки выше!"
+    }
+    err_msg = await msg.answer(TEXTS[lang])
+    await asyncio.sleep(1)
+    await err_msg.delete()
+
+
+async def check_olympian(call, state):
+    pass
 
 
 @dp.callback_query_handler(application_callback_data.filter(), state=ApplicantRegisterStates.direction_type_lan)
@@ -332,14 +428,8 @@ async def show_faculties(call, language, fullname):
                          "собираетесь подавать документы?")
         }
     }
-    if isinstance(call, types.Message):
-        await call.answer("✅ Tasdiqlangan foydalanuvchi!" if language == 'uz' else "✅ Подтвержденный пользователь!",
-                          reply_markup=ReplyKeyboardRemove())
-        await call.answer(resp_texts[language]['question'].format(fullname),
-                          reply_markup=await all_faculties_inlines(language))
-    else:
-        await call.message.edit_text(resp_texts[language]['question'].format(fullname),
-                                     reply_markup=await all_faculties_inlines(language))
+    await call.message.edit_text(resp_texts[language]['question'].format(fullname),
+                                 reply_markup=await all_faculties_inlines(language))
 
 
 async def show_types_and_contracts(call, direction_id, language):

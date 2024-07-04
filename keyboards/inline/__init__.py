@@ -15,3 +15,5 @@ from .tests_inlines import (all_science_inlines_for_test, lang_inlines_for_test,
                             question_delete_test_markup, questions_list_markup, question_markup,
                             question_delete_question_markup)
 from .admin_inlines import accept_applicant_inline, accept_app_callback_data
+from .regions_buttons import regions_buttons, region_callback_data
+from .cities_buttons import cities_buttons, city_callback_data

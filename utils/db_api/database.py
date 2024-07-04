@@ -215,7 +215,8 @@ class Database:
         query = (
             "SELECT tgId, phoneNumber, additionalPhoneNumber, pinfl, firstName, lastName, middleName, passport, "
             "directionOfEducation_id, typeOfEducation_id, languageOfEducation, contractFile, olympian, createdTime, "
-            "applicationStatus, applicantNumber, birthDate, gender, photo, applicantId "
+            "applicationStatus, applicantNumber, birthDate, gender, photo, applicantId, regionId, regionName, cityId, "
+            "cityName "
             "FROM applicants WHERE tgId = %s OR (passport = %s AND birthDate = %s);"
         )
         result = await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
@@ -234,6 +235,7 @@ class Database:
                 result[15],
                 decrypt_data(result[16]),
                 result[17], result[18], result[19],
+                result[20], result[21], result[22], result[23],
             )
         return result
 

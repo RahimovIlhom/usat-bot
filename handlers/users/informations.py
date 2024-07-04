@@ -53,7 +53,8 @@ async def direction_info_uz(msg: types.Message):
         f"📝 Yo'nalish: {direction}\n\n"
         f"ℹ️ Yo’nalish haqida ma’lumot:\n{info['Yo’nalish haqida ma’lumot']}\n\n"
         f"🎓 2024/2025-yil uchun qabul kvotasi:\n{info['2024/2025-yil uchun qabul kvotasi']}\n\n"
-        f"📋 Qabul qilinish talablari:\n{info['Qabul qilinish talablari']}"
+        f"📋 Ushbu yo'nalish bo'yicha imtihonda tushadigan fanlar kesimidagi savollar soni va baholash mezoni:"
+        f"\n{info['Qabul qilinish talablari']}"
     )
     try:
         await msg.answer_photo(photo=info['image'])
@@ -88,10 +89,10 @@ async def contract_information(msg: types.Message):
 
     if lang == 'uz':
         contract_info = CONTRACT_INFO_UZ
-        response = "📋 Barcha yo'nalishlar bo'yicha kontrakt summalari:\n\n"
+        response = "📋 Barcha yo'nalishlar bo'yicha o'qish davomiyligi va kontrakt summalari:\n\n"
     else:
         contract_info = CONTRACT_INFO_RU
-        response = "📋 Суммы контрактов по всем направлениям:\n\n"
+        response = "📋 Продолжительность обучения и суммы контрактов по всем направлениям:\n\n"
 
     for direction, info in contract_info.items():
         response += f"🔹 {direction}\n"

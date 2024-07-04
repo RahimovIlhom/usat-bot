@@ -104,6 +104,10 @@ class Applicant(models.Model):
     birthCountry = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan davlati")
     nationality = models.CharField(max_length=255, null=True, blank=True, verbose_name="Millati")
     citizenship = models.CharField(max_length=255, null=True, blank=True, verbose_name="Fuqaroligi")
+    regionId = models.IntegerField(null=True, blank=True, verbose_name="Viloyat ID")
+    regionName = models.CharField(max_length=100, null=True, blank=True, verbose_name="Viloyat nomi")
+    cityId = models.IntegerField(null=True, blank=True, verbose_name="Tuman ID")
+    cityName = models.CharField(max_length=100, null=True, blank=True, verbose_name="Tuman nomi")
     gender = models.CharField(max_length=6, choices=GENDER_STATUS, null=True, blank=True, verbose_name="Jinsi")
     photo = models.CharField(max_length=255, null=True, blank=True, verbose_name="Rasmi")
     directionOfEducation = models.ForeignKey(DirectionOfEducation, on_delete=models.SET_NULL, null=True, blank=True,
