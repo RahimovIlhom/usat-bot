@@ -51,4 +51,4 @@ class DatabaseOlympian:
         )
         start_date = datetime(2024, 4, 15)
         end_date = datetime(2024, 5, 5)
-        return await self.execute_query(query, (tgId, pinfl, start_date, end_date), fetchone=True)
+        return await self.execute_query(query, tgId, pinfl, start_date, end_date, fetchone=True)
