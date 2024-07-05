@@ -32,7 +32,8 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
                                          passport, pinfl, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
                                          languageOfEducationId, languageOfEducationName, regionId, regionName,
-                                         cityId, cityName, vaucher, certificateImage, result, photo=None, *args, **kwargs):
+                                         cityId, cityName, vaucher, certificateImage, photo=None, *args,
+                                         **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
@@ -73,6 +74,13 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
         "typeAbiturient": "ABITURIENT",
         "stage": "COURSE_OF_STUDY"
     }
+    if vaucher:
+        data.update({
+            "score": f"{vaucher}",
+            "certificateNumber": "vaucher"
+        })
+    elif certificateImage:
+        data.update({"certificateNumber": certificateImage})
 
     response = await post_request_with_bearer_token(url, data, active_token)
     return response

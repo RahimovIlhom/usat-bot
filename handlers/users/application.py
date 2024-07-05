@@ -12,7 +12,8 @@ from keyboards.inline import all_faculties_inlines, application_callback_data, t
 from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
 from utils import certificate_photo_link
-from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
+from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission, \
+    update_profile_applicant
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -235,7 +236,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
         await handle_error(msg, 'pinfl_exist_text')
         return
 
-    no_data = True
+    profile_exists = 'no'
     user_data_resp = await get_applicant_in_admission(msg.from_user.id)
     if user_data_resp.status_code == 200:
         user_data = user_data_resp.json()
@@ -253,10 +254,15 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 'passport': user_data.get('passportNumber'),
                 'phoneNumber': user_data.get('mobilePhone')
             })
-            no_data = False
-    if no_data:
+            profile_exists = 'data_available'
+        else:
+            profile_exists = 'no_data'
+    if profile_exists != 'data_available':
         data.update({'birthDate': birthDate})
-        resp = await signup_applicant(**data)
+        if profile_exists == 'no_data':
+            resp = await update_profile_applicant(**data)
+        else:
+            resp = await signup_applicant(**data)
         if resp.status_code == 201:
             await msg.answer(TEXTS[language]['checking'])
             await asyncio.sleep(2)
@@ -428,10 +434,10 @@ async def check_olympian(call, state):
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
             await show_faculties(call, lang, data.get('fullname'), answer_text=True)
             return
-    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup())
+    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
 
-@dp.message_handler(state=ApplicantRegisterStates.certificate, text='Mavjud emas')
+@dp.message_handler(state=ApplicantRegisterStates.certificate, text=['Mavjud emas', 'Не имеется'])
 async def no_certificate(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.set_state(ApplicantRegisterStates.direction_type_lan)
