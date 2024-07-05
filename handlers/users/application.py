@@ -263,7 +263,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             resp = await update_profile_applicant(**data)
         else:
             resp = await signup_applicant(**data)
-        if resp.status_code == 201:
+        if resp.status_code in [201, 204]:
             await msg.answer(TEXTS[language]['checking'])
             await asyncio.sleep(2)
             user_data_resp = await get_applicant_in_admission(msg.from_user.id)

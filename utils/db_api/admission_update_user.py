@@ -33,7 +33,7 @@ async def update_profile_applicant(tgId, phoneNumber, passport, birthDate, *args
         "birthDate": birth_date
     }
 
-    response = requests.put(url, json=data, headers=headers, verify=False)
+    response = requests.post(url, json=data, headers=headers, verify=False)
 
     if response.status_code in [201, 400]:
         return response
@@ -44,7 +44,7 @@ async def update_profile_applicant(tgId, phoneNumber, passport, birthDate, *args
             "Content-Type": "application/json"
         }
         await db.add_active_token(new_token)
-        resp = requests.put(url, json=data, headers=headers, verify=False)
+        resp = requests.post(url, json=data, headers=headers, verify=False)
         return resp
     else:
         return None
