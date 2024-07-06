@@ -10,7 +10,7 @@ from keyboards.default import menu_markup_uz, menu_markup_ru
 from keyboards.inline import ready_inline_button, responses_callback_data, all_responses_inlines, ready_callback_data
 from loader import dp, db
 from states import TestExecutionStates
-from utils.db_api import get_applicant_in_admission
+from utils.db_api import get_applicant_in_admission, send_exam_result_for_admission
 
 SCORE_MAP = {
     1: 3.1,
@@ -282,15 +282,17 @@ async def finish_test(call, state, language, true_responses, user_responses, sco
 
     await db.add_exam_result(call.from_user.id, correct_answers, result, total_score, user_responses, interval_time)
     await db.update_application_status(call.from_user.id, applicantStatus)
+
+    await send_exam_result_for_admission(call.from_user.id, total_score)
     RESPONSE_RESULT = {
         'uz': ("✅ Tabriklaymiz, siz imtihonni tugatdingiz!\n"
-               "Natijangiz tekshirishga yuborildi. Umumiy ball: {}"),
+               "Natijangiz tekshirishga yuborildi."),
         'ru': ("✅ Поздравляем, вы завершили экзамен!\n"
-               "Ваш результат отправлен на проверку. Общий балл: {}")
+               "Ваш результат отправлен на проверку.")
     }
 
     await call.message.answer(
-        RESPONSE_RESULT[language].format(total_score),
+        RESPONSE_RESULT[language],
         reply_markup=menu_markup_uz if language == 'uz' else menu_markup_ru
     )
     await state.finish()

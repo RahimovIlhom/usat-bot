@@ -239,6 +239,54 @@ class Database:
             )
         return result
 
+    async def get_applicant_for_post_exam_result(self, tgId, passport=None, birthDate=None):
+        query = (
+            "SELECT a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.pinfl, a.firstName, a.lastName, a.middleName, "
+            "a.passport, a.directionOfEducation_id, a.typeOfEducation_id, a.languageOfEducation, a.contractFile, "
+            "a.olympian, a.createdTime, a.applicationStatus, a.applicantNumber, a.birthDate, a.gender, a.photo, "
+            "a.applicantId, a.regionId, a.regionName, a.cityId, a.cityName, "
+            "e.nameUz AS directionOfEducationName, t.nameUz AS typeOfEducationName, "
+            "o.vaucher "
+            "FROM applicants a "
+            "LEFT JOIN educational_areas e ON a.directionOfEducation_id = e.id "
+            "LEFT JOIN types_of_education t ON a.typeOfEducation_id = t.id "
+            "LEFT JOIN olympians o ON a.tgId = o.applicant_id "
+            "WHERE a.tgId = %s OR (a.passport = %s AND a.birthDate = %s);"
+        )
+        result = await self.execute_query(query, tgId, passport, birthDate, fetchone=True)
+
+        if result:
+            result = {
+                'tgId': result[0],
+                'phoneNumber': result[1],
+                'additionalPhoneNumber': result[2],
+                'pinfl': decrypt_data(result[3]) if result[3] else None,
+                'firstName': result[4],
+                'lastName': result[5],
+                'middleName': result[6],
+                'passport': decrypt_data(result[7]) if result[7] else None,
+                'directionOfEducation_id': result[8],
+                'typeOfEducation_id': result[9],
+                'languageOfEducation': result[10],
+                'contractFile': result[11],
+                'olympian': result[12],
+                'createdTime': result[13],
+                'applicationStatus': result[14],
+                'applicantNumber': result[15],
+                'birthDate': decrypt_data(result[16]) if result[16] else None,
+                'gender': result[17],
+                'photo': result[18],
+                'applicantId': result[19],
+                'regionId': result[20],
+                'regionName': result[21],
+                'cityId': result[22],
+                'cityName': result[23],
+                'directionOfEducationName': result[24],
+                'typeOfEducationName': result[25],
+                'vaucher': result[26]
+            }
+        return result
+
     # async def get_applicant_for_excel(self, tgId):
     #     query = """
     #     SELECT
