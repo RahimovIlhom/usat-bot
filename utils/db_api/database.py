@@ -302,16 +302,23 @@ class Database:
                                  passport_encrypted, birthDate_encrypted, pinfl_encrypted, firstName, lastName,
                                  middleName, gender, photo, 'DRAFT', olympian, datetime.now(), datetime.now())
 
-    async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation,
+    async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian,
+                               regionId, regionName, cityId, cityName,
                                *args, **kwargs):
         query = (
             "UPDATE applicants SET "
             "directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
-            "applicationStatus = %s, updatedTime = %s "
+            "applicationStatus = %s, updatedTime = %s, olympian = %s, regionId = %s, regionName = %s, cityId = %s, "
+            "cityName = %s "
             "WHERE tgId = %s;"
         )
         await self.execute_query(query, directionOfEducation_id, typeOfEducation_id,
-                                 languageOfEducation, 'SUBMITTED', datetime.now(), tgId)
+                                 languageOfEducation, 'SUBMITTED', datetime.now(), olympian, regionId, regionName,
+                                 cityId, cityName, tgId)
+
+    async def add_olympian_result(self, olympianId, vaucher, certificateImage, result, **kwargs):
+        query = "INSERT INTO olympians (applicant_id, result, vaucher, certificateImage) VALUES (%s, %s, %s, %s);"
+        await self.execute_query(query, olympianId, result, vaucher, certificateImage)
 
     async def get_applicant_exam_results(self, applicant_id):
         query = """

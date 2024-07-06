@@ -309,6 +309,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
 
     await db.add_draft_applicant(**data)
     data.update({'fullname': data.get('firstName') + ' ' + data.get('lastName')})
+    data.update({'fullname': 'firstName' + ' ' + 'lastName'})
     await state.update_data(data)
     await msg.answer(TEXTS[language]['one_resp_text'])
     await asyncio.sleep(0.5)
@@ -408,12 +409,14 @@ async def check_olympian(call, state):
                         "vaucherga egasiz!",
             'no_olympian': "Agar olimpiada sertifikatingiz bo'lsa uni yuboring. Sertifikatingiz mavjud bo'lmasa "
                            "quyidagi \"Mavjud emas\" tugmasini bosing.",
+            'success': "Yashash manzilingiz qabul qilindi."
         },
         'ru': {
             'olympian': "Вы являетесь участником олимпиады \"Fan javohirlari\" и обладателем ваучера на {vaucher} "
                         "сум по предмету {science}!",
             'no_olympian': "Если у вас есть сертификат об участии в олимпиаде, отправьте его. Если у вас нет "
                            "сертификата, нажмите кнопку \"Не имеется\".",
+            'success': "Ваш адрес проживания был принят."
         },
     }
     data = await state.get_data()
@@ -429,12 +432,14 @@ async def check_olympian(call, state):
             await state.update_data({
                 'vaucher': vaucher,
                 'certificateImage': olympian_result[7],
-                'result': result
+                'result': result,
+                'olympian': True
             })
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
             await show_faculties(call, lang, data.get('fullname'), answer_text=True)
             return
-    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
+    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['success'], reply_markup=None)
+    await call.message.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
 
 @dp.message_handler(state=ApplicantRegisterStates.certificate, text=['Mavjud emas', 'Не имеется'])
@@ -448,7 +453,7 @@ async def no_certificate(msg: types.Message, state: FSMContext):
 async def send_certificate(msg: types.Message, state: FSMContext):
     photo = msg.photo[-1]
     image_url = await certificate_photo_link(photo)
-    await state.update_data({'certificateImage': image_url})
+    await state.update_data({'certificateImage': image_url, 'olympian': True})
     data = await state.get_data()
     await state.set_state(ApplicantRegisterStates.direction_type_lan)
     await show_faculties(msg, data.get('language'), data.get('fullname'), answer_text=True)
@@ -495,11 +500,20 @@ async def show_faculties(call, language, fullname, answer_text=False):
                          "собираетесь подавать документы?")
         }
     }
-    if answer_text:
-        await call.message.answer(resp_texts[language]['question'].format(fullname))
+    if isinstance(call, types.Message):
+        if answer_text:
+            await call.answer(resp_texts[language]['question'].format(fullname),
+                              reply_markup=await all_faculties_inlines(language))
+        else:
+            await call.edit_text(resp_texts[language]['question'].format(fullname),
+                                 reply_markup=await all_faculties_inlines(language))
     else:
-        await call.message.edit_text(resp_texts[language]['question'].format(fullname),
-                                     reply_markup=await all_faculties_inlines(language))
+        if answer_text:
+            await call.message.answer(resp_texts[language]['question'].format(fullname),
+                                      reply_markup=await all_faculties_inlines(language))
+        else:
+            await call.message.edit_text(resp_texts[language]['question'].format(fullname),
+                                         reply_markup=await all_faculties_inlines(language))
 
 
 async def show_types_and_contracts(call, direction_id, language):
@@ -545,9 +559,20 @@ async def err_direction_type_lan(msg: types.Message, state: FSMContext):
 
 
 async def save_send_data_admission(call, direction_id, type_id, edu_language, lang, fullname, state):
-    await db.submit_applicant(call.from_user.id, direction_id, type_id, edu_language)
-
     data = await state.get_data()
+    vaucher = data.get('vaucher', 0)
+    certificateImage = data.get('certificateImage', None)
+    result = data.get('result', 0)
+    olympian = data.get('olympian', False)
+    regionName = data.get('regionName')
+    regionId = data.get('regionId')
+    cityName = data.get('cityName')
+    cityId = data.get('cityId')
+    if certificateImage:
+        await db.add_olympian_result(call.from_user.id, vaucher, certificateImage, result)
+    await db.submit_applicant(call.from_user.id, direction_id, type_id, edu_language, olympian, regionId, regionName,
+                              cityId, cityName)
+
     data.update({
         'directionOfEducationId': direction_id,
         'directionOfEducationName': (await db.select_direction(direction_id))[1 if edu_language == 'uz' else 2],
