@@ -34,6 +34,7 @@ async def submit_application_uz(msg: types.Message, state: FSMContext):
                 'gender': applicant[17],
                 'passport': applicant[7],
                 'pinfl': applicant[3],
+                'phoneNumber': applicant[1],
                 'additionalPhoneNumber': applicant[2],
                 'photo': applicant[18],
                 'applicantId': applicant[19],
@@ -71,6 +72,7 @@ async def submit_application_ru(msg: types.Message, state: FSMContext):
                 'gender': applicant[17],
                 'passport': applicant[7],
                 'pinfl': applicant[3],
+                'phoneNumber': applicant[1],
                 'additionalPhoneNumber': applicant[2],
                 'photo': applicant[18],
                 'applicantId': applicant[19],
@@ -252,7 +254,8 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                 'photo': user_data.get('photo'),
                 'birthDate': datetime.strptime(user_data.get('birthDate'), '%Y-%m-%dT%H:%M:%SZ').date(),
                 'passport': user_data.get('passportNumber'),
-                'phoneNumber': user_data.get('mobilePhone')
+                # 'phoneNumber': user_data.get('mobilePhone'),
+                # 'additionalPhoneNumber': user_data.get('homePhone')
             })
             profile_exists = 'data_available'
         else:
@@ -309,7 +312,6 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
 
     await db.add_draft_applicant(**data)
     data.update({'fullname': data.get('firstName') + ' ' + data.get('lastName')})
-    data.update({'fullname': 'firstName' + ' ' + 'lastName'})
     await state.update_data(data)
     await msg.answer(TEXTS[language]['one_resp_text'])
     await asyncio.sleep(0.5)

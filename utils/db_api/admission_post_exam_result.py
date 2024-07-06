@@ -55,6 +55,7 @@ async def send_exam_result_for_admission(tgId, ball, examType=True, *args, **kwa
         "passportNumber": applicant['passport'],
         "jshir": applicant['pinfl'],
         "mobilePhone": applicant['additionalPhoneNumber'].replace("+", ""),
+        "homePhone": applicant['phoneNumber'].replace("+", ""),
         "region": {
             "id": applicant['regionId'],
             "name": applicant['regionName']

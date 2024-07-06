@@ -46,7 +46,7 @@ async def send_olympian_result(url, data, token):
 
 
 async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender,
-                                         passport, pinfl, additionalPhoneNumber, directionOfEducationId,
+                                         passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
                                          languageOfEducationId, languageOfEducationName, regionId, regionName,
                                          cityId, cityName, vaucher, certificateImage, photo=None, *args,
@@ -65,7 +65,8 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
         "gender": gender,
         "passportNumber": passport,
         "jshir": pinfl,
-        "mobilePhone": additionalPhoneNumber.replace("+", ""),
+        "mobilePhone": phoneNumber.replace("+", ""),
+        "homePhone": additionalPhoneNumber.replace('+', ''),
         "region": {
             "id": regionId,
             "name": regionName
