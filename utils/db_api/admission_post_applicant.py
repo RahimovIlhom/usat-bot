@@ -49,7 +49,7 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
                                          passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
                                          languageOfEducationId, languageOfEducationName, regionId, regionName,
-                                         cityId, cityName, vaucher, certificateImage, photo=None, *args,
+                                         cityId, cityName, vaucher=None, certificateImage=None, photo=None, *args,
                                          **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db

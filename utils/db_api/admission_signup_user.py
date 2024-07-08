@@ -7,6 +7,7 @@ env = Env()
 env.read_env()
 
 REGISTER_URL = env.str('USER_REGISTER_URL')
+TIMEOUT = 3
 
 
 async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwargs):
@@ -33,39 +34,22 @@ async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwar
         "birthDate": birth_date
     }
 
-    response = requests.post(url, json=data, headers=headers, verify=False)
+    try:
+        response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
 
-    if response.status_code in [201, 400]:
-        return response
-    elif response.status_code == 401:
-        new_token = await get_token()
-        headers = {
-            "Authorization": new_token,
-            "Content-Type": "application/json"
-        }
-        await db.add_active_token(new_token)
-        resp = requests.post(url, json=data, headers=headers, verify=False)
-        return resp
-    else:
+        if response.status_code in [201, 400]:
+            return response
+        elif response.status_code == 401:
+            new_token = await get_token()
+            headers = {
+                "Authorization": new_token,
+                "Content-Type": "application/json"
+            }
+            await db.add_active_token(new_token)
+            response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
+            if response.status_code in [201, 400]:
+                return response
+        else:
+            return None
+    except requests.exceptions.RequestException as e:
         return None
-
-# {
-#     "code": 499,
-#     "meta": {
-#         "phone": [
-#             "Error. Phone already exist exception"
-#         ],
-#         "general_errors": [
-#             "Pasport raqami allaqachon mavjud"
-#         ]
-#     }
-# }
-
-# {
-#     "code": 499,
-#     "meta": {
-#         "general_errors": [
-#             "Pasport raqami allaqachon mavjud"
-#         ]
-#     }
-# }

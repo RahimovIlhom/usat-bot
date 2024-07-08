@@ -266,9 +266,14 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
             resp = await update_profile_applicant(**data)
         else:
             resp = await signup_applicant(**data)
+        await msg.answer(TEXTS[language]['checking'])
+        await asyncio.sleep(2)
+
+        if not resp:
+            await handle_error(msg, 'unknown_error')
+            return
+
         if resp.status_code in [201, 204]:
-            await msg.answer(TEXTS[language]['checking'])
-            await asyncio.sleep(2)
             user_data_resp = await get_applicant_in_admission(msg.from_user.id)
             if user_data_resp.status_code == 200:
                 user_data = user_data_resp.json()
