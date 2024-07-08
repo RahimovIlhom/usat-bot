@@ -99,7 +99,9 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
         })
     elif certificateImage:
         olympiad_data = {
+            "id": tgId,
             "telegrammId": tgId,
+            "result": "no value",
             "certificateImage": certificateImage
         }
         await send_olympian_result(OLYMPIAN_RESULT_URL, olympiad_data, active_token)

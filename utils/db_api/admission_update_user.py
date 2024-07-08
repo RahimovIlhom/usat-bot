@@ -9,7 +9,7 @@ env.read_env()
 USER_UPDATE_URL = env.str('USER_UPDATE_URL')
 
 
-async def update_profile_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwargs):
+async def update_profile_applicant(tgId, passport, birthDate, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = USER_UPDATE_URL.format(telegrammId=tgId)
@@ -28,14 +28,13 @@ async def update_profile_applicant(tgId, phoneNumber, passport, birthDate, *args
     birth_date = birthDate.isoformat() + "T00:00:00Z"
     data = {
         "telegrammId": tgId,
-        "phone": phoneNumber.replace("+", ""),
         "passportNumber": passport,
         "birthDate": birth_date
     }
 
     response = requests.post(url, json=data, headers=headers, verify=False)
 
-    if response.status_code in [201, 400]:
+    if response.status_code in [201, 204, 400]:
         return response
     elif response.status_code == 401:
         new_token = await get_token()
