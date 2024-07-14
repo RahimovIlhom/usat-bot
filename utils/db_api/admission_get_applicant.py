@@ -29,11 +29,14 @@ async def get_applicant_in_admission(tgId):
 
     response = requests.get(url, headers=headers, verify=False)
 
-    if response.status_code == 401:
-        new_token = await get_token()
-        headers["Authorization"] = f"Bearer {new_token}"
-        await db.add_active_token(new_token)
-        resp = requests.get(url, headers=headers, verify=False)
-        return resp
-    else:
-        return response
+    try:
+        if response.status_code == 401:
+            new_token = await get_token()
+            headers["Authorization"] = f"Bearer {new_token}"
+            await db.add_active_token(new_token)
+            resp = requests.get(url, headers=headers, verify=False)
+            return resp
+        else:
+            return response
+    except Exception as e:
+        return str(e)

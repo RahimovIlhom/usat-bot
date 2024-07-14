@@ -19,6 +19,7 @@ marshmallow==3.21.2
 multidict==6.0.5
 mysqlclient==2.2.4
 packaging==24.0
+pillow==10.4.0
 pycparser==2.22
 PyMySQL==1.1.1
 python-dotenv==1.0.1

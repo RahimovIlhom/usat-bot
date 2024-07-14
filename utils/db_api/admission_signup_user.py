@@ -37,9 +37,7 @@ async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwar
     try:
         response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
 
-        if response.status_code in [201, 400]:
-            return response
-        elif response.status_code == 401:
+        if response.status_code == 401:
             new_token = await get_token()
             headers = {
                 "Authorization": new_token,
@@ -47,9 +45,8 @@ async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwar
             }
             await db.add_active_token(new_token)
             response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
-            if response.status_code in [201, 400]:
-                return response
-        else:
-            return None
+            return response
+        return response
+
     except requests.exceptions.RequestException as e:
         return None

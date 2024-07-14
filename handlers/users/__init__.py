@@ -1,7 +1,8 @@
 from . import help
 from . import start
 from . import settings
-from . import application
+# from . import application
+from . import submit_application
 from . import take_exam
 from . import profile
 from . import informations
