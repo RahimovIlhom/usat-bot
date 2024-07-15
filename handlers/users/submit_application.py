@@ -15,7 +15,7 @@ from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
 from utils import certificate_photo_link
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
-from utils.misc.send_passport_telegraph import passport_photo_link
+# from utils.misc.send_passport_telegraph import passport_photo_link
 
 
 @dp.message_handler(IsPrivate(), Text(equals=["📰 Universitetga hujjat topshirish", "📰 Подать документы в университет"]))
@@ -351,11 +351,12 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     language = data.get('language')
     await state.update_data({'pinfl': msg.text})
-    PASSPORT_DATA = {
-        'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
-        'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
-    }
-    await msg.answer(PASSPORT_DATA[language])
+    # PASSPORT_DATA = {
+    #     'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
+    #     'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
+    # }
+    # await msg.answer(PASSPORT_DATA[language])
+    await show_regions(msg, language)
     await ApplicantRegisterStates.next()
 
 
@@ -364,35 +365,35 @@ async def err_send_pinfl(msg: types.Message):
     await msg.delete()
 
 
-@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.PHOTO)
-async def send_passport_front(msg: types.Message, state: FSMContext):
-    photo = msg.photo[-1]
-    image_url = await passport_photo_link(photo)
-    await state.update_data({'passportPhoto': image_url})
-    data = await state.get_data()
-    lang = data.get('language')
-    PASSPORT_DATA = {
-        'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
-        'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
-    }
-    await msg.answer(PASSPORT_DATA[lang])
-    await ApplicantRegisterStates.next()
+# @dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.PHOTO)
+# async def send_passport_front(msg: types.Message, state: FSMContext):
+#     photo = msg.photo[-1]
+#     image_url = await passport_photo_link(photo)
+#     await state.update_data({'passportPhoto': image_url})
+#     data = await state.get_data()
+#     lang = data.get('language')
+#     PASSPORT_DATA = {
+#         'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
+#         'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
+#     }
+#     await msg.answer(PASSPORT_DATA[lang])
+#     await ApplicantRegisterStates.next()
 
 
-@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.ANY)
-async def err_send_passport_front(msg: types.Message):
-    await msg.delete()
+# @dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.ANY)
+# async def err_send_passport_front(msg: types.Message):
+#     await msg.delete()
 
 
-@dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.PHOTO)
-async def send_passport_back(msg: types.Message, state: FSMContext):
-    photo = msg.photo[-1]
-    image_url = await passport_photo_link(photo)
-    await state.update_data({'passportBackPhoto': image_url})
-    data = await state.get_data()
-    lang = data.get('language')
-    await show_regions(msg, lang)
-    await ApplicantRegisterStates.next()
+# @dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.PHOTO)
+# async def send_passport_back(msg: types.Message, state: FSMContext):
+#     photo = msg.photo[-1]
+#     image_url = await passport_photo_link(photo)
+#     await state.update_data({'passportBackPhoto': image_url})
+#     data = await state.get_data()
+#     lang = data.get('language')
+#     await show_regions(msg, lang)
+#     await ApplicantRegisterStates.next()
 
 
 async def show_regions(msg, lang):
@@ -481,22 +482,22 @@ async def check_olympian(call, state):
     data = await state.get_data()
     pinfl = data.get('pinfl')
     lang = data.get('language')
-    # olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
-    # if olympian_result:
-    #     science = olympian_result[3]
-    #     result = olympian_result[8]
-    #     vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
-    #     if vaucher > 0:
-    #         await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
-    #         await state.update_data({
-    #             'vaucher': vaucher,
-    #             'certificateImage': olympian_result[7],
-    #             'result': result,
-    #             'olympian': True
-    #         })
-    #         await state.set_state(ApplicantRegisterStates.direction_type_lan)
-    #         await show_faculties(call, lang, data.get('firstName'), answer_text=True)
-    #         return
+    olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
+    if olympian_result:
+        science = olympian_result[3]
+        result = olympian_result[8]
+        vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
+        if vaucher > 0:
+            await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+            await state.update_data({
+                'vaucher': vaucher,
+                'certificateImage': olympian_result[7],
+                'result': result,
+                'olympian': True
+            })
+            await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await show_faculties(call, lang, data.get('firstName'), answer_text=True)
+            return
     await call.message.edit_text(OLYMPIAN_TEXTS[lang]['success'], reply_markup=None)
     await call.message.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
