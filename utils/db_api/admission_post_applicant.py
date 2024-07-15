@@ -109,6 +109,9 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
             "result": "no value",
             "certificateImage": certificateImage
         }
+        data.update({
+            "certificateNumber": "vaucher"
+        })
         await send_olympian_result(OLYMPIAN_RESULT_URL, olympiad_data, active_token)
 
     response = await post_request_with_bearer_token(url, data, active_token)
