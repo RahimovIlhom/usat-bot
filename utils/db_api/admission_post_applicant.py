@@ -49,8 +49,8 @@ async def send_olympian_result(url, data, token):
 async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName, middleName, applicantNumber, birthDate,
                                          passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
-                                         languageOfEducationId, languageOfEducationName, passportPhoto,
-                                         passportBackPhoto, regionId, regionName, cityId, cityName, vaucher=None,
+                                         languageOfEducationId, languageOfEducationName, regionId, regionName,
+                                         cityId, cityName, vaucher=None,
                                          certificateImage=None, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
@@ -91,8 +91,6 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
             "id": directionOfEducationId,
             "name": directionOfEducationName
         },
-        "passportPhoto": passportPhoto,  # url
-        "passportBackPhoto": passportBackPhoto,  # url
         "status": "SUBMITTED",
         "typeAbiturient": "ABITURIENT",
         "stage": "COURSE_OF_STUDY"

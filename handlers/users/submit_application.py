@@ -351,11 +351,6 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     language = data.get('language')
     await state.update_data({'pinfl': msg.text})
-    # PASSPORT_DATA = {
-    #     'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
-    #     'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
-    # }
-    # await msg.answer(PASSPORT_DATA[language])
     await show_regions(msg, language)
     await ApplicantRegisterStates.next()
 
@@ -363,37 +358,6 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
 @dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.ANY)
 async def err_send_pinfl(msg: types.Message):
     await msg.delete()
-
-
-# @dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.PHOTO)
-# async def send_passport_front(msg: types.Message, state: FSMContext):
-#     photo = msg.photo[-1]
-#     image_url = await passport_photo_link(photo)
-#     await state.update_data({'passportPhoto': image_url})
-#     data = await state.get_data()
-#     lang = data.get('language')
-#     PASSPORT_DATA = {
-#         'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
-#         'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
-#     }
-#     await msg.answer(PASSPORT_DATA[lang])
-#     await ApplicantRegisterStates.next()
-
-
-# @dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.ANY)
-# async def err_send_passport_front(msg: types.Message):
-#     await msg.delete()
-
-
-# @dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.PHOTO)
-# async def send_passport_back(msg: types.Message, state: FSMContext):
-#     photo = msg.photo[-1]
-#     image_url = await passport_photo_link(photo)
-#     await state.update_data({'passportBackPhoto': image_url})
-#     data = await state.get_data()
-#     lang = data.get('language')
-#     await show_regions(msg, lang)
-#     await ApplicantRegisterStates.next()
 
 
 async def show_regions(msg, lang):
@@ -496,6 +460,7 @@ async def check_olympian(call, state):
                 'olympian': True
             })
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await asyncio.sleep(2)
             await show_faculties(call, lang, data.get('firstName'), answer_text=True)
             return
     await call.message.edit_text(OLYMPIAN_TEXTS[lang]['success'], reply_markup=None)
@@ -653,6 +618,8 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     await db.submit_applicant(**data)
 
     resp = await submit_applicant_for_admission(**data)
+    print(resp)
+
     if resp.status_code == 404:
         await applicant_not_found(call, state, lang)
         return

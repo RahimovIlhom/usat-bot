@@ -310,22 +310,19 @@ class Database:
                                  passport_encrypted, birthDate_encrypted, gender, photo, 'DRAFT', olympian,
                                  datetime.now(), datetime.now())
 
-    async def submit_applicant(self, firstName, lastName, middleName, pinfl, passportPhoto,
-                               passportBackPhoto, tgId, directionOfEducationId, typeOfEducationId,
-                               languageOfEducationName, olympian, regionId, regionName, cityId, cityName, *args, **kwargs):
+    async def submit_applicant(self, firstName, lastName, middleName, pinfl, tgId, directionOfEducationId,
+                               typeOfEducationId, languageOfEducationName, olympian, regionId, regionName,
+                               cityId, cityName, *args, **kwargs):
         pinfl_encrypted = encrypt_data(pinfl)
-        passport_image_front_encrypted = encrypt_data(passportPhoto)
-        passport_image_back_encrypted = encrypt_data(passportBackPhoto)
         query = (
             "UPDATE applicants SET "
-            "pinfl = %s, firstName = %s, lastName = %s, middleName = %s, passportImageFront = %s, "
-            "passportImageBack = %s, directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
+            "pinfl = %s, firstName = %s, lastName = %s, middleName = %s, directionOfEducation_id = %s, "
+            "typeOfEducation_id = %s, languageOfEducation = %s, "
             "applicationStatus = %s, updatedTime = %s, olympian = %s, regionId = %s, regionName = %s, cityId = %s, "
             "cityName = %s "
             "WHERE tgId = %s;"
         )
-        await self.execute_query(query, pinfl_encrypted, firstName, lastName, middleName,
-                                 passport_image_front_encrypted, passport_image_back_encrypted, directionOfEducationId,
+        await self.execute_query(query, pinfl_encrypted, firstName, lastName, middleName, directionOfEducationId,
                                  typeOfEducationId, languageOfEducationName, 'SUBMITTED', datetime.now(), olympian,
                                  regionId, regionName, cityId, cityName, tgId)
 
