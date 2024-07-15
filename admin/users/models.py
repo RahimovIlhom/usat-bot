@@ -100,10 +100,8 @@ class Applicant(models.Model):
     firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
     lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
     middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
-    passportImageFront = models.ImageField(upload_to='passport/images/front/', null=True, blank=True,
-                                           verbose_name="Pasport old rasmi")
-    passportImageBack = models.ImageField(upload_to='passport/images/back/', null=True, blank=True,
-                                          verbose_name="Pasport orqa rasmi")
+    passportImageFront = models.CharField(max_length=255, null=True, blank=True, verbose_name="Pasport old rasmi")
+    passportImageBack = models.CharField(max_length=255, null=True, blank=True, verbose_name="Pasport orqa rasmi")
     birthPlace = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan joyi")
     birthCountry = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan davlati")
     nationality = models.CharField(max_length=255, null=True, blank=True, verbose_name="Millati")
@@ -140,7 +138,7 @@ class Applicant(models.Model):
 class Olympian(models.Model):
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='olympian_user',
                                   verbose_name="Arizachi")
-    result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Imtihon natijasi")
+    result = models.DecimalField(max_digits=5, null=True, blank=True, decimal_places=2, verbose_name="Imtihon natijasi")
     vaucher = models.BigIntegerField(default=0, verbose_name="Vaucheri")
     certificateImage = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sertifikati")
 

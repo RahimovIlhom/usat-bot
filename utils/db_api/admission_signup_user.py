@@ -7,7 +7,6 @@ env = Env()
 env.read_env()
 
 REGISTER_URL = env.str('USER_REGISTER_URL')
-TIMEOUT = 3
 
 
 async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwargs):
@@ -35,7 +34,7 @@ async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwar
     }
 
     try:
-        response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
+        response = requests.post(url, json=data, headers=headers, verify=False)
 
         if response.status_code == 401:
             new_token = await get_token()
@@ -44,9 +43,9 @@ async def signup_applicant(tgId, phoneNumber, passport, birthDate, *args, **kwar
                 "Content-Type": "application/json"
             }
             await db.add_active_token(new_token)
-            response = requests.post(url, json=data, headers=headers, verify=False, timeout=TIMEOUT)
+            response = requests.post(url, json=data, headers=headers, verify=False)
             return response
         return response
 
     except requests.exceptions.RequestException as e:
-        return None
+        return str(e)

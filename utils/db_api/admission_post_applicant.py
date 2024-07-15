@@ -27,6 +27,8 @@ async def post_request_with_bearer_token(url, data, token):
         await db.add_active_token(new_token)
         resp = requests.post(url, json=data, headers=headers, verify=False)
         return resp
+    else:
+        return response
 
 
 async def send_olympian_result(url, data, token):
@@ -41,15 +43,14 @@ async def send_olympian_result(url, data, token):
         new_token = await get_token()
         headers["Authorization"] = f"Bearer {new_token}"
         await db.add_active_token(new_token)
-        resp = requests.post(url, json=data, headers=headers, verify=False)
-        return resp
+        requests.post(url, json=data, headers=headers, verify=False)
 
 
-async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, applicantNumber, birthDate, gender,
+async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName, middleName, applicantNumber, birthDate,
                                          passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
-                                         languageOfEducationId, languageOfEducationName, passport_image_front,
-                                         passport_image_back, regionId, regionName, cityId, cityName, vaucher=None,
+                                         languageOfEducationId, languageOfEducationName, passportPhoto,
+                                         passportBackPhoto, regionId, regionName, cityId, cityName, vaucher=None,
                                          certificateImage=None, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
@@ -57,16 +58,19 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
     active_token = await db.get_active_token()
     birth_date = birthDate.isoformat() + "T00:00:00Z"
     data = {
+        "id": applicantId,
+        "applicantNumber": applicantNumber,
         "firstName": firstName,
         "lastName": lastName,
         "middleName": middleName,
-        "applicantNumber": applicantNumber,
         "birthDate": birth_date,
-        "gender": gender,
         "passportNumber": passport,
         "jshir": pinfl,
         "mobilePhone": phoneNumber.replace("+", ""),
         "homePhone": additionalPhoneNumber.replace('+', ''),
+        "country": {
+            "id": 1,
+        },
         "region": {
             "id": regionId,
             "name": regionName
@@ -87,8 +91,8 @@ async def submit_applicant_for_admission(tgId, firstName, lastName, middleName, 
             "id": directionOfEducationId,
             "name": directionOfEducationName
         },
-        "passportPhoto": passport_image_front,  # url
-        "passportBackPhoto": passport_image_back,  # url
+        "passportPhoto": passportPhoto,  # url
+        "passportBackPhoto": passportBackPhoto,  # url
         "status": "SUBMITTED",
         "typeAbiturient": "ABITURIENT",
         "stage": "COURSE_OF_STUDY"

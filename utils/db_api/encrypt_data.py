@@ -11,12 +11,16 @@ cipher_suite = Fernet(key)
 
 
 def encrypt_data(data):
-    if isinstance(data, datetime.date):
-        data = data.strftime("%Y-%m-%d")
-    return cipher_suite.encrypt(data.encode()).decode()
+    if data:
+        if isinstance(data, datetime.date):
+            data = data.strftime("%Y-%m-%d")
+        return cipher_suite.encrypt(data.encode()).decode()
+    return data
 
 
 def decrypt_data(data):
+    if not data:
+        return data
     decrypted_data = cipher_suite.decrypt(data.encode()).decode()
     try:
         return datetime.datetime.strptime(decrypted_data, "%Y-%m-%d").date()

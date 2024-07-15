@@ -287,84 +287,49 @@ class Database:
             }
         return result
 
-    # async def get_applicant_for_excel(self, tgId):
-    #     query = """
-    #     SELECT
-    #         a.tgId, a.phoneNumber, a.additionalPhoneNumber, a.passport, a.birthDate, a.pinfl, a.firstName, a.lastName,
-    #         a.middleName, e.nameUz AS directionOfEducation, t.nameUz AS typeOfEducation, a.languageOfEducation,
-    #         a.contractFile, a.olympian, a.createdTime, a.applicationStatus
-    #     FROM
-    #         applicants a
-    #     LEFT JOIN
-    #         educational_areas e ON a.directionOfEducation_id = e.id
-    #     LEFT JOIN
-    #         types_of_education t ON a.typeOfEducation_id = t.id
-    #     WHERE
-    #         a.tgId = %s;
-    #     """
-    #     result = await self.execute_query(query, tgId, fetchone=True)
-    #
-    #     if result:
-    #         # Decrypt sensitive data
-    #         result = (
-    #             result[0],
-    #             decrypt_data(result[1]),
-    #             decrypt_data(result[2]),
-    #             decrypt_data(result[3]),
-    #             decrypt_data(result[4]),
-    #             decrypt_data(result[5]) if result[5] else None,
-    #             decrypt_data(result[6]) if result[6] else None,
-    #             decrypt_data(result[7]) if result[7] else None,
-    #             decrypt_data(result[8]) if result[8] else None,
-    #             result[9],
-    #             result[10],
-    #             result[11],
-    #             result[12],
-    #             result[13],
-    #             result[14],
-    #             result[15]
-    #         )
-    #     return result
-
     async def update_application_status(self, tgId, new_status):
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
         await self.execute_query(query, new_status, tgId)
 
     async def add_draft_applicant(self, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
-                                  passport, birthDate, pinfl, firstName, lastName, middleName, gender=None, photo=None,
+                                  passport, birthDate, gender=None, photo=None,
                                   olympian=False, *args, **kwargs):
 
         passport_encrypted = encrypt_data(passport)
         birthDate_encrypted = encrypt_data(birthDate)
-        pinfl_encrypted = encrypt_data(pinfl) if pinfl else None
         gender = gender if gender in ['MALE', 'FEMALE'] else None
 
         query = (
             "INSERT INTO applicants "
-            "(tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber, passport, birthDate, pinfl, "
-            "firstName, lastName, middleName, gender, photo, applicationStatus, olympian, createdTime, updatedTime) "
+            "(tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber, passport, birthDate, gender, "
+            "photo, applicationStatus, olympian, createdTime, updatedTime) "
             "VALUES "
-            "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
         )
         await self.execute_query(query, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
-                                 passport_encrypted, birthDate_encrypted, pinfl_encrypted, firstName, lastName,
-                                 middleName, gender, photo, 'DRAFT', olympian, datetime.now(), datetime.now())
+                                 passport_encrypted, birthDate_encrypted, gender, photo, 'DRAFT', olympian,
+                                 datetime.now(), datetime.now())
 
-    async def submit_applicant(self, tgId, directionOfEducation_id, typeOfEducation_id, languageOfEducation, olympian,
-                               regionId, regionName, cityId, cityName,
-                               *args, **kwargs):
+    async def submit_applicant(self, firstName, lastName, middleName, pinfl, passportPhoto,
+                               passportBackPhoto, tgId, directionOfEducationId, typeOfEducationId,
+                               languageOfEducationName, olympian, regionId, regionName, cityId, cityName, *args, **kwargs):
+        pinfl_encrypted = encrypt_data(pinfl)
+        passport_image_front_encrypted = encrypt_data(passportPhoto)
+        passport_image_back_encrypted = encrypt_data(passportBackPhoto)
         query = (
             "UPDATE applicants SET "
-            "directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
+            "pinfl = %s, firstName = %s, lastName = %s, middleName = %s, passportImageFront = %s, "
+            "passportImageBack = %s, directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
             "applicationStatus = %s, updatedTime = %s, olympian = %s, regionId = %s, regionName = %s, cityId = %s, "
             "cityName = %s "
             "WHERE tgId = %s;"
         )
-        await self.execute_query(query, directionOfEducation_id, typeOfEducation_id,
-                                 languageOfEducation, 'SUBMITTED', datetime.now(), olympian, regionId, regionName,
-                                 cityId, cityName, tgId)
+        await self.execute_query(query, pinfl_encrypted, firstName, lastName, middleName,
+                                 passport_image_front_encrypted, passport_image_back_encrypted, directionOfEducationId,
+                                 typeOfEducationId, languageOfEducationName, 'SUBMITTED', datetime.now(), olympian,
+                                 regionId, regionName, cityId, cityName, tgId)
 
-    async def add_olympian_result(self, olympianId, vaucher, certificateImage, result, **kwargs):
+    async def add_olympian_result(self, olympianId, vaucher, certificateImage=None, result=None, **kwargs):
         query = "INSERT INTO olympians (applicant_id, result, vaucher, certificateImage) VALUES (%s, %s, %s, %s);"
         await self.execute_query(query, olympianId, result, vaucher, certificateImage)
 

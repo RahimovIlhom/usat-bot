@@ -4,7 +4,8 @@ from datetime import datetime
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.types import ContentType, ReplyKeyboardRemove
+from aiogram.types import ContentType, ReplyKeyboardRemove, InputFile
+from aiogram.utils.exceptions import BadRequest
 
 from filters import IsPrivate
 from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru, no_olympian_markup
@@ -14,6 +15,7 @@ from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
 from utils import certificate_photo_link
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
+from utils.misc.send_passport_telegraph import passport_photo_link
 
 
 @dp.message_handler(IsPrivate(), Text(equals=["📰 Universitetga hujjat topshirish", "📰 Подать документы в университет"]))
@@ -34,8 +36,8 @@ async def submit_application(msg: types.Message, state: FSMContext):
                 'applicantId': applicant[19],
             })
 
-            await show_regions(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
-            await state.set_state(ApplicantRegisterStates.region)
+            await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
+            await state.set_state(ApplicantRegisterStates.first_name)
             return
 
         if language == "uz":
@@ -90,7 +92,10 @@ async def send_contact(msg: types.Message, state: FSMContext):
         await msg.answer(message_text)
         return
 
-    await state.update_data({'additionalPhoneNumber': msg.text})
+    phone = msg.text.replace('+', '')
+    if not phone.startswith('998'):
+        phone = f"998{phone}"
+    await state.update_data({'additionalPhoneNumber': phone})
 
     if user_language == 'uz':
         info = "Pasportingiz seriyasini va raqamini yuboring.\n\nMisol uchun: AA1234567"
@@ -149,15 +154,11 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
     separator = '-' if '-' in birthDateText else '.'
     birthDate = datetime.strptime(birthDateText, f'%d{separator}%m{separator}%Y').date()
     data = await state.get_data()
+    data.update({'birthDate': birthDate})
     language = data.get('language', 'ru')
 
     TEXTS = {
         'uz': {
-            'one_resp_text': (
-                "Talabalik - oltin davr deyishadi. Shu davrni bizning universitetda o'tkazishga ahd qilganingizdan "
-                "xursandmiz. O'z navbatida biz ham sizga sifatli ta'lim berishga, kelajakda yetuk mutaxassis bo'lib "
-                "yetishingizga yordam berishga tayyormiz!"
-            ),
             'pinfl_exist_text': ("❗️ Bunday passport ma'lumotlari bilan hujjat topshirilgan. Iltimos, "
                                  "pasport ma'lumotlaringizni qayta yuboring:"),
             'checking': "♻️ Ma'lumotlar tekshirilmoqda",
@@ -170,11 +171,6 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                              "bo'lsangiz, \"Parolni unutdingizmi?\" tugmasini bosing va parolingizni tiklang."),
         },
         'ru': {
-            'one_resp_text': (
-                "Студенческая жизнь - золотой век, как говорят. Мы рады, что вы решили провести это время в нашем "
-                "университете. Со своей стороны, мы готовы предоставить вам качественное образование и помочь стать "
-                "выдающимся специалистом в будущем!"
-            ),
             'pinfl_exist_text': (
                 "❗️ С такими паспортными данными уже поданы документы. Пожалуйста, подайте документы повторно:"),
             'checking': "♻️ Данные проверяются",
@@ -185,6 +181,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
                              "Для входа в личный кабинет на сайте qabul.usat.uz нажмите кнопку \"Вход\" и введите "
                              "пароль, отправленный по SMS на ваш номер телефона. Если вы потеряли пароль, нажмите "
                              "кнопку \"Забыли пароль?\" и восстановите его."),
+
         }
     }
 
@@ -207,7 +204,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
 
     user_data_resp = await get_applicant_in_admission(msg.from_user.id)
 
-    if not user_data_resp:
+    if isinstance(user_data_resp, str):
         await msg.answer(user_data_resp)
         return
 
@@ -215,17 +212,14 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
         user_data = user_data_resp.json()
         data.update({
             'applicantId': user_data.get('id'),
-            'applicantNumber': user_data.get('applicantNumber'),
-            'birthDate': datetime.strptime(user_data.get('birthDate'), '%Y-%m-%dT%H:%M:%SZ').date(),
-            'passport': user_data.get('passportNumber'),
+            'applicantNumber': user_data.get('applicantNumber')
         })
     elif user_data_resp.status_code == 404:
-        data.update({'birthDate': birthDate})
         resp = await signup_applicant(**data)
         await msg.answer(TEXTS[language]['checking'])
         await asyncio.sleep(1)
 
-        if not resp:
+        if isinstance(resp, str):
             await msg.answer(resp)
             return
         elif resp.status_code != 201:
@@ -256,9 +250,8 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
 
     await db.add_draft_applicant(**data)
     await state.update_data(data)
-    await msg.answer(TEXTS[language]['one_resp_text'])
     await asyncio.sleep(0.5)
-    await show_regions(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
+    await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
     await ApplicantRegisterStates.next()
 
 
@@ -279,6 +272,129 @@ async def err_send_birth_date(msg: types.Message, state: FSMContext):
     await msg.answer(TEXTS[language]['err_text'])
 
 
+async def question_first_name(msg, language):
+    QUESTION_TEXTS = {
+        'uz': "Ismingizni yuboring (pasportingiz bo'yicha)",
+        'ru': "Отправьте своё имя (как в паспорте)"
+    }
+    await msg.answer(QUESTION_TEXTS[language],
+                     reply_markup=ReplyKeyboardRemove())
+
+
+@dp.message_handler(state=ApplicantRegisterStates.first_name, content_types=ContentType.TEXT)
+async def send_first_name(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    LAST_NAME_TEXTS = {
+        'uz': "Familiyangizni yuboring (pasportingiz bo'yicha)",
+        'ru': "Отправьте своё фамилию (как в паспорте)"
+    }
+    await state.update_data({'firstName': msg.text})
+    await msg.answer(LAST_NAME_TEXTS[language])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.first_name, content_types=ContentType.ANY)
+async def err_send_first_name(msg: types.Message):
+    await msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.last_name, content_types=ContentType.TEXT)
+async def send_last_name(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    MIDDLE_NAME_TEXTS = {
+        'uz': "Sha'rifingizni yuboring (otangizni ismini yozing)",
+        'ru': "Отправьте своё отчество (напишите имя отца)"
+    }
+    await state.update_data({'lastName': msg.text})
+    await msg.answer(MIDDLE_NAME_TEXTS[language])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.last_name, content_types=ContentType.ANY)
+async def err_send_last_name(msg: types.Message):
+    await msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.middle_name, content_types=ContentType.TEXT)
+async def send_middle_name(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    await state.update_data({'middleName': msg.text})
+    PINFL_DATA = {
+        'uz': {
+            'text': "JSHSHIR (PINFL) yoki ID-kartangizdagi Shaxsiy raqamingizni yuboring.",
+            'image_url': "http://telegra.ph//file/97b3043fbcdc89ba48360.jpg",
+            'image': InputFile('data/images/pinfl.jpg')
+        },
+        'ru': {
+            'text': "Отправьте JSHSHIR (PINFL) или персональный идентификационный номер, указанный на ID-карте.",
+            'image_url': "http://telegra.ph//file/e815e58a3c4c08948b617.jpg",
+            'image': InputFile('data/images/pinfl_ru.jpg')
+        }
+    }
+    try:
+        await msg.answer_photo(PINFL_DATA[language]['image_url'], caption=PINFL_DATA[language]['text'])
+    except BadRequest:
+        await msg.answer_photo(PINFL_DATA[language]['image'], caption=PINFL_DATA[language]['text'])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.middle_name, content_types=ContentType.ANY)
+async def err_send_middle_name(msg: types.Message):
+    await msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.TEXT, regexp=r'^\d{14}$')
+async def send_pinfl(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    language = data.get('language')
+    await state.update_data({'pinfl': msg.text})
+    PASSPORT_DATA = {
+        'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
+        'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
+    }
+    await msg.answer(PASSPORT_DATA[language])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.ANY)
+async def err_send_pinfl(msg: types.Message):
+    await msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.PHOTO)
+async def send_passport_front(msg: types.Message, state: FSMContext):
+    photo = msg.photo[-1]
+    image_url = await passport_photo_link(photo)
+    await state.update_data({'passportPhoto': image_url})
+    data = await state.get_data()
+    lang = data.get('language')
+    PASSPORT_DATA = {
+        'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
+        'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
+    }
+    await msg.answer(PASSPORT_DATA[lang])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.ANY)
+async def err_send_passport_front(msg: types.Message):
+    await msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.PHOTO)
+async def send_passport_back(msg: types.Message, state: FSMContext):
+    photo = msg.photo[-1]
+    image_url = await passport_photo_link(photo)
+    await state.update_data({'passportBackPhoto': image_url})
+    data = await state.get_data()
+    lang = data.get('language')
+    await show_regions(msg, lang)
+    await ApplicantRegisterStates.next()
+
+
 async def show_regions(msg, lang):
     resp_texts = {
         'uz': {
@@ -291,8 +407,6 @@ async def show_regions(msg, lang):
     if isinstance(msg, types.CallbackQuery):
         await msg.message.edit_text(resp_texts[lang]['question'], reply_markup=await regions_buttons(lang))
     else:
-        await msg.answer("✅ Tasdiqlangan foydalanuvchi!" if lang == 'uz' else "✅ Подтвержденный пользователь!",
-                         reply_markup=ReplyKeyboardRemove())
         await msg.answer(resp_texts[lang]['question'], reply_markup=await regions_buttons(lang))
 
 
@@ -367,22 +481,22 @@ async def check_olympian(call, state):
     data = await state.get_data()
     pinfl = data.get('pinfl')
     lang = data.get('language')
-    olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
-    if olympian_result:
-        science = olympian_result[3]
-        result = olympian_result[8]
-        vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
-        if vaucher > 0:
-            await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
-            await state.update_data({
-                'vaucher': vaucher,
-                'certificateImage': olympian_result[7],
-                'result': result,
-                'olympian': True
-            })
-            await state.set_state(ApplicantRegisterStates.direction_type_lan)
-            await show_faculties(call, lang, data.get('fullname'), answer_text=True)
-            return
+    # olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
+    # if olympian_result:
+    #     science = olympian_result[3]
+    #     result = olympian_result[8]
+    #     vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
+    #     if vaucher > 0:
+    #         await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+    #         await state.update_data({
+    #             'vaucher': vaucher,
+    #             'certificateImage': olympian_result[7],
+    #             'result': result,
+    #             'olympian': True
+    #         })
+    #         await state.set_state(ApplicantRegisterStates.direction_type_lan)
+    #         await show_faculties(call, lang, data.get('firstName'), answer_text=True)
+    #         return
     await call.message.edit_text(OLYMPIAN_TEXTS[lang]['success'], reply_markup=None)
     await call.message.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
@@ -391,7 +505,7 @@ async def check_olympian(call, state):
 async def no_certificate(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.set_state(ApplicantRegisterStates.direction_type_lan)
-    await show_faculties(msg, data.get('language'), data.get('fullname'), answer_text=True)
+    await show_faculties(msg, data.get('language'), data.get('firstName'), answer_text=True)
 
 
 @dp.message_handler(state=ApplicantRegisterStates.certificate, content_types=ContentType.PHOTO)
@@ -401,7 +515,7 @@ async def send_certificate(msg: types.Message, state: FSMContext):
     await state.update_data({'certificateImage': image_url, 'olympian': True})
     data = await state.get_data()
     await state.set_state(ApplicantRegisterStates.direction_type_lan)
-    await show_faculties(msg, data.get('language'), data.get('fullname'), answer_text=True)
+    await show_faculties(msg, data.get('language'), data.get('firstName'), answer_text=True)
 
 
 @dp.message_handler(state=ApplicantRegisterStates.certificate, content_types=ContentType.ANY)
@@ -419,7 +533,7 @@ async def send_certificate(msg: types.Message, state: FSMContext):
 async def select_application_func(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     data = await state.get_data()
     language = data.get('language')
-    first_name = data.get('first_name')
+    first_name = data.get('firstName')
     direction_id = callback_data.get('direction_id')
     type_id = callback_data.get('type_id')
     edu_language = callback_data.get('edu_language')
@@ -437,16 +551,28 @@ async def select_application_func(call: types.CallbackQuery, callback_data: dict
 async def show_faculties(call, language, first_name, answer_text=False):
     resp_texts = {
         'uz': {
+            'one_resp_text': (
+                "Talabalik - oltin davr deyishadi. Shu davrni bizning universitetda o'tkazishga ahd qilganingizdan "
+                "xursandmiz. O'z navbatida biz ham sizga sifatli ta'lim berishga, kelajakda yetuk mutaxassis bo'lib "
+                "yetishingizga yordam berishga tayyormiz!"
+            ),
             'question': ("Hurmatli {}! Aytingchi, siz universitetimizdagi qaysi ta'lim yo'nalishiga hujjatlaringizni "
                          "topshirmoqchisiz?")
         },
         'ru': {
             'question': ("Уважаемый {}! Скажите, пожалуйста, на какое направление обучения в нашем университете вы "
-                         "собираетесь подавать документы?")
+                         "собираетесь подавать документы?"),
+            'one_resp_text': (
+                "Студенческая жизнь - золотой век, как говорят. Мы рады, что вы решили провести это время в нашем "
+                "университете. Со своей стороны, мы готовы предоставить вам качественное образование и помочь стать "
+                "выдающимся специалистом в будущем!"
+            ),
         }
     }
     if isinstance(call, types.Message):
         if answer_text:
+            await call.answer(resp_texts[language]['one_resp_text'].format(first_name),
+                              reply_markup=ReplyKeyboardRemove())
             await call.answer(resp_texts[language]['question'].format(first_name),
                               reply_markup=await all_faculties_inlines(language))
         else:
@@ -454,6 +580,8 @@ async def show_faculties(call, language, first_name, answer_text=False):
                                  reply_markup=await all_faculties_inlines(language))
     else:
         if answer_text:
+            await call.message.answer(resp_texts[language]['one_resp_text'].format(first_name),
+                                      reply_markup=ReplyKeyboardRemove())
             await call.message.answer(resp_texts[language]['question'].format(first_name),
                                       reply_markup=await all_faculties_inlines(language))
         else:
@@ -509,14 +637,6 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     certificateImage = data.get('certificateImage', None)
     result = data.get('result', 0)
     olympian = data.get('olympian', False)
-    regionName = data.get('regionName')
-    regionId = data.get('regionId')
-    cityName = data.get('cityName')
-    cityId = data.get('cityId')
-    if certificateImage:
-        await db.add_olympian_result(call.from_user.id, vaucher, certificateImage, result)
-    await db.submit_applicant(call.from_user.id, direction_id, type_id, edu_language, olympian, regionId, regionName,
-                              cityId, cityName)
 
     data.update({
         'directionOfEducationId': direction_id,
@@ -524,15 +644,16 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
         'typeOfEducationId': type_id,
         'typeOfEducationName': (await db.select_type_of_education(type_id))[1 if edu_language == 'uz' else 2],
         'languageOfEducationId': 1 if edu_language == 'uz' else 2,
-        'languageOfEducationName': edu_language
+        'languageOfEducationName': edu_language,
+        'olympian': olympian,
     })
+    if certificateImage:
+        await db.add_olympian_result(call.from_user.id, vaucher, certificateImage, result)
+    await db.submit_applicant(**data)
+
     resp = await submit_applicant_for_admission(**data)
     if resp.status_code == 404:
-        if lang == "uz":
-            resp_info = "Siz ariza topshirib bo'lgansiz! Ariza ma'lumotlarini Profilim bo'limida ko'rishingiz mumkin."
-        else:
-            resp_info = "Вы уже подали заявку! Вы можете увидеть информацию о заявке в разделе Профиль."
-        await call.message.answer(resp_info)
+        await applicant_not_found(call, state, lang)
         return
 
     if lang == "uz":
@@ -554,5 +675,44 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     await call.message.edit_text(resp_info, reply_markup=None)
     await asyncio.sleep(0.4)
     await call.message.answer(question, reply_markup=markup)
+    await state.reset_data()
+    await state.finish()
+
+
+async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang: str = "uz"):
+    application = await get_applicant_in_admission(call.from_user.id)
+    data = application.json()
+    data.update({
+        'firstName': data['firstName'],
+        'lastName': data['lastName'],
+        'middleName': data['middleName'],
+        'pinfl': data['jshir'],
+        'passportPhoto': data['passportPhoto'],
+        'passportBackPhoto': data['passportBackPhoto'],
+        'tgId': call.from_user.id,
+        'regionId': data['region']['id'],
+        'regionName': data['region']['name'],
+        'cityId': data['city']['id'],
+        'cityName': data['city']['name'],
+        'directionOfEducationId': data['educationFaculty']['id'],
+        'directionOfEducationName': data['educationFaculty']['name'],
+        'typeOfEducationId': data['educationType']['id'],
+        'typeOfEducationName': data['educationType']['name'],
+        'languageOfEducationId': data['educationLanguage']['id'],
+        'languageOfEducationName': 'uz' if data['educationLanguage']['id'] == 1 else 'ru',
+        'olympian': True if data.get('certificateNumber') else False,
+    })
+
+    if data.get('certificateNumber'):
+        await db.add_olympian_result(call.from_user.id, data.get('score'))
+    await db.submit_applicant(**data)
+
+    if lang == "uz":
+        resp_info = "Siz ariza topshirib bo'lgansiz! Ariza ma'lumotlarini Profilim bo'limida ko'rishingiz mumkin."
+    else:
+        resp_info = "Вы уже подали заявку! Вы можете увидеть информацию о заявке в разделе Профиль."
+    await call.message.edit_text(resp_info, reply_markup=None)
+    await call.message.answer("Menyu" if lang == "uz" else "Меню",
+                              reply_markup=menu_markup_uz if lang == "uz" else menu_markup_ru)
     await state.reset_data()
     await state.finish()
