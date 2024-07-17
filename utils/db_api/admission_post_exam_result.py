@@ -1,3 +1,4 @@
+import base64
 import warnings
 
 import aiohttp
@@ -27,6 +28,12 @@ async def post_request_with_bearer_token(url, data, token):
         await db.add_active_token(new_token)
         resp = requests.post(url, json=data, headers=headers, verify=False)
         return resp
+
+
+async def encode_image_to_base64(image_path):
+    with open(f"admin/media/{image_path}", 'rb') as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+    return encoded_string
 
 
 async def send_exam_result_for_admission(tgId, ball, examType=True, *args, **kwargs):
@@ -76,6 +83,8 @@ async def send_exam_result_for_admission(tgId, ball, examType=True, *args, **kwa
             "id": applicant['directionOfEducation_id'],
             "name": applicant['directionOfEducationName']
         },
+        "passportPhoto": encode_image_to_base64(applicant['passportPhotoFront']),  # base64
+        "passportBackPhoto": encode_image_to_base64(applicant['passportPhotoBack']),  # base64
         "ball": ball,
         "examType": examType,
         "photo": applicant['photo'],

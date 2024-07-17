@@ -246,7 +246,7 @@ class Database:
             "a.olympian, a.createdTime, a.applicationStatus, a.applicantNumber, a.birthDate, a.gender, a.photo, "
             "a.applicantId, a.regionId, a.regionName, a.cityId, a.cityName, "
             "e.nameUz AS directionOfEducationName, t.nameUz AS typeOfEducationName, "
-            "o.vaucher "
+            "o.vaucher, a.passportImageFront, a.passportImageBack "
             "FROM applicants a "
             "LEFT JOIN educational_areas e ON a.directionOfEducation_id = e.id "
             "LEFT JOIN types_of_education t ON a.typeOfEducation_id = t.id "
@@ -283,7 +283,9 @@ class Database:
                 'cityName': result[23],
                 'directionOfEducationName': result[24],
                 'typeOfEducationName': result[25],
-                'vaucher': result[26]
+                'vaucher': result[26],
+                'passportImageFront': result[27],
+                'passportImageBack': result[28]
             }
         return result
 
