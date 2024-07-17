@@ -100,9 +100,9 @@ class Applicant(models.Model):
     firstName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Ismi")
     lastName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Familiyasi")
     middleName = models.CharField(max_length=255, null=True, blank=True, verbose_name="Sha'rifi")
-    passportImageFront = models.ImageField(upload_to='passport/images/front/', null=True, blank=True,
+    passportImageFront = models.ImageField(max_length=255, upload_to='passport/images/front/', null=True, blank=True,
                                            verbose_name="Pasport old rasmi")
-    passportImageBack = models.ImageField(upload_to='passport/images/back/', null=True, blank=True,
+    passportImageBack = models.ImageField(max_length=255, upload_to='passport/images/back/', null=True, blank=True,
                                           verbose_name="Pasport orqa rasmi")
     birthPlace = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan joyi")
     birthCountry = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan davlati")
