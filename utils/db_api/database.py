@@ -310,7 +310,7 @@ class Database:
                                  passport_encrypted, birthDate_encrypted, gender, photo, 'DRAFT', olympian,
                                  datetime.now(), datetime.now())
 
-    async def submit_applicant(self, firstName, lastName, middleName, pinfl, passportPhoto,
+    async def submit_applicant(self, firstName, lastName, middleName, pinfl, passportPhotoFront,
                                passportBackPhoto, tgId, directionOfEducationId, typeOfEducationId,
                                languageOfEducationName, olympian, regionId, regionName, cityId, cityName, *args, **kwargs):
         pinfl_encrypted = encrypt_data(pinfl)
@@ -323,7 +323,7 @@ class Database:
             "WHERE tgId = %s;"
         )
         await self.execute_query(query, pinfl_encrypted, firstName, lastName, middleName,
-                                 passportPhoto, passportBackPhoto, directionOfEducationId,
+                                 passportPhotoFront, passportBackPhoto, directionOfEducationId,
                                  typeOfEducationId, languageOfEducationName, 'SUBMITTED', datetime.now(), olympian,
                                  regionId, regionName, cityId, cityName, tgId)
 

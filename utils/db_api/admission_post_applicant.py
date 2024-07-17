@@ -53,7 +53,7 @@ async def encode_image_to_base64(image_path):
 async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName, middleName, applicantNumber, birthDate,
                                          passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
-                                         languageOfEducationId, languageOfEducationName, passportPhoto,
+                                         languageOfEducationId, languageOfEducationName, passportPhotoFront,
                                          passportBackPhoto, regionId, regionName, cityId, cityName, vaucher=None,
                                          certificateImage=None, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
@@ -63,7 +63,7 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
     birth_date = birthDate.isoformat() + "T00:00:00Z"
 
     # Encode images to base64
-    passport_photo_base64 = await encode_image_to_base64(passportPhoto)
+    passport_photo_base64 = await encode_image_to_base64(passportPhotoFront)
     passport_back_photo_base64 = await encode_image_to_base64(passportBackPhoto)
 
     data = {
