@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 
 from aiogram import types
@@ -295,8 +296,17 @@ async def send_first_name(msg: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=ApplicantRegisterStates.first_name, content_types=ContentType.ANY)
-async def err_send_first_name(msg: types.Message):
+async def err_send_first_name(msg: types.Message, state: FSMContext):
     await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, ismingizni yuboring!",
+        'ru': "Пожалуйста, Отправьте своё имя!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
 
 
 @dp.message_handler(state=ApplicantRegisterStates.last_name, content_types=ContentType.TEXT)
@@ -313,8 +323,17 @@ async def send_last_name(msg: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=ApplicantRegisterStates.last_name, content_types=ContentType.ANY)
-async def err_send_last_name(msg: types.Message):
+async def err_send_last_name(msg: types.Message, state: FSMContext):
     await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, familiyangizni yuboring!",
+        'ru': "Пожалуйста, Отправьте своё фамилию!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
 
 
 @dp.message_handler(state=ApplicantRegisterStates.middle_name, content_types=ContentType.TEXT)
@@ -342,8 +361,17 @@ async def send_middle_name(msg: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=ApplicantRegisterStates.middle_name, content_types=ContentType.ANY)
-async def err_send_middle_name(msg: types.Message):
+async def err_send_middle_name(msg: types.Message, state: FSMContext):
     await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, sharifingizni yuboring!",
+        'ru': "Пожалуйста, Отправьте своё отчество!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
 
 
 @dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.TEXT, regexp=r'^\d{14}$')
@@ -351,13 +379,103 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     language = data.get('language')
     await state.update_data({'pinfl': msg.text})
-    await show_regions(msg, language)
+    PASSPORT_DATA = {
+        'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
+        'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
+    }
+    await msg.answer(PASSPORT_DATA[language])
+    # await show_regions(msg, language)
     await ApplicantRegisterStates.next()
 
 
 @dp.message_handler(state=ApplicantRegisterStates.pinfl, content_types=ContentType.ANY)
-async def err_send_pinfl(msg: types.Message):
+async def err_send_pinfl(msg: types.Message, state: FSMContext):
     await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': ("Iltimos, JSHSHIR (PINFL) yoki ID-kartangizdagi shaxsiy raqamingizni yuboring! Odatda JSHSHIR (PINFL) "
+               "yoki ID-kartangizdagi shaxsiy raqam 14ta raqamdan iborat bo'ladi."),
+        'ru': ("Пожалуйста, oтправьте JSHSHIR (PINFL) или персональный идентификационный номер, указанный на ID-карте! "
+               "Обычно ваш ПИНФЛ или личный номер на ID-карте состоит из 14 цифр.")
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.PHOTO)
+async def send_passport_front(msg: types.Message, state: FSMContext):
+    photo = msg.photo[-1]
+    directory = 'admin/media/passport/images/front/'
+    image_path = f'{directory}{photo.file_id}.jpg'
+    image_db_path = f'passport/images/front/{photo.file_id}.jpg'
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Download and save the image
+    await photo.download(destination_file=image_path)
+
+    # Update state with the image path
+    await state.update_data({'passportPhotoFront': image_db_path})
+    data = await state.get_data()
+    lang = data.get('language')
+    PASSPORT_DATA = {
+        'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
+        'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
+    }
+    await msg.answer(PASSPORT_DATA[lang])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_front, content_types=ContentType.ANY)
+async def err_send_passport_front(msg: types.Message, state: FSMContext):
+    await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, pasport yoki ID Kartangiz old qismining rasmini yuboring!",
+        'ru': "Пожалуйста, отправьте фото копии передней стороны вашего паспорта или ID-карты!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.PHOTO)
+async def send_passport_back(msg: types.Message, state: FSMContext):
+    photo = msg.photo[-1]
+    directory = 'admin/media/passport/images/back/'
+    image_path = f'{directory}{photo.file_id}.jpg'
+    image_db_path = f'passport/images/back/{photo.file_id}.jpg'
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Download and save the image
+    await photo.download(destination_file=image_path)
+    await state.update_data({'passportBackPhoto': image_db_path})
+    data = await state.get_data()
+    lang = data.get('language')
+    await show_regions(msg, lang)
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.passport_image_back, content_types=ContentType.ANY)
+async def err_send_passport_back(msg: types.Message, state: FSMContext):
+    await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, pasport yoki ID Kartangiz orqa qismining rasmini yuboring!",
+        'ru': "Пожалуйста, отправьте фото копии задней стороны вашего паспорта или ID-карты!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(1)
+    await err_msg.delete()
 
 
 async def show_regions(msg, lang):
@@ -616,9 +734,9 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     if certificateImage:
         await db.add_olympian_result(call.from_user.id, vaucher, certificateImage, result)
     await db.submit_applicant(**data)
+    await asyncio.sleep(0.5)
 
     resp = await submit_applicant_for_admission(**data)
-    print(resp)
 
     if resp.status_code == 404:
         await applicant_not_found(call, state, lang)
@@ -655,8 +773,10 @@ async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang
         'lastName': data['lastName'],
         'middleName': data['middleName'],
         'pinfl': data['jshir'],
-        'passportPhoto': data['passportPhoto'],
-        'passportBackPhoto': data['passportBackPhoto'],
+        # 'passportPhoto': data['passportPhoto'],
+        'passportPhoto': None,
+        # 'passportBackPhoto': data['passportBackPhoto'],
+        'passportBackPhoto': None,
         'tgId': call.from_user.id,
         'regionId': data['region']['id'],
         'regionName': data['region']['name'],

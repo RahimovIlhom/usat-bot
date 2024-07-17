@@ -1,9 +1,7 @@
 import warnings
-
-import aiohttp
 import requests
 from environs import Env
-
+import base64
 from utils.db_api import get_token
 
 env = Env()
@@ -46,17 +44,28 @@ async def send_olympian_result(url, data, token):
         requests.post(url, json=data, headers=headers, verify=False)
 
 
+async def encode_image_to_base64(image_path):
+    with open(f"admin/media/{image_path}", 'rb') as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+    return encoded_string
+
+
 async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName, middleName, applicantNumber, birthDate,
                                          passport, pinfl, phoneNumber, additionalPhoneNumber, directionOfEducationId,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
-                                         languageOfEducationId, languageOfEducationName, regionId, regionName,
-                                         cityId, cityName, vaucher=None,
+                                         languageOfEducationId, languageOfEducationName, passportPhoto,
+                                         passportBackPhoto, regionId, regionName, cityId, cityName, vaucher=None,
                                          certificateImage=None, *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
     active_token = await db.get_active_token()
     birth_date = birthDate.isoformat() + "T00:00:00Z"
+
+    # Encode images to base64
+    passport_photo_base64 = await encode_image_to_base64(passportPhoto)
+    passport_back_photo_base64 = await encode_image_to_base64(passportBackPhoto)
+
     data = {
         "id": applicantId,
         "applicantNumber": applicantNumber,
@@ -91,6 +100,8 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
             "id": directionOfEducationId,
             "name": directionOfEducationName
         },
+        "passportPhoto": passport_photo_base64,  # base64
+        "passportBackPhoto": passport_back_photo_base64,  # base64
         "status": "SUBMITTED",
         "typeAbiturient": "ABITURIENT",
         "stage": "COURSE_OF_STUDY"
