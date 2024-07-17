@@ -25,8 +25,7 @@ admin_menu_markup_uz = ReplyKeyboardMarkup(
 applications_menu_markup = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="📋 Ariza yuborganlar"),
-            KeyboardButton(text="✅ Arizasi tasdiqlanganlar"),
+            KeyboardButton(text="📋 Arizalar ro'yxati"),
         ],
         [
             KeyboardButton(text="◀️ Orqaga"),
