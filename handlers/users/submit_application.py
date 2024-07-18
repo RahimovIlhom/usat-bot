@@ -741,6 +741,18 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     if resp.status_code == 404:
         await applicant_not_found(call, state, lang)
         return
+    elif resp.status_code == 500:
+        TEXTS = {
+            "uz": "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring!",
+            "ru": "Произошла ошибка. Пожалуйста, попробуйте еще раз!",
+            "en": "Error occurred. Please try again!",
+        }
+        await state.reset_data()
+        await state.finish()
+        await call.message.edit_text(TEXTS[lang], reply_markup=None)
+        await call.message.answer("Menyu" if lang == 'uz' else "Меню",
+                                  reply_markup=menu_markup_uz if lang == 'uz' else menu_markup_ru)
+        return
 
     if lang == "uz":
         resp_info = f"✅ Hurmatli {first_name}! Arizangiz qabul qilindi!"
