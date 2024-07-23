@@ -12,8 +12,7 @@ from keyboards.inline import all_faculties_inlines, application_callback_data, t
 from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
 from utils import certificate_photo_link
-from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission, \
-    update_profile_applicant
+from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
 
 
 @dp.message_handler(IsPrivate(), text="📰 Universitetga hujjat topshirish")
@@ -263,7 +262,8 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
     if profile_exists != 'data_available':
         data.update({'birthDate': birthDate})
         if profile_exists == 'no_data':
-            resp = await update_profile_applicant(**data)
+            # resp = await update_profile_applicant(**data)
+            pass
         else:
             resp = await signup_applicant(**data)
         await msg.answer(TEXTS[language]['checking'])

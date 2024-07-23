@@ -44,6 +44,29 @@ async def submit_application(msg: types.Message, state: FSMContext):
             await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
             await state.set_state(ApplicantRegisterStates.first_name)
             return
+        else:
+            user_data_resp = await get_applicant_in_admission(msg.from_user.id)
+            if user_data_resp.status_code == 200:
+                status = user_data_resp.json().get('status')
+                await db.update_application_status(msg.from_user.id, status)
+                if status == 'REJECTED':
+                    await state.update_data({
+                        'tgId': applicant[0],
+                        'applicantNumber': applicant[15],
+                        'birthDate': applicant[16],
+                        'passport': applicant[7],
+                        'phoneNumber': applicant[1],
+                        'additionalPhoneNumber': applicant[2],
+                        'applicantId': applicant[19],
+                    })
+                    TEXTS = {
+                        "uz": "❗️ Ma'lumotlar yetarli emasligi sababli arizangiz rad etildi, qayta urinib ko'ring.",
+                        "ru": "❗️ Ваша заявка отклонена из-за недостатка данных, попробуйте снова."
+                    }
+                    await msg.answer(TEXTS[language])
+                    await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
+                    await state.set_state(ApplicantRegisterStates.first_name)
+                    return
 
         if language == "uz":
             await msg.answer("❗️ Siz allaqachon hujjat topshirib bo'lgansiz!")
