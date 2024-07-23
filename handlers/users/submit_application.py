@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 from datetime import datetime
 
 from aiogram import types
@@ -9,13 +10,16 @@ from aiogram.types import ContentType, ReplyKeyboardRemove, InputFile
 from aiogram.utils.exceptions import BadRequest
 
 from filters import IsPrivate
-from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru, no_olympian_markup
+from keyboards.default import phone_markup_uz, phone_markup_ru, menu_markup_uz, menu_markup_ru, no_olympian_markup, \
+    dtm_markup
 from keyboards.inline import all_faculties_inlines, application_callback_data, types_and_contracts, \
     choices_e_edu_language, regions_buttons, region_callback_data, cities_buttons, city_callback_data
 from loader import dp, db, db_olympian
 from states import ApplicantRegisterStates
 from utils import certificate_photo_link
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
+
+
 # from utils.misc.send_passport_telegraph import passport_photo_link
 
 
@@ -218,7 +222,7 @@ async def send_birth_date(msg: types.Message, state: FSMContext):
     elif user_data_resp.status_code == 404:
         resp = await signup_applicant(**data)
         await msg.answer(TEXTS[language]['checking'])
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
 
         if isinstance(resp, str):
             await msg.answer(resp)
@@ -305,7 +309,7 @@ async def err_send_first_name(msg: types.Message, state: FSMContext):
         'ru': "Пожалуйста, Отправьте своё имя!"
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -332,7 +336,7 @@ async def err_send_last_name(msg: types.Message, state: FSMContext):
         'ru': "Пожалуйста, Отправьте своё фамилию!"
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -370,7 +374,7 @@ async def err_send_middle_name(msg: types.Message, state: FSMContext):
         'ru': "Пожалуйста, Отправьте своё отчество!"
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -400,7 +404,7 @@ async def err_send_pinfl(msg: types.Message, state: FSMContext):
                "Обычно ваш ПИНФЛ или личный номер на ID-карте состоит из 14 цифр.")
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -440,7 +444,7 @@ async def err_send_passport_front(msg: types.Message, state: FSMContext):
         'ru': "Пожалуйста, отправьте фото копии передней стороны вашего паспорта или ID-карты!"
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -474,7 +478,7 @@ async def err_send_passport_back(msg: types.Message, state: FSMContext):
         'ru': "Пожалуйста, отправьте фото копии задней стороны вашего паспорта или ID-карты!"
     }
     err_msg = await msg.answer(TEXTS[language])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
@@ -526,8 +530,21 @@ async def show_cities_for_reg(call: types.CallbackQuery, callback_data: dict, st
             'cityName': city_name,
             'cityId': city_id
         })
+        TEXTS = {
+            'uz': {
+                'success': "Yashash manzilingiz qabul qilindi.",
+                'dtm': ("DTM balingizni yuboring. \n(Agar DTM balingiz mavjud bo'lmasa, quyidagi \"MAVJUD EMAS\" "
+                        "tugmani bosing)"),
+            },
+            'ru': {
+                'success': "Ваш адрес проживания принят.",
+                'dtm': "Отправьте ваш балл DTM. \n(Если у вас нет балла DTM, нажмите кнопку \"НЕ СУЩЕСТВУЕТ\" ниже)",
+            }
+        }
     await ApplicantRegisterStates.next()
-    await check_olympian(call, state)
+    await call.message.edit_text(TEXTS[language]['success'], reply_markup=None)
+    await call.message.answer(TEXTS[language]['dtm'], reply_markup=await dtm_markup(language))
+    # await check_olympian(call, state)
 
 
 @dp.message_handler(state=[ApplicantRegisterStates.city, ApplicantRegisterStates.region], content_types=ContentType.ANY)
@@ -540,37 +557,105 @@ async def error_city_send(msg: types.Message, state: FSMContext):
         'ru': "‼️ Пожалуйста, используйте кнопки выше!"
     }
     err_msg = await msg.answer(TEXTS[lang])
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await err_msg.delete()
 
 
-async def check_olympian(call, state):
+@dp.message_handler(state=ApplicantRegisterStates.dtm_score, content_types=ContentType.TEXT)
+async def dtm_send(msg: types.Message, state: FSMContext):
+    ball = msg.text
+    if ball in ["MAVJUD EMAS", "НЕ СУЩЕСТВУЕТ"]:
+        await ApplicantRegisterStates.certificate.set()
+        await check_olympian(msg, state)
+        return
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "DTM Abituriyent ID raqamini yuboring",
+        'ru': "Отправьте ID номер абитуриента DTM"
+    }
+
+    def is_decimal(s):
+        decimal_pattern = re.compile(r'^-?\d+(\.\d+)?$')
+        return bool(decimal_pattern.match(s))
+
+    if not is_decimal(ball):
+        await error_dtm_send(msg, state)
+        return
+
+    await state.update_data({
+        'dtmScore': ball
+    })
+    await msg.answer(TEXTS[language])
+    await ApplicantRegisterStates.next()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.dtm_score, content_types=ContentType.ANY)
+async def error_dtm_send(msg: types.Message, state: FSMContext):
+    await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, DTM balingizni yuboring yoki quyidagi tugmadan foydalaning!",
+        'ru': "Пожалуйста, отправьте ваш балл DTM или воспользуйтесь кнопкой ниже!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(2)
+    await err_msg.delete()
+
+
+@dp.message_handler(state=ApplicantRegisterStates.dtm_abiturient_number, content_types=ContentType.TEXT)
+async def dtm_number_send(msg: types.Message, state: FSMContext):
+    dtm_number = msg.text
+    if not dtm_number.isdigit() or len(dtm_number) != 7:
+        await error_dtm_number_send(msg, state)
+        return
+    await state.update_data({
+        'dtmAbiturientNumber': msg.text
+    })
+    await ApplicantRegisterStates.next()
+    await check_olympian(msg, state)
+
+
+@dp.message_handler(state=ApplicantRegisterStates.dtm_abiturient_number, content_types=ContentType.ANY)
+async def error_dtm_number_send(msg: types.Message, state: FSMContext):
+    await msg.delete()
+    data = await state.get_data()
+    language = data.get('language')
+    TEXTS = {
+        'uz': "Iltimos, DTM Abituriyent ID raqamini yuboring!",
+        'ru': "Пожалуйста, отправьте ID номер абитуриента DTM!"
+    }
+    err_msg = await msg.answer(TEXTS[language])
+    await asyncio.sleep(2)
+    await err_msg.delete()
+
+
+async def check_olympian(msg, state):
     OLYMPIAN_TEXTS = {
         'uz': {
             'olympian': "Siz \"Fan javohirlari\" olimpiadasi ishtirok etib, {science} fanidan {vaucher} so'mlik "
                         "vaucherga egasiz!",
-            'no_olympian': "Agar olimpiada sertifikatingiz bo'lsa uni yuboring. Sertifikatingiz mavjud bo'lmasa "
+            'no_olympian': "Agar olimpiada sertifikatingiz bo'lsa uni yuboring. \nSertifikatingiz mavjud bo'lmasa "
                            "quyidagi \"Mavjud emas\" tugmasini bosing.",
-            'success': "Yashash manzilingiz qabul qilindi."
         },
         'ru': {
             'olympian': "Вы являетесь участником олимпиады \"Fan javohirlari\" и обладателем ваучера на {vaucher} "
                         "сум по предмету {science}!",
-            'no_olympian': "Если у вас есть сертификат об участии в олимпиаде, отправьте его. Если у вас нет "
+            'no_olympian': "Если у вас есть сертификат об участии в олимпиаде, отправьте его. \nЕсли у вас нет "
                            "сертификата, нажмите кнопку \"Не имеется\".",
-            'success': "Ваш адрес проживания был принят."
         },
     }
     data = await state.get_data()
     pinfl = data.get('pinfl')
     lang = data.get('language')
-    olympian_result = await db_olympian.get_olympian(call.from_user.id, pinfl)
+    olympian_result = await db_olympian.get_olympian(msg.from_user.id, pinfl)
     if olympian_result:
         science = olympian_result[3]
         result = olympian_result[8]
         vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
         if vaucher > 0:
-            await call.message.edit_text(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+            await msg.answer(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
             await state.update_data({
                 'vaucher': vaucher,
                 'certificateImage': olympian_result[7],
@@ -578,11 +663,10 @@ async def check_olympian(call, state):
                 'olympian': True
             })
             await state.set_state(ApplicantRegisterStates.direction_type_lan)
-            await asyncio.sleep(2)
-            await show_faculties(call, lang, data.get('firstName'), answer_text=True)
+            await asyncio.sleep(1.5)
+            await show_faculties(msg, lang, data.get('firstName'), answer_text=True)
             return
-    await call.message.edit_text(OLYMPIAN_TEXTS[lang]['success'], reply_markup=None)
-    await call.message.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
+    await msg.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
 
 @dp.message_handler(state=ApplicantRegisterStates.certificate, text=['Mavjud emas', 'Не имеется'])
@@ -785,10 +869,8 @@ async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang
         'lastName': data['lastName'],
         'middleName': data['middleName'],
         'pinfl': data['jshir'],
-        # 'passportPhoto': data['passportPhoto'],
-        'passportPhoto': None,
-        # 'passportBackPhoto': data['passportBackPhoto'],
-        'passportBackPhoto': None,
+        'passportPhoto': data['passportPhoto'],
+        'passportBackPhoto': data['passportBackPhoto'],
         'tgId': call.from_user.id,
         'regionId': data['region']['id'],
         'regionName': data['region']['name'],
@@ -800,10 +882,12 @@ async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang
         'typeOfEducationName': data['educationType']['name'],
         'languageOfEducationId': data['educationLanguage']['id'],
         'languageOfEducationName': 'uz' if data['educationLanguage']['id'] == 1 else 'ru',
+        'dtmScore': data['dtmScore'],
+        'dtmAbiturientNumber': data['dtmAbiturientNumber'],
         'olympian': True if data.get('certificateNumber') else False,
     })
 
-    if data.get('certificateNumber'):
+    if data.get('certificateNumber', None):
         await db.add_olympian_result(call.from_user.id, data.get('score'))
     await db.submit_applicant(**data)
 

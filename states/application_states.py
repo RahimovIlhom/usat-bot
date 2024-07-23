@@ -14,5 +14,7 @@ class ApplicantRegisterStates(StatesGroup):
     passport_image_back = State()
     region = State()
     city = State()
+    dtm_score = State()
+    dtm_abiturient_number = State()
     certificate = State()
     direction_type_lan = State()

@@ -314,20 +314,21 @@ class Database:
 
     async def submit_applicant(self, firstName, lastName, middleName, pinfl, passportPhotoFront,
                                passportBackPhoto, tgId, directionOfEducationId, typeOfEducationId,
-                               languageOfEducationName, olympian, regionId, regionName, cityId, cityName, *args, **kwargs):
+                               languageOfEducationName, olympian, regionId, regionName, cityId, cityName,
+                               dtmScore=None, dtmAbiturientNumber=None, *args, **kwargs):
         pinfl_encrypted = encrypt_data(pinfl)
         query = (
             "UPDATE applicants SET "
             "pinfl = %s, firstName = %s, lastName = %s, middleName = %s, passportImageFront = %s, "
             "passportImageBack = %s, directionOfEducation_id = %s, typeOfEducation_id = %s, languageOfEducation = %s, "
             "applicationStatus = %s, updatedTime = %s, olympian = %s, regionId = %s, regionName = %s, cityId = %s, "
-            "cityName = %s "
+            "cityName = %s, dtmScore = %s, dtmAbiturientNumber = %s "
             "WHERE tgId = %s;"
         )
         await self.execute_query(query, pinfl_encrypted, firstName, lastName, middleName,
                                  passportPhotoFront, passportBackPhoto, directionOfEducationId,
                                  typeOfEducationId, languageOfEducationName, 'SUBMITTED', datetime.now(), olympian,
-                                 regionId, regionName, cityId, cityName, tgId)
+                                 regionId, regionName, cityId, cityName, dtmScore, dtmAbiturientNumber, tgId)
 
     async def add_olympian_result(self, olympianId, vaucher, certificateImage=None, result=None, **kwargs):
         query = "INSERT INTO olympians (applicant_id, result, vaucher, certificateImage) VALUES (%s, %s, %s, %s);"

@@ -55,7 +55,7 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
                                          directionOfEducationName, typeOfEducationId, typeOfEducationName,
                                          languageOfEducationId, languageOfEducationName, passportPhotoFront,
                                          passportBackPhoto, regionId, regionName, cityId, cityName, vaucher=None,
-                                         certificateImage=None, *args, **kwargs):
+                                         certificateImage=None, dtmScore=None, dtmAbiturientNumber=None,  *args, **kwargs):
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
@@ -77,6 +77,8 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
         "jshir": pinfl,
         "mobilePhone": phoneNumber.replace("+", ""),
         "homePhone": additionalPhoneNumber.replace('+', ''),
+        'dtmScore': dtmScore,
+        'dtmAbiturientNumber': dtmAbiturientNumber,
         "country": {
             "id": 1,
         },
@@ -102,9 +104,10 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
         },
         "passportPhoto": passport_photo_base64,  # base64
         "passportBackPhoto": passport_back_photo_base64,  # base64
-        "status": "SUBMITTED",
+        "needChangePhoto": True,
+        "status": "SUBMITTED",  # DRAFT, SUBMITTED
         "typeAbiturient": "ABITURIENT",
-        "stage": "COURSE_OF_STUDY"
+        "stage": "COURSE_OF_STUDY"  # REGISTRATION, COURSE_OF_STUDY
     }
     if vaucher:
         data.update({

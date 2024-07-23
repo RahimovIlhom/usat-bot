@@ -104,6 +104,8 @@ class Applicant(models.Model):
                                            verbose_name="Pasport old rasmi")
     passportImageBack = models.ImageField(max_length=255, upload_to='passport/images/back/', null=True, blank=True,
                                           verbose_name="Pasport orqa rasmi")
+    dtmScore = models.DecimalField(max_digits=5, null=True, blank=True, decimal_places=2, verbose_name="DTM natijasi")
+    dtmAbiturientNumber = models.CharField(max_length=255, null=True, blank=True, verbose_name="DTM abituriyent raqami")
     birthPlace = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan joyi")
     birthCountry = models.CharField(max_length=255, null=True, blank=True, verbose_name="Tug'ilgan davlati")
     nationality = models.CharField(max_length=255, null=True, blank=True, verbose_name="Millati")
