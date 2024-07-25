@@ -384,15 +384,15 @@ class Database:
     async def select_questions_for_test(self, test_id, count=None):
         if count:
             # Randomly select `count` number of questions
-            query = ("SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s AND active = "
-                     "TRUE;")
+            query = ("SELECT id, test_id, image, question, trueResponse, response1, response2, response3, response4 "
+                     "FROM questions WHERE test_id = %s AND active = TRUE;")
             all_questions = await self.execute_query(query, test_id, fetchall=True)
             random_questions = random.sample(all_questions, min(count, len(all_questions)))
             return random_questions
         else:
             # Select all questions
-            query = ("SELECT id, test_id, image, question, trueResponse FROM questions WHERE test_id = %s AND active = "
-                     "TRUE;")
+            query = ("SELECT id, test_id, image, question, trueResponse, response1, response2, response3, response4 "
+                     "FROM questions WHERE test_id = %s AND active = TRUE;")
             return await self.execute_query(query, test_id, fetchall=True)
 
     async def select_question(self, ques_id):

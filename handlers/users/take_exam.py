@@ -147,7 +147,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
             reply_markup=ReplyKeyboardRemove()
         )
 
-        # await countdown(call, 10)
+        await countdown(call, 10)
         await msg.delete()
         await science_all_questions(call, {}, state)
 
@@ -221,7 +221,7 @@ async def handle_new_test(call, state, language_text, true_responses, sciences, 
         else f"❕ Подготовьтесь, тест {science[1]} начнется через 10 секунд.",
         reply_markup=ReplyKeyboardRemove()
     )
-    # await countdown(call, 10)
+    await countdown(call, 10)
     await msg.delete()
     tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
     if not tests:
