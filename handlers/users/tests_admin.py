@@ -194,8 +194,9 @@ async def no_send_image_question(msg: Message, state: FSMContext):
     data = await state.get_data()
     await state.update_data({'image': None})
     lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] else f"🇷🇺 Rus tilida, "
-    text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
-            "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
+    # text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
+    #         "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
+    text = "savolni yuboring"
     await msg.answer(lang_text + text, reply_markup=ReplyKeyboardRemove())
     await AddQuestionStates.next()
 
@@ -207,21 +208,68 @@ async def send_image_question(msg: Message, state: FSMContext):
     image_url = await question_photo_link(photo)
     await state.update_data({'image': image_url})
     lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] else f"🇷🇺 Rus tilida, "
-    text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
-            "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
+    # text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
+    #         "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
+    text = "savolni yuboring"
     await msg.answer(lang_text + text, reply_markup=ReplyKeyboardRemove())
     await AddQuestionStates.next()
 
 
+# @dp.message_handler(state=AddQuestionStates.question, content_types=ContentType.TEXT)
+# async def send_question_text(msg: Message, state: FSMContext):
+#     question_text = msg.text[0:-1:1]
+#     true_resp_dict = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
+#     true_resp = true_resp_dict.get(msg.text[-1], None)
+#     if not true_resp:
+#         await msg.answer("‼️ Xatolik, to'g'ri javob ko'rsatilmagan. Iltimos, savolni qayta yuboring:")
+#         return
+#     await state.update_data({'question': question_text, 'trueResponse': true_resp})
+#     data = await state.get_data()
+#     resp = await db.add_or_update_question(**data)
+#     if resp == 'add':
+#         await msg.answer("✅ Savol muvaffaqiyatli qo'shildi!", reply_markup=tests_menu_markup)
+#     else:
+#         await msg.answer("✅ Savol muvaffaqiyatli o'zgartirildi!", reply_markup=tests_menu_markup)
+#     await state.finish()
+#     await show_test(call=msg, test_id=data.get('test_id'))
+
+
 @dp.message_handler(state=AddQuestionStates.question, content_types=ContentType.TEXT)
 async def send_question_text(msg: Message, state: FSMContext):
-    question_text = msg.text[0:-1:1]
-    true_resp_dict = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
-    true_resp = true_resp_dict.get(msg.text[-1], None)
-    if not true_resp:
-        await msg.answer("‼️ Xatolik, to'g'ri javob ko'rsatilmagan. Iltimos, savolni qayta yuboring:")
-        return
-    await state.update_data({'question': question_text, 'trueResponse': true_resp})
+    question_text = msg.text
+    await state.update_data({'question': question_text, 'trueResponse': 'a'})
+    await msg.answer("1-variantni yuboring (1-varint to'g'ri javob sifatida qanul qilinadi!)")
+    await AddQuestionStates.next()
+
+
+@dp.message_handler(state=AddQuestionStates.response1, content_types=ContentType.TEXT)
+async def send_question_response1(msg: Message, state: FSMContext):
+    true_resp = msg.text
+    await state.update_data({'response1': true_resp})
+    await msg.answer("2-variantni yuboring")
+    await AddQuestionStates.next()
+
+
+@dp.message_handler(state=AddQuestionStates.response2, content_types=ContentType.TEXT)
+async def send_question_response1(msg: Message, state: FSMContext):
+    true_resp = msg.text
+    await state.update_data({'response2': true_resp})
+    await msg.answer("3-variantni yuboring")
+    await AddQuestionStates.next()
+
+
+@dp.message_handler(state=AddQuestionStates.response3, content_types=ContentType.TEXT)
+async def send_question_response1(msg: Message, state: FSMContext):
+    true_resp = msg.text
+    await state.update_data({'response3': true_resp})
+    await msg.answer("4-variantni yuboring")
+    await AddQuestionStates.next()
+
+
+@dp.message_handler(state=AddQuestionStates.response4, content_types=ContentType.TEXT)
+async def send_question_response1(msg: Message, state: FSMContext):
+    true_resp = msg.text
+    await state.update_data({'response4': true_resp})
     data = await state.get_data()
     resp = await db.add_or_update_question(**data)
     if resp == 'add':
@@ -250,7 +298,11 @@ async def show_question_for_test(call, ques_id):
     result = await db.select_question(ques_id)
     text = (f"Fan: {result[7]}\n"
             f"Savol tili: {'🇺🇿 Uz' if result[6] == 'uz' else '🇷🇺 Ru'}\n\n"
-            f"Savol:\n{result[3].replace('<', '&lt')}\n\n"
+            f"Savol:\n{result[3].replace('<', '&lt')}\n"
+            f"A) {result[8].replace('<', '&lt')}\n"
+            f"B) {result[9].replace('<', '&lt')}\n"
+            f"C) {result[10].replace('<', '&lt')}\n"
+            f"D) {result[11].replace('<', '&lt')}\n\n"
             f"To'g'ri javob: {result[4]}")
     if result[2]:
         try:

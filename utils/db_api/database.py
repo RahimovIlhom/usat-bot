@@ -397,7 +397,8 @@ class Database:
 
     async def select_question(self, ques_id):
         query = """
-            SELECT q.id, q.test_id, q.image, q.question, q.trueResponse, t.science_id, t.language, s.nameUz
+            SELECT q.id, q.test_id, q.image, q.question, q.trueResponse, t.science_id, t.language, s.nameUz, 
+            q.response1, q.response2, q.response3, q.response4
             FROM questions q
             JOIN tests t ON q.test_id = t.id
             JOIN sciences s ON t.science_id = s.id
@@ -405,15 +406,18 @@ class Database:
             """
         return await self.execute_query(query, ques_id, fetchone=True)
 
-    async def add_or_update_question(self, test_id, image, question, trueResponse, question_id=None, *args, **kwargs):
+    async def add_or_update_question(self, test_id, image, question, trueResponse, response1=None, response2=None,
+                                     response3=None, response4=None, question_id=None, *args, **kwargs):
         if question_id:
-            query = "UPDATE questions SET test_id = %s, image = %s, question = %s, trueResponse = %s WHERE id = %s;"
-            await self.execute_query(query, test_id, image, question, trueResponse, question_id)
+            query = ("UPDATE questions SET test_id = %s, image = %s, question = %s, trueResponse = %s, "
+                     "response1 = %s, response2 = %s, response3 = %s, response4 = %s WHERE id = %s;")
+            await self.execute_query(query, test_id, image, question, trueResponse, response1, response2,
+                                     response3, response4, question_id)
             return 'update'
         else:
-            query = ("INSERT INTO questions (test_id, image, question, trueResponse, active) "
-                     "VALUES (%s, %s, %s, %s, TRUE);")
-            await self.execute_query(query, test_id, image, question, trueResponse)
+            query = ("INSERT INTO questions (test_id, image, question, trueResponse, active, response1, response2, response3, response4) "
+                     "VALUES (%s, %s, %s, %s, TRUE, %s, %s, %s, %s);")
+            await self.execute_query(query, test_id, image, question, trueResponse, response1, response2, response3, response4)
             test_app = await self.select_test(test_id)
             if test_app[2] == test_app[6]:
                 query_test = "UPDATE tests SET isActive = %s WHERE id = %s"

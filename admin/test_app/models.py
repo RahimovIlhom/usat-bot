@@ -34,8 +34,12 @@ class Question(models.Model):
                              verbose_name="Savol testi")
     image = models.CharField(max_length=255, null=True, blank=True, verbose_name="Savol rasmi")
     question = models.TextField(verbose_name="Savol matni")
-    trueResponse = models.CharField(max_length=1, choices=TEST_RESPONSES, verbose_name="To'g'ri javob")
+    trueResponse = models.CharField(max_length=1, choices=TEST_RESPONSES, default='a', verbose_name="To'g'ri javob")
     active = models.BooleanField(default=True, verbose_name="Savolning aktivligi")
+    response1 = models.CharField(max_length=255, null=True, blank=True, verbose_name="Javob 1")
+    response2 = models.CharField(max_length=255, null=True, blank=True, verbose_name="Javob 2")
+    response3 = models.CharField(max_length=255, null=True, blank=True, verbose_name="Javob 3")
+    response4 = models.CharField(max_length=255, null=True, blank=True, verbose_name="Javob 4")
 
     def __str__(self):
         return f"{self.test}: {self.pk}"
@@ -52,7 +56,7 @@ class ExamResult(models.Model):
     userResponses = models.JSONField(null=True, blank=True, verbose_name="Foydalanuvchi javoblari")
     trueResponseCount = models.PositiveIntegerField(verbose_name="To'g'ri yechgan savollar soni")
     result = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Natijasi (%)")
-    totalScore = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,verbose_name="Umumiy ball")
+    totalScore = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Umumiy ball")
     intervalTime = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
                                        verbose_name="Interval (daqiqa)")
     createdTime = models.DateTimeField(auto_now_add=True, verbose_name="Natijaga ochilgan sana")
