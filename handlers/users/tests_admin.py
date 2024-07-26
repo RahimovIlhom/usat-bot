@@ -177,7 +177,7 @@ async def delete_question_func(call, sc_id, test_id, ques_id):
 async def add_or_set_question(call, test_id, state, question_id=None):
     test = await db.select_test(test_id)
     await state.set_data({'test_id': test_id, 'question_id': question_id, 'language': test[3]})
-    lang_text = f"🇺🇿 O'zbek tilida, " if test[3] else f"🇷🇺 Rus tilida, "
+    lang_text = f"🇺🇿 O'zbek tilida, " if test[3] == 'uz' else f"🇷🇺 Rus tilida, "
     if question_id:
         if call.message.text:
             await call.message.edit_text(call.message.text + "\n\n✏️ Savolni o'zgartirish", reply_markup=None)
@@ -193,7 +193,7 @@ async def add_or_set_question(call, test_id, state, question_id=None):
 async def no_send_image_question(msg: Message, state: FSMContext):
     data = await state.get_data()
     await state.update_data({'image': None})
-    lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] else f"🇷🇺 Rus tilida, "
+    lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] == 'uz' else f"🇷🇺 Rus tilida, "
     # text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
     #         "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
     text = "savolni yuboring"
@@ -207,7 +207,7 @@ async def send_image_question(msg: Message, state: FSMContext):
     photo = msg.photo[-1]
     image_url = await question_photo_link(photo)
     await state.update_data({'image': image_url})
-    lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] else f"🇷🇺 Rus tilida, "
+    lang_text = f"🇺🇿 O'zbek tilida, " if data['language'] == 'uz' else f"🇷🇺 Rus tilida, "
     # text = ("savolni yuboring (variantlari bilan!)\n\nOxirgi qismda to'g'ri variantni raqam orqali "
     #         "ifodalang.\nTo'g'ri javob raqamlari: 1 - A, 2 - B, 3 - C, 4 - D.")
     text = "savolni yuboring"
