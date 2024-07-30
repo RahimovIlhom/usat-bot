@@ -315,12 +315,16 @@ async def ask_question(call, language, question, number):
     image = question[2]
     question_text = f"{number}-savol.\n\n{question[3].replace('<', '&lt')}" if language == 'uz' else \
         f"{number}-й вопрос.\n\n{question[3].replace('<', '&lt')}"
+    if language == 'uz':
+        question_text += f""
     try:
         if image:
             await call.message.answer_photo(image, question_text, reply_markup=await all_responses_inlines(language))
         else:
             await call.message.answer(question_text, reply_markup=await all_responses_inlines(language))
     except BadRequest:
+        if image:
+            await call.message.answer_photo(image)
         await call.message.answer(question_text, reply_markup=await all_responses_inlines(language))
 
 

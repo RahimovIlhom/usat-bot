@@ -671,23 +671,23 @@ async def check_olympian(msg, state):
     data = await state.get_data()
     pinfl = data.get('pinfl')
     lang = data.get('language')
-    # olympian_result = await db_olympian.get_olympian(msg.from_user.id, pinfl)
-    # if olympian_result:
-    #     science = olympian_result[3]
-    #     result = olympian_result[8]
-    #     vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
-    #     if vaucher > 0:
-    #         await msg.answer(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
-    #         await state.update_data({
-    #             'vaucher': vaucher,
-    #             'certificateImage': olympian_result[7],
-    #             'result': result,
-    #             'olympian': True
-    #         })
-    #         await state.set_state(ApplicantRegisterStates.direction_type_lan)
-    #         await asyncio.sleep(1.5)
-    #         await show_faculties(msg, lang, data.get('firstName'), answer_text=True)
-    #         return
+    olympian_result = await db_olympian.get_olympian(msg.from_user.id, pinfl)
+    if olympian_result:
+        science = olympian_result[3]
+        result = olympian_result[8]
+        vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
+        if vaucher > 0:
+            await msg.answer(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+            await state.update_data({
+                'vaucher': vaucher,
+                'certificateImage': olympian_result[7],
+                'result': result,
+                'olympian': True
+            })
+            await state.set_state(ApplicantRegisterStates.direction_type_lan)
+            await asyncio.sleep(1.5)
+            await show_faculties(msg, lang, data.get('firstName'), answer_text=True)
+            return
     await msg.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
 
