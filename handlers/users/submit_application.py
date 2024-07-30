@@ -20,9 +20,6 @@ from utils import certificate_photo_link
 from utils.db_api import signup_applicant, get_applicant_in_admission, submit_applicant_for_admission
 
 
-# from utils.misc.send_passport_telegraph import passport_photo_link
-
-
 @dp.message_handler(IsPrivate(), Text(equals=["📰 Universitetga hujjat topshirish", "📰 Подать документы в университет"]))
 async def submit_application(msg: types.Message, state: FSMContext):
     language = 'uz' if msg.text == '📰 Universitetga hujjat topshirish' else 'ru'
@@ -87,9 +84,11 @@ async def send_contact(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.update_data({'phoneNumber': msg.contact.phone_number})
     if data.get('language') == 'uz':
-        info = "Qo'shimcha telefon raqam yuboring."
+        info = ("Iltimos, yana bitta qo’shimcha telefon raqamini yuboring. Bunda onangiz yoki otangizni telefon raqami "
+                "bo’lishi maqsadga muvofiq.")
     else:
-        info = "Отправьте дополнительный номер телефона."
+        info = ("Пожалуйста, отправьте еще один дополнительный номер телефона. Лучше всего указать номер телефона "
+                "вашей мамы или папы.")
     await msg.answer(info, reply_markup=ReplyKeyboardRemove())
     await ApplicantRegisterStates.next()
 
@@ -407,8 +406,8 @@ async def send_pinfl(msg: types.Message, state: FSMContext):
     language = data.get('language')
     await state.update_data({'pinfl': msg.text})
     PASSPORT_DATA = {
-        'uz': "Pasport yoki ID Kartangiz old qismining nusxasini yuboring.",
-        'ru': "Отправьте копию лицевой стороны вашего паспорта или ID-карты."
+        'uz': "Pasport yoki ID Kartangiz old qismining rasmini yuboring.",
+        'ru': "Отправьте, пожалуйста, фотографию передней стороны вашего паспорта или ID-карты."
     }
     await msg.answer(PASSPORT_DATA[language])
     # await show_regions(msg, language)
@@ -450,8 +449,8 @@ async def send_passport_front(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get('language')
     PASSPORT_DATA = {
-        'uz': "Pasport yoki ID Kartangiz orqa qismining nusxasini yuboring.",
-        'ru': "Отправьте копию оборотной стороны вашего паспорта или ID-карты."
+        'uz': "Pasport yoki ID Kartangiz orqa qismining rasmini yuboring.",
+        'ru': "Отправьте пожалуйста, фотографию задней стороны вашего паспорта или ID-карты."
     }
     await msg.answer(PASSPORT_DATA[lang])
     await ApplicantRegisterStates.next()
@@ -657,42 +656,42 @@ async def error_dtm_number_send(msg: types.Message, state: FSMContext):
 async def check_olympian(msg, state):
     OLYMPIAN_TEXTS = {
         'uz': {
-            'olympian': "Siz \"Fan javohirlari\" olimpiadasi ishtirok etib, {science} fanidan {vaucher} so'mlik "
-                        "vaucherga egasiz!",
-            'no_olympian': "Agar olimpiada sertifikatingiz bo'lsa uni yuboring. \nSertifikatingiz mavjud bo'lmasa "
-                           "quyidagi \"Mavjud emas\" tugmasini bosing.",
+            'olympian': ("Siz \"Fan javohirlari\" olimpiadasi ishtirok etib, {science} fanidan {vaucher} so'mlik "
+                         "vaucherga egasiz!"),
+            'no_olympian': ("Agar olimpiadada qo’lga kiritgan sertifikatingiz bo'lsa, rasmini yuboring. "
+                            "\nSertifikatingiz mavjud bo'lmasa quyidagi \"MAVJUD EMAS\" tugmasini bosing."),
         },
         'ru': {
-            'olympian': "Вы являетесь участником олимпиады \"Fan javohirlari\" и обладателем ваучера на {vaucher} "
-                        "сум по предмету {science}!",
-            'no_olympian': "Если у вас есть сертификат об участии в олимпиаде, отправьте его. \nЕсли у вас нет "
-                           "сертификата, нажмите кнопку \"Не имеется\".",
+            'olympian': ("Вы являетесь участником олимпиады \"Fan javohirlari\" и обладателем ваучера на {vaucher} "
+                         "сум по предмету {science}!"),
+            'no_olympian': ("Если у вас есть сертификат, полученный на олимпиаде, отправьте его фотографию. \n"
+                            "Если сертификата нет, нажмите кнопку «НЕ ИМЕЕТСЯ».")
         },
     }
     data = await state.get_data()
     pinfl = data.get('pinfl')
     lang = data.get('language')
-    olympian_result = await db_olympian.get_olympian(msg.from_user.id, pinfl)
-    if olympian_result:
-        science = olympian_result[3]
-        result = olympian_result[8]
-        vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
-        if vaucher > 0:
-            await msg.answer(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
-            await state.update_data({
-                'vaucher': vaucher,
-                'certificateImage': olympian_result[7],
-                'result': result,
-                'olympian': True
-            })
-            await state.set_state(ApplicantRegisterStates.direction_type_lan)
-            await asyncio.sleep(1.5)
-            await show_faculties(msg, lang, data.get('firstName'), answer_text=True)
-            return
+    # olympian_result = await db_olympian.get_olympian(msg.from_user.id, pinfl)
+    # if olympian_result:
+    #     science = olympian_result[3]
+    #     result = olympian_result[8]
+    #     vaucher = (2000000 if result >= 26 else 1500000 if result >= 20 else 1000000) if result >= 10 else 0
+    #     if vaucher > 0:
+    #         await msg.answer(OLYMPIAN_TEXTS[lang]['olympian'].format(science=science, vaucher=vaucher))
+    #         await state.update_data({
+    #             'vaucher': vaucher,
+    #             'certificateImage': olympian_result[7],
+    #             'result': result,
+    #             'olympian': True
+    #         })
+    #         await state.set_state(ApplicantRegisterStates.direction_type_lan)
+    #         await asyncio.sleep(1.5)
+    #         await show_faculties(msg, lang, data.get('firstName'), answer_text=True)
+    #         return
     await msg.answer(OLYMPIAN_TEXTS[lang]['no_olympian'], reply_markup=await no_olympian_markup(lang))
 
 
-@dp.message_handler(state=ApplicantRegisterStates.certificate, text=['Mavjud emas', 'Не имеется'])
+@dp.message_handler(state=ApplicantRegisterStates.certificate, text=['MAVJUD EMAS', 'НЕ ИМЕЕТСЯ'])
 async def no_certificate(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.set_state(ApplicantRegisterStates.direction_type_lan)
@@ -764,6 +763,7 @@ async def show_faculties(call, language, first_name, answer_text=False):
         if answer_text:
             await call.answer(resp_texts[language]['one_resp_text'].format(first_name),
                               reply_markup=ReplyKeyboardRemove())
+            await asyncio.sleep(3)
             await call.answer(resp_texts[language]['question'].format(first_name),
                               reply_markup=await all_faculties_inlines(language))
         else:
@@ -773,6 +773,7 @@ async def show_faculties(call, language, first_name, answer_text=False):
         if answer_text:
             await call.message.answer(resp_texts[language]['one_resp_text'].format(first_name),
                                       reply_markup=ReplyKeyboardRemove())
+            await asyncio.sleep(3)
             await call.message.answer(resp_texts[language]['question'].format(first_name),
                                       reply_markup=await all_faculties_inlines(language))
         else:
@@ -869,6 +870,7 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
                     "qilinganingiz haqida xabar chiqadi. Shu zahotiyoq shartnomangizni ko'chirib olishingiz mumkin "
                     "bo'ladi. Yetarlicha ball to'play olmasangiz, yana bir bor urinib ko'rishingizga imkoniyat "
                     "beriladi. Sizga omad tilaymiz!")
+        success = "Iltimos arizangiz qabul qilinishini kuting, tez orada sizga xabar beramiz!"
         markup = menu_markup_uz
     else:
         resp_info = f"✅ Уважаемый {first_name}! Ваша заявка принята!"
@@ -876,12 +878,18 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
                     "Если вы наберете достаточное количество баллов по результатам теста, вам будет сообщено о "
                     "зачислении на учебу. Сразу после этого вы сможете скачать ваш контракт. Если набранных баллов "
                     "не хватит, вам будет предоставлена возможность попробовать еще раз. Желаем вам удачи!")
+        success = "Пожалуйста, дождитесь обработки вашего заявления, мы свяжемся с вами в ближайшее время!"
         markup = menu_markup_ru
+    dtm_score = data.get('dtmScore', None)
     await call.message.edit_text(resp_info, reply_markup=None)
-    await asyncio.sleep(0.4)
-    await call.message.answer(question, reply_markup=markup)
+    await asyncio.sleep(1)
     await state.reset_data()
     await state.finish()
+    if dtm_score:
+        if float(dtm_score) > 50.0:
+            await call.message.answer(success, reply_markup=markup)
+            return
+    await call.message.answer(question, reply_markup=markup)
 
 
 async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang: str = "uz"):
@@ -892,7 +900,7 @@ async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang
         'lastName': data['lastName'],
         'middleName': data['middleName'],
         'pinfl': data['jshir'],
-        'passportPhoto': data['passportPhoto'],
+        'passportPhotoFront': data['passportPhoto'],
         'passportBackPhoto': data['passportBackPhoto'],
         'tgId': call.from_user.id,
         'regionId': data['region']['id'],

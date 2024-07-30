@@ -41,7 +41,7 @@ async def bot_start(message: types.Message, state: FSMContext):
                   "yerda siz universitetga hujjat topshirishingiz, onlayn imtihon topshirishingiz, shartnomani "
                   "olishingiz, universitet, ta'lim yo'nalishlari va kontrakt summalari haqida ma'lumot olishingiz, "
                   "ma'muriyatga murojaatlaringizni yuborishingiz mumkin.")
-        answer += ("\n\nПривет! Добро пожаловать в официальный Telegram-бот Университета науки и технологий. Здесь вы "
+        answer += ("\n\nЗдравствуйте! Добро пожаловать в официальный Telegram-бот Университета науки и технологий. Здесь вы "
                    "можете подать документы в университет, пройти онлайн экзамен, получить контракт, информацию об "
                    "университете, направлениях обучения и суммах контракта, а также направить свои обращения "
                    "администрации.")
