@@ -47,13 +47,22 @@ async def submit_application(msg: types.Message, state: FSMContext):
                 status = user_data_resp.json().get('status')
                 await db.update_application_status(msg.from_user.id, status)
                 if status == 'REJECTED':
-                    if language == "uz":
-                        await msg.answer("Pastdagi tugmani bosib, telefon raqamingizni yuboring.", reply_markup=phone_markup_uz)
-                    else:
-                        await msg.answer("Нажмите кнопку ниже и отправьте свой номер телефона.", reply_markup=phone_markup_ru)
-
-                    await state.set_state(ApplicantRegisterStates.phone)
-                    await state.update_data({'tgId': msg.from_user.id})
+                    await state.update_data({
+                        'tgId': applicant[0],
+                        'applicantNumber': applicant[15],
+                        'birthDate': applicant[16],
+                        'passport': applicant[7],
+                        'phoneNumber': applicant[1],
+                        'additionalPhoneNumber': applicant[2],
+                        'applicantId': applicant[19],
+                    })
+                    TEXTS = {
+                        "uz": "❗️ Afsuski, arizangiz tasdiqlanmadi. Iltimos, kiritgan ma’lumotlaringizni tekshirib, yana boshqatdan yuboring.",
+                        "ru": "❗️ К сожалению, ваша заявка не была подтверждена. Пожалуйста, проверьте введенные данные и отправьте их снова."
+                    }
+                    await msg.answer(TEXTS[language])
+                    await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
+                    await state.set_state(ApplicantRegisterStates.first_name)
                     return
 
         if language == "uz":
