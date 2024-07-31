@@ -52,9 +52,6 @@ profile_menu_markup_uz = ReplyKeyboardMarkup(
             KeyboardButton(text="📄 Arizalarim")
         ],
         [
-            KeyboardButton(text="📊 Imtihon natijam"),
-        ],
-        [
             KeyboardButton(text="◀️ Orqaga"),
         ],
     ],
@@ -113,9 +110,6 @@ profile_menu_markup_ru = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="ℹ️ Мои данные"),
             KeyboardButton(text="📄 Мои заявки")
-        ],
-        [
-            KeyboardButton(text="📊 Мои результаты экзамена"),
         ],
         [
             KeyboardButton(text="◀️ Назад"),
