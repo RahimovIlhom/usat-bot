@@ -83,8 +83,7 @@ class Database:
             FROM sciences s
             INNER JOIN educational_areas_sciences eas ON s.id = eas.science_id
             WHERE eas.directionofeducation_id = %s AND s.deleted = FALSE
-            ORDER BY eas.id
-            LIMIT 3;
+            ORDER BY eas.id;
         """
         return await self.execute_query(query, direction_id, fetchall=True)
 

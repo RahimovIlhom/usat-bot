@@ -47,22 +47,13 @@ async def submit_application(msg: types.Message, state: FSMContext):
                 status = user_data_resp.json().get('status')
                 await db.update_application_status(msg.from_user.id, status)
                 if status == 'REJECTED':
-                    await state.update_data({
-                        'tgId': applicant[0],
-                        'applicantNumber': applicant[15],
-                        'birthDate': applicant[16],
-                        'passport': applicant[7],
-                        'phoneNumber': applicant[1],
-                        'additionalPhoneNumber': applicant[2],
-                        'applicantId': applicant[19],
-                    })
-                    TEXTS = {
-                        "uz": "❗️ Ma'lumotlar yetarli emasligi sababli arizangiz rad etildi, qayta urinib ko'ring.",
-                        "ru": "❗️ Ваша заявка отклонена из-за недостатка данных, попробуйте снова."
-                    }
-                    await msg.answer(TEXTS[language])
-                    await question_first_name(msg, language)  # shu yerda ism dan boshlab so'rab ketilishi kerak.
-                    await state.set_state(ApplicantRegisterStates.first_name)
+                    if language == "uz":
+                        await msg.answer("Pastdagi tugmani bosib, telefon raqamingizni yuboring.", reply_markup=phone_markup_uz)
+                    else:
+                        await msg.answer("Нажмите кнопку ниже и отправьте свой номер телефона.", reply_markup=phone_markup_ru)
+
+                    await state.set_state(ApplicantRegisterStates.phone)
+                    await state.update_data({'tgId': msg.from_user.id})
                     return
 
         if language == "uz":
@@ -870,7 +861,13 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
                     "qilinganingiz haqida xabar chiqadi. Shu zahotiyoq shartnomangizni ko'chirib olishingiz mumkin "
                     "bo'ladi. Yetarlicha ball to'play olmasangiz, yana bir bor urinib ko'rishingizga imkoniyat "
                     "beriladi. Sizga omad tilaymiz!")
-        success = "Iltimos arizangiz qabul qilinishini kuting, tez orada sizga xabar beramiz!"
+        success = ("Barcha ma’lumotlaringiz tasdiqlansa, siz talabalikka tavsiya etilasiz. Bu haqda sizga botda va SMS "
+                   "orqali tegishli xabar yuboramiz. Arizani ko’rib chiqish bir necha daqiqa ichida amalga oshiriladi.")
+        failed = ("Afsuski UZBMB (DTM) ballingiz sizni imtihonsiz qabul qilishimiz uchun yetarli emas. Shuning uchun "
+                  "shu botni o’zida test topshirishingiz kerak bo’ladi. Tayyor bo'lsangiz, pastdagi \"🧑‍💻 Imtihon "
+                  "topshirish\" tugmasini bosing.\n\nTest natijasiga ko'ra yetarlicha ball to'plasangiz, "
+                  "sizga o'qishga qabul qilinganingiz haqida xabar yuboriladi. Yetarlicha ball to'play olmasangiz, "
+                  "yana bir bor urinib ko'rishingizga imkoniyat beriladi. Sizga omad tilaymiz!")
         markup = menu_markup_uz
     else:
         resp_info = f"✅ Уважаемый {first_name}! Ваша заявка принята!"
@@ -878,7 +875,14 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
                     "Если вы наберете достаточное количество баллов по результатам теста, вам будет сообщено о "
                     "зачислении на учебу. Сразу после этого вы сможете скачать ваш контракт. Если набранных баллов "
                     "не хватит, вам будет предоставлена возможность попробовать еще раз. Желаем вам удачи!")
-        success = "Пожалуйста, дождитесь обработки вашего заявления, мы свяжемся с вами в ближайшее время!"
+        success = ("Если вся ваша информация будет подтверждена, вас рекомендуют к зачислению в студенты. "
+                   "Об этом вам будет отправлено соответствующее уведомление в боте и по SMS. "
+                   "Рассмотрение заявки осуществляется в течение нескольких минут.")
+        failed = ("К сожалению, ваш балл UZBMB (DTM) недостаточен для поступления без экзамена. Поэтому вам нужно "
+                  "будет сдать тест в этом боте. Когда будете готовы, нажмите кнопку \"🧑‍💻 Сдать экзамен\" "
+                  "ниже.\n\nЕсли вы наберете достаточное количество баллов по результатам теста, вам будет отправлено "
+                  "уведомление о зачислении. Если вы не наберете достаточное количество баллов, вам будет "
+                  "предоставлена еще одна попытка. Желаем вам удачи!")
         markup = menu_markup_ru
     dtm_score = data.get('dtmScore', None)
     await call.message.edit_text(resp_info, reply_markup=None)
@@ -888,8 +892,10 @@ async def save_send_data_admission(call, direction_id, type_id, edu_language, la
     if dtm_score:
         if float(dtm_score) > 50.0:
             await call.message.answer(success, reply_markup=markup)
-            return
-    await call.message.answer(question, reply_markup=markup)
+        else:
+            await call.message.answer(failed, reply_markup=markup)
+    else:
+        await call.message.answer(question, reply_markup=markup)
 
 
 async def applicant_not_found(call: types.CallbackQuery, state: FSMContext, lang: str = "uz"):

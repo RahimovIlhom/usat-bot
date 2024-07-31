@@ -1,4 +1,5 @@
 import asyncio
+import random
 from datetime import datetime
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -58,7 +59,7 @@ async def check_execution_text(msg: types.Message):
                 await msg.answer(RESPONSE_TEXTS[language]['two_failed'])
                 return
 
-        if status in ('ACCEPTED', 'FAILED'):
+        if status in ('SUBMITTED', 'ACCEPTED', 'FAILED'):
             sciences = await db.get_sciences_for_exam(applicant[8])
             if not sciences:
                 await msg.answer(RESPONSE_TEXTS[language]['no_exam_questions'])
@@ -67,21 +68,19 @@ async def check_execution_text(msg: types.Message):
             sciences_info = "\nFanlar ro'yxati va savollar soni:\n" \
                 if language == 'uz' else '\nСписок предметов и количество вопросов:\n'
             all_count = 0
-            ready = True
 
             for i, sc in enumerate(sciences, start=1):
                 tests = await db.select_active_tests_for_science(sc[0], applicant[10])
                 questions_count = sum(test[2] for test in tests)
                 if not tests:
-                    ready = False
-                    break
+                    continue
                 all_count += questions_count
                 if language == 'uz':
                     sciences_info += f"{i}. {sc[1]} - {questions_count} ta savol\n"
                 else:
                     sciences_info += f"{i}. {sc[2]} - {questions_count} вопросов\n"
 
-            if ready:
+            if all_count > 0:
                 resp_text = (RESPONSE_TEXTS[language][status_to_key[status]].format(len(sciences), all_count) +
                              sciences_info)
                 permission = True
@@ -112,8 +111,14 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         languageOfEducation = applicant[10]
         direction_id = applicant[8]
         sciences = await db.get_sciences_for_exam(direction_id)
+        sciences_list = []
+        for i, sc in enumerate(sciences, start=1):
+            tests = await db.select_active_tests_for_science(sc[0], applicant[10])
+            if not tests:
+                continue
+            sciences_list.append(sc)
 
-        science = sciences[0]
+        science = sciences_list[0]
         tests = await db.select_active_tests_for_science(science[0], languageOfEducation)
         if not tests:
             await call.message.answer("No active tests available.")
@@ -126,7 +131,7 @@ async def you_are_ready(call: types.CallbackQuery, callback_data: dict, state: F
         test_data = {
             'languageOfEducation': languageOfEducation,
             'language_text': language_text,
-            'sciences': sciences[1:],
+            'sciences': sciences_list[1:],
             'science_id': science[0],
             'science_number': 1,
             'questions': questions,
@@ -186,12 +191,12 @@ async def science_all_questions(call: types.CallbackQuery, callback_data: dict, 
         user_response_data = {
             "science_id": science_id,
             "question_id": question_id,
-            "true_response": true_responses[number - 1],
+            "true_response": true_responses[-1],
             "user_response": user_resp,
             "score": score
         }
 
-        if user_resp == true_responses[number - 1]:
+        if user_resp == true_responses[-1]:
             scores.append(score)
         else:
             scores.append(0)
@@ -231,19 +236,28 @@ async def handle_new_test(call, state, language_text, true_responses, sciences, 
     questions = []
     for test in tests:
         questions.extend(await db.select_questions_for_test(test[0], test[2]))
-    question = questions[0]
+    question = list(questions[0])
+    responses = question[5:9]
+    true_response = question[5]
+    random.shuffle(responses)
+    resp_dict = {
+        0: 'a',
+        1: 'b',
+        2: 'c',
+        3: 'd'
+    }
 
     await state.update_data(
         {
             'science_id': science[0],
             'sciences': sciences[1:],
             'science_number': science_number + 1,
-            'true_responses': true_responses + [question[4]],
+            'true_responses': true_responses + [resp_dict[responses.index(true_response)]],
             'questions': questions[1:],
             'number': 1,
         }
     )
-    await ask_question(call, language_text, question, 1)
+    await ask_question(call, language_text, question[:5]+responses, 1)
 
 
 async def finish_test(call, state, language, true_responses, user_responses, scores, elapsed_time,
@@ -273,7 +287,7 @@ async def finish_test(call, state, language, true_responses, user_responses, sco
                         "user_response": '',
                         "score": 0
                     })
-    user_defined_options = ''.join(item['user_response'] for item in user_responses)
+    user_defined_options = [item['user_response'] for item in user_responses]
     correct_answers = sum(1 for t, u in zip(true_responses, user_defined_options) if t == u)
     result = round((correct_answers / len(true_responses)) * 100, 2)
     applicantStatus = 'EXAMINED'
@@ -283,7 +297,12 @@ async def finish_test(call, state, language, true_responses, user_responses, sco
     await db.add_exam_result(call.from_user.id, correct_answers, result, total_score, user_responses, interval_time)
     await db.update_application_status(call.from_user.id, applicantStatus)
 
-    await send_exam_result_for_admission(call.from_user.id, total_score)
+    user_data_resp = await get_applicant_in_admission(call.from_user.id)
+    if user_data_resp.status_code == 200:
+        status = user_data_resp.json().get('status')
+        if status in ['ACCEPTED', 'FAILED']:
+            await send_exam_result_for_admission(call.from_user.id, total_score)
+
     RESPONSE_RESULT = {
         'uz': ("✅ Tabriklaymiz, siz imtihonni tugatdingiz!\n"
                "Natijangiz tekshirishga yuborildi."),
@@ -299,16 +318,25 @@ async def finish_test(call, state, language, true_responses, user_responses, sco
 
 
 async def ask_next_question(call, state, language, questions, number, true_responses):
-    question = questions[0]
+    question = list(questions[0])
+    responses = question[5:9]
+    true_response = question[5]
+    random.shuffle(responses)
+    resp_dict = {
+        0: 'a',
+        1: 'b',
+        2: 'c',
+        3: 'd'
+    }
     await state.update_data(
         {
             'question_id': question[0],
-            'true_responses': true_responses + [question[4]],
+            'true_responses': true_responses + [resp_dict[responses.index(true_response)]],
             'questions': questions[1:],
             'number': number + 1,
         }
     )
-    await ask_question(call, language, question, number + 1)
+    await ask_question(call, language, question[:5]+responses, number + 1)
 
 
 async def ask_question(call, language, question, number):
@@ -316,7 +344,9 @@ async def ask_question(call, language, question, number):
     question_text = f"{number}-savol.\n\n{question[3].replace('<', '&lt')}" if language == 'uz' else \
         f"{number}-й вопрос.\n\n{question[3].replace('<', '&lt')}"
     if language == 'uz':
-        question_text += f""
+        question_text += f"\n\nA) {question[5].replace('<', '&lt')}\nB) {question[6].replace('<', '&lt')}\nC) {question[7].replace('<', '&lt')}\nD) {question[8].replace('<', '&lt')}"
+    else:
+        question_text += f"\n\nA) {question[5].replace('<', '&lt')}\nБ) {question[6].replace('<', '&lt')}\nC) {question[7].replace('<', '&lt')}\nД) {question[8].replace('<', '&lt')}"
     try:
         if image:
             await call.message.answer_photo(image, question_text, reply_markup=await all_responses_inlines(language))

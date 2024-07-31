@@ -3,13 +3,15 @@ RESPONSE_TEXTS = {
     'uz': {
         'draft': "❗️ Arizangiz hali tayyor emas. Iltimos, arizangizni yuboring.",
         'submitted': "❗️ Arizangiz yuborilgan. Iltimos, arizangiz qabul qilinishini kuting.",
-        'rejected': "😔 Sizning arizangiz rad etilgan. Shuning uchun siz imtihon topshira olmaysiz.",
+        'rejected': ("😔 Afsuski, arizangiz tasdiqlanmadi. Iltimos, kiritgan ma’lumotlaringizni tekshirib, "
+                     "yana boshqatdan yuboring."),
         'failed': ("Fan va texnologiyalar universitetining kirish imtihonlari tizimiga xush kelibsiz!\n"
                    "❗️ Siz imtihondan o'ta olmadingiz. Shuning uchun sizga yana imkoniyat berildi.\n\n"
                    "{} ta fandan umumiy {} ta test savollari uchun 4 soat vaqt beriladi."),
-        'passed': ("🥳 Tabriklaymiz, siz imtihondan muvaffaqiyatli o'tib Fan va texnologiyalari "
-                   "universiteti talabasi bo'ldingiz!\n «📥 Shartnomani olish» bo'limi orqali kontrakt "
-                   "shartnomangizni yuklab olishingiz mumkin."),
+        'passed': ("🥳 Tabriklaymiz, siz Fan va texnologiyalar "
+                   "universitetiga talabalikka tavsiya etildingiz! Shartnomani https://qabul.usat.uz saytidagi "
+                   "shaxsiy kabinetdan yuklab olishingiz mumkin. Saytga kirish uchun parol sizga SMS xabar sifatida "
+                   "yuborilgan. Savollaringiz bo’lsa bizga qo’ng’iroq qiling: 78-888-38-88"),
         'examined': ("✅ Siz imtihon topshirib bo'lgansiz!\n"
                      "Imtihon natijangizni «👤 Profilim» ning «📊 Imtihon natijam» bo'limida ko'rishingiz mumkin."),
         'no_exam_questions': "❗️ Hozirda imtihon savollari mavjud emas!",
@@ -23,12 +25,14 @@ RESPONSE_TEXTS = {
     'ru': {
         'draft': "❗️ Ваша заявка еще не готова. Пожалуйста, отправьте вашу заявку.",
         'submitted': "❗️ Ваша заявка отправлена. Пожалуйста, ожидайте подтверждения вашей заявки.",
-        'rejected': "😔 Ваша заявка была отклонена. Поэтому вы не можете сдавать экзамен.",
+        'rejected': ("😔 К сожалению, ваша заявка не была подтверждена. Пожалуйста, проверьте введенные данные и "
+                     "отправьте их снова."),
         'failed': ("Добро пожаловать в систему вступительных экзаменов Университета науки и технологий!\n"
                    "❗️ Вы не прошли экзамен. Поэтому вам предоставляется еще одна возможность.\n\n"
                    "Для {} предметов выделено 4 часа на общий {} вопросов."),
-        'passed': ("🥳 Поздравляем, вы успешно прошли экзамен и стали студентом Университета науки и "
-                   "технологий!\n Ваш контракт можно скачать в разделе «📥 Получить контракт»."),
+        'passed': ("🥳 Поздравляем, вас рекомендовали к зачислению в Университет науки и технологий! Вы можете "
+                   "скачать договор из личного кабинета на сайте https://qabul.usat.uz. Пароль для входа на сайт был "
+                   "отправлен вам в SMS-сообщении. Если у вас есть вопросы, позвоните нам: 78-888-38-88"),
         'examined': ("✅ Вы сдали экзамен!\n"
                      "Ваши результаты экзамена можно посмотреть в разделе «👤 Мой профиль» -> «📊 Мои "
                      "результаты экзамена»."),
