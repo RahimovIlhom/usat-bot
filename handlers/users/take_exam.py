@@ -35,7 +35,7 @@ async def check_execution_text(msg: types.Message):
         status = applicant[14]
         status_to_key = {
             'DRAFT': 'draft',
-            'SUBMITTED': 'submitted',
+            'SUBMITTED': 'welcome_message',
             'REJECTED': 'rejected',
             'PASSED': 'passed',
             'ACCEPTED': 'welcome_message',
