@@ -59,7 +59,8 @@ async def submit_applicant_for_admission(applicantId, tgId, firstName, lastName,
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL.format(telegramm_id=tgId)
-    active_token = await db.get_active_token()
+    token_tuple = await db.get_active_token()
+    active_token = token_tuple[1] if token_tuple else None
     birth_date = birthDate.isoformat() + "T00:00:00Z"
 
     # Encode images to base64

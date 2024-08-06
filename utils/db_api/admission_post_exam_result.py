@@ -31,7 +31,8 @@ async def send_exam_result_for_admission(tgId, ball, examType=True, *args, **kwa
     warnings.filterwarnings("ignore", message="Unverified HTTPS request")
     from loader import db
     url = SUBMIT_URL
-    active_token = await db.get_active_token()
+    token_tuple = await db.get_active_token()
+    active_token = token_tuple[1] if token_tuple else None
 
     data = {
         "id": tgId,
