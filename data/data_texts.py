@@ -83,10 +83,12 @@ INFORMATION_TEXTS = {
 DIRECTIONS_EDU = {
     'uz': ["Logistika", "Maktabgacha ta’lim", "Boshlang’ich ta’lim", "Tarix", "Xorijiy til va adabiyoti", "Iqtisodiyot",
            "Psixologiya", "Buxgalteriya hisobi va audit", "Moliya va moliyaviy texnologiyalar", "Bank ishi va auditi",
-           "Dasturiy injiniring", "Turizm"],
+           "Dasturiy injiniring", "Turizm", "Maxsus pedagogika", "O‘zbek tili va adabiyoti", "Matematika",
+           "Kompyuter injiniringi", "Arxitektura", "Ijtimoiy ish"],
     'ru': ["Логистика", "Дошкольное образование", "Начальное образование", "История", "Иностранный язык и литература",
            "Экономика", "Психология", "Бухгалтерский учет и аудит", "Финансы и финансовые технологии",
-           "Банковское дело и аудит", "Программная инженерия", "Туризм"]
+           "Банковское дело и аудит", "Программная инженерия", "Туризм", "Специальная педагогика",
+           "Узбекский язык и литература", "Математика", "Компьютерный инжиниринг", "Архитектура", "Социальная работа"]
 }
 
 DIRECTIONS_EDU_INFO_UZ = {
@@ -161,7 +163,43 @@ DIRECTIONS_EDU_INFO_UZ = {
         "Yo’nalish haqida ma’lumot": "'Turizm' yo‘nalishi talabalarga turizm xizmatlarini tashkil etish va boshqarish, milliy va xalqaro turizm sohalarida chuqur bilim beradi. O’qish davomida talabalar mehmondo‘stlik asoslari, turizm marketingi va turizm biznesini boshqarishning turli jihatlarini o‘rganadilar.\nTurizm bo'yicha diplomga ega bo'lgan bitiruvchilar mehmonxona sanoatida, turoperatorlarda, tadbir agentliklarida va hatto turizm bilan bog'liq madaniyat muassasalarida ish topishlari mumkin. Ular turizm menejeri, ekskursiya gidlari, turistik marshrutlarni ishlab chiqish bo'yicha mutaxassis bo'lishlari yoki xalqaro turizm bilan shug'ullanishlari mumkin. Bundan tashqari, bitiruvchilar turizm bo'yicha konsalting, tadbirlarni boshqarish bo'yicha kasb tanlashi yoki turizm sohasida o'z tadbirkorligini boshlashi mumkin.\nZamonaviy turizm globallashuv, xalqaro sayohatlarning o'sishi va sayyohlik yo'nalishlari sonining ko'payishi tufayli faol rivojlanmoqda. Turizm industriyasi pandemiyadan keyin tiklanib, yangi sharoitlarga moslashib, innovatsion yechimlarni joriy eta oladigan va yuqori darajadagi xizmat ko‘rsata oladigan mutaxassislar uchun noyob imkoniyatlarni taklif qilmoqda. Turizm hududlarning iqtisodiy rivojlanishiga, madaniy aloqalarni mustahkamlashga va hayot sifatini yaxshilashga xizmat qiladi, bu esa uni dolzarb va istiqbolli yo‘nalishga aylantiradi.",
         "2024/2025-yil uchun qabul kvotasi": "O'zbek\nKunduzgi: 150\nKechki:100\nSirtqi:400\n\nRus\nKunduzgi: 50\nKechki:50\nSirtqi:100",
         "Qabul qilinish talablari": "Tarix – 3,1 ball\n(25 ta savol)\n\nIngliz tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
-    }
+    },
+    "Maxsus pedagogika": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "Maxsus pedagogika (defektologiya) - rivojlanishda (aqliy, eshitishda, koʻrishida yoki nutqida) nuqsoni bo'lgan odamlar bilan ishlaydigan, ularga yordam beradigan mutaxassislarni, pedagog kadrlarni tayyorlaydigan ta'lim sohasi. Defektologlar alohida ta'limga muhtoj bolalar va kattalarni tashxislash, o'qitish, reabilitatsiya qilish bilan shug'ullanadilar.\nO'quv jarayonida talabalar psixologiya, pedagogika, maxsus o'qitish usullarini o'rganadilar, shuningdek, ta'lim va reabilitatsiya muassasalarida amaliy mashg'ulot o'taydilar.\nHozirgi kunda maxsus pedagogika yo‘nalishi koʻp qirrali boʻlib, bitiruvchi talabalar sogʻlom bolalarga moʻljallangan maktabgacha taʼlim muassasalarida logoped, maxsus maktabgacha taʼlim muassasalarida defektolog, umumtaʼlim maktablarida logoped, maxsus maktab va maktab-internatlarda defektolog, oilaviy poliklinikada logoped lavozimida faoliyat yuritishlari mumkin boʻladi.\nDefektologlar nogironligi boʻlgan/imkoniyati cheklangan bolalarning ijtimoiy moslashuviga yordam beradi.",
+        "2024/2025-yil uchun qabul kvotasi": "",
+        "Qabul qilinish talablari": "Biologiya – 3,1 ball\n(25 ta savol)\n\nOna tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
+    "O‘zbek tili va adabiyoti": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "“Oʻzbek tili va adabiyoti” ta’lim yo’nalishi - oʻzbek tili va adabiy merosini oʻrganish, oʻqitish va tadqiq etish sohasida mutaxassislar tayyorlaydigan yoʻnalishdir.\nBitiruvchilar maktab, kollej va oliy o‘quv yurtlarida o‘qituvchi, ilmiy institutlarda adabiyotshunos va tadqiqotchi, nashriyot va ommaviy axborot vositalarida muharrir va korrektor, xalqaro tashkilotlar va madaniyat markazlarida tarjimon va maslahatchi bo‘lib ishlashlari mumkin.\nMilliy madaniyat va tilni asrab-avaylash va rivojlantirish, o‘zbek adabiyotiga qiziqishning ortishi, ta’lim va madaniyat sohalari uchun malakali o‘qituvchi va mutaxassislar tayyorlash zarurligi ushbu yo‘nalishning hozirgi kunda dolzarbligini namoyon qiladi.",
+        "2024/2025-yil uchun qabul kvotasi": "Tarix – 3,1 ball\n(25 ta savol)\n\nIngliz tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)",
+        "Qabul qilinish talablari": "Ona tili – 3,1 ball\n(25 ta savol)\n\nIngliz tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
+    "Matematika": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "Matematika fan, texnika va biznesning turli sohalarida murakkab masalalarni yechish uchun mutaxassislar tayyorlaydigan ta’lim sohasidir.\nBitiruvchilar maktablar, kollejlar va universitetlarda o'qituvchi, ilmiy va tadqiqot institutlarida tadqiqotchi, moliyaviy va texnologiya kompaniyalarida tahlilchi va ma'lumotlar bo'yicha mutaxassis, IT kompaniyalarida muhandis sifatida ishlashlari mumkin.\nYo'nalishning bugungi kunda dolzarbligi fan, texnologiya, iqtisodiyot va IT sohalarida matematik usullar va modellarning keng qo'llanilishi bilan bog'liq. Matematika innovatsion texnologiyalarni rivojlantirish va ma'lumotlarni tahlil qilish uchun asos bo'lib, matematiklarni zamonaviy dunyoda talabgir mutaxassislarga aylantirdi.",
+        "2024/2025-yil uchun qabul kvotasi": "",
+        "Qabul qilinish talablari": "Matematika – 3,1 ball\n(25 ta savol)\n\nFizika– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
+    "Kompyuter injiniringi": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "Kompyuter injiniringi - bu kompyuter tizimlari va tarmoqlarini ishlab chiqish, loyihalash va qo'llab-quvvatlash bo'yicha mutaxassislarni tayyorlaydigan ta'lim yo'nalishi. Bu sohada yangi apparat qurilmalari yaratiladi, mikroprotsessorlar, mikrokontrollerlar va boshqa komponentlar loyihalashtiriladi va ishlab chiqiladi.\nTalabalar axborot texnologiyalari servisi (AT-servis), axborot xavfsizligi, va multimediya texnologiyalarini boshqarish, tizimlarni loyihalash bo'yicha ko'nikmalarga ega bo'ladi.\nBitiruvchilar IT-kompaniyalarda kompyuter bo’yicha muhandis, dasturiy ta'minot ishlab chiqaruvchi, tarmoq administratori va kiberxavfsizlik bo'yicha mutaxassis, ilmiy va texnologik institutlarda tadqiqotchi sifatida ishlashlari mumkin.\nHozirgi kunda kompyuter injiniringi sohasi eng talabgir va yuqori haq to'lanadigan faoliyat sohalaridan biridir.",
+        "2024/2025-yil uchun qabul kvotasi": "",
+        "Qabul qilinish talablari": "Matematika – 3,1 ball\n(25 ta savol)\n\nIngliz tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
+    "Arxitektura": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "Arxitektura - bu funksionallik va estetikani o’zida uyg'unlashtirgan bino va inshootlarni loyihalash va yaratish bo'yicha mutaxassislarni tayyorlaydigan ta'lim yo'nalishidir.\nBitiruvchilar arxitektura byurolari va qurilish kompaniyalarida arxitektor, hokimlik va davlat idoralarida shaharsozlik bo’yicha mutaxassis, interyer dizayneri, landshaft arxitektori, universitetlar va ilmiy institutlarda tadqiqotchi va o'qituvchi bo'lib ishlashlari mumkin.\nYo'nalishning dolzarbligi urbanizatsiya darajasining oshishi, barqaror va ekologik toza muhitni yaratish zarurati, shuningdek, hayot sifatini yaxshilash va shahar infratuzilmasini rivojlantirish uchun innovatsion arxitektura yechimlariga bo'lgan ehtiyoj bilan bog'liq.",
+        "2024/2025-yil uchun qabul kvotasi": "",
+        "Qabul qilinish talablari": "Matematika – 3,1 ball\n(25 ta savol)\n\nFizika– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
+    "Ijtimoiy ish": {
+        "image": "",
+        "Yo’nalish haqida ma’lumot": "Ijtimoiy ish - bu qiyin hayotiy vaziyatlarda bo'lgan odamlarni qo'llab-quvvatlash va yordam berish, ularning hayot sifatini yaxshilash va huquqlarini himoya qilish uchun mutaxassislarni tayyorlaydigan ta'lim sohasi.\nIjtimoiy ish bo‘yicha mutaxassislar kasalxona va klinikalarda, maslahat markazlarida, shaxslar bilan ishlash xizmatida, ta’lim-tarbiya muassasalarida o‘zlariga ish topishlari mumkin. Shu bilan birga, bitiruvchilar davlat va notijorat tashkilotlarida ijtimoiy ishchi, ijtimoiy yordam va reabilitatsiya markazlarida maslahatchi va mutaxassis, xayriya tashkilotlarida dastur kuratori, universitetlar va ilmiy institutlarda tadqiqotchi va o'qituvchi sifatida ishlashi mumkin.\nYo'nalishning dolzarbligi aholining ijtimoiy himoyaga muhtoj qatlamlarini himoya qilish zarurati, odamlarni ijtimoiy qo'llab-quvvatlash va jamiyatga integratsiyalashuvining ahamiyati ortib borayotgani, shuningdek, ijtimoiy dasturlar va xizmatlarning rivojlanishi bilan bog'liq.",
+        "2024/2025-yil uchun qabul kvotasi": "",
+        "Qabul qilinish talablari": "Tarix – 3,1 ball\n(25 ta savol)\n\nIngliz tili– 2,1 ball\n(25 ta savol)\n\nMantiqiy savol – 1,1 ball\n(10 ta savol)"
+    },
 }
 
 DIRECTIONS_EDU_INFO_RU = {
@@ -205,7 +243,7 @@ DIRECTIONS_EDU_INFO_RU = {
         "image": "http://telegra.ph//file/1371c84abd713df72e376.jpg",
         "Информация о направлении": "'Психология' дает студентам глубокие знания о психике человека, эмоциональном состоянии и способах воздействия на поведение. В процессе обучения студенты изучают психологические теории, методы исследования, а также развивают навыки консультирования и помощи в решении психологических проблем.\nСпециалисты в области психологии могут работать в клинической психологии, образовании, управлении персоналом, маркетинге, исследованиях и даже в спортивной психологии. Они могут стать практикующими психотерапевтами, школьными психологами, консультантами по управлению человеческими ресурсами, маркетологами или исследователями психологии, внося вклад в понимание человеческого поведения.\nКроме того, психологи могут помогать людям, сталкивающимся с эмоциональными трудностями, стрессом, депрессией и другими проблемами.\nВ целом, обучение по направлению 'психология' дает широкий спектр навыков и знаний, которые могут быть полезны в различных сферах жизни, что делает эту образовательную область привлекательной для многих студентов.",
         "Квота на 2024/2025 год": "Узбекский\nОчное: 100\nВечернее: 100\nЗаочное: 600\n\nРусский\nОчное: 50\nВечернее: 50\nЗаочное: 50",
-        "Требования к поступлению": "Биология – 3,1 балла\n(25 вопросов)\n\nРодной язык – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+        "Требования к поступлению": "Биология – 3,1 балла\n(25 вопросов)\n\nРодной язык и литература – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
     },
     "Бухгалтерский учет и аудит": {
         "image": "http://telegra.ph//file/2b2f95aa7d1623e5ea630.jpg",
@@ -236,7 +274,43 @@ DIRECTIONS_EDU_INFO_RU = {
         "Информация о направлении": "'Туризм' дает студентам глубокие знания в области организации и управления туристическими услугами, а также национального и международного туризма. В процессе обучения студенты изучают основы гостеприимства, маркетинг туризма и различные аспекты управления туристическим бизнесом.\nВыпускники направления 'Туризм' могут найти работу в гостиничном бизнесе, у туроператоров, в агентствах по организации мероприятий и даже в культурных учреждениях, связанных с туризмом. Они могут стать менеджерами по туризму, экскурсоводами, специалистами по разработке туристических маршрутов или заниматься международным туризмом. Кроме того, выпускники могут выбрать карьеру в консалтинге по туризму, управлении мероприятиями или начать собственное предпринимательство в сфере туризма.\nСовременный туризм активно развивается благодаря глобализации, росту международных путешествий и увеличению количества туристических направлений. Туристическая индустрия восстанавливается после пандемии и предлагает уникальные возможности для специалистов, способных внедрять инновационные решения и предоставлять высококачественные услуги. Туризм способствует экономическому развитию регионов, укреплению культурных связей и повышению качества жизни, что делает его актуальным и перспективным направлением.",
         "Квота на 2024/2025 год": "Узбекский\nОчное: 150\nВечернее: 100\nЗаочное: 400\n\nРусский\nОчное: 50\nВечернее: 50\nЗаочное: 100",
         "Требования к поступлению": "История – 3,1 балла\n(25 вопросов)\n\nАнглийский язык – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
-    }
+    },
+    "Специальная педагогика": {
+        "image": "",
+        "Информация о направлении": "Специальная педагогика (Дефектология) – это учебное направление, которое готовит специалистов для работы с людьми, имеющими различные нарушения в развитии, такие как сенсорные, физические, интеллектуальные и эмоциональные. Дефектологи занимаются диагностикой, обучением, реабилитацией и социализацией детей и взрослых с особыми образовательными потребностями.\nВ процессе обучения студенты изучают психологию, педагогику, специальные методики обучения и коррекции, а также проходят практику в образовательных и реабилитационных учреждениях.\nДефектологи могут работать в школах, детских садах, реабилитационных и медицинских центрах, социальных службах, а также вести частную практику. Это направление актуально из-за роста числа детей с особыми образовательными потребностями и перехода к инклюзивному образованию. Дефектологи способствуют социальной адаптации и улучшению качества жизни людей с ограниченными возможностями, оказывают поддержку семьям и помогают интегрировать таких людей в общество.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "Биология – 3,1 балла\n(25 вопросов)\n\nРодной язык и литература – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
+    "Узбекский язык и литература": {
+        "image": "",
+        "Информация о направлении": "Узбекский язык и литература – это учебное направление, которое готовит специалистов в области изучения, преподавания и исследования узбекского языка и литературного наследия. \nВыпускники могут работать преподавателями в школах, колледжах и вузах, литературоведами и исследователями в научных институтах, редакторами и корректорами в издательствах и СМИ, переводчиками и консультантами в международных организациях и культурных центрах.\nАктуальность направления объясняется важностью сохранения и развития национальной культуры и языка, ростом интереса к узбекской литературе, необходимостью подготовки квалифицированных педагогов и специалистов для образовательной и культурной сфер.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "Родной язык и литература – 3,1 балла\n(25 вопросов)\n\nАнглийский язык – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
+    "Математика": {
+        "image": "",
+        "Информация о направлении": "Математика – это учебное направление, которое готовит специалистов для решения сложных задач в различных областях науки, техники и бизнеса.\nВыпускники могут работать преподавателями в школах, колледжах и вузах, исследователями в научных и исследовательских институтах, аналитиками и специалистами по данным в финансовых и технологических компаниях, инженерами и разработчиками в IT-компаниях и промышленности.\nАктуальность направления связана с повсеместным применением математических методов и моделей в науке, технике, экономике и IT. Математика является основой для развития инновационных технологий и анализа данных, что делает математиков востребованными специалистами в современном мире.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "Математика – 3,1 балла\n(25 вопросов)\n\nФизика – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
+    "Компьютерный инжиниринг": {
+        "image": "",
+        "Информация о направлении": "Компьютерный инжиниринг – это учебное направление, готовящее специалистов по разработке, проектированию и поддержке компьютерных систем и сетей.\nВыпускники могут работать инженерами по аппаратному обеспечению в IT-компаниях, разработчиками встроенных систем и программного обеспечения, сетевыми администраторами и специалистами по кибербезопасности, исследователями в научных и технологических институтах.\nАктуальность направления обусловлена быстрым развитием технологий, увеличением спроса на высокопроизводительные вычислительные системы, необходимостью обеспечения кибербезопасности и постоянным совершенствованием информационных и коммуникационных технологий.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "Математика – 3,1 балла\n(25 вопросов)\n\nАнглийский язык – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
+    "Архитектура": {
+        "image": "",
+        "Информация о направлении": "Архитектура – это учебное направление, которое готовит специалистов по проектированию и созданию зданий и сооружений, сочетающих функциональность и эстетику.\nВыпускники могут работать архитекторами в архитектурных бюро и строительных компаниях, градостроителями и проектировщиками в муниципальных и государственных учреждениях, дизайнерами интерьеров и ландшафтными архитекторами, исследователями и преподавателями в вузах и научных институтах.\nАктуальность направления связана с ростом урбанизации, необходимостью создания устойчивой и экологичной среды, а также с потребностью в инновационных архитектурных решениях для улучшения качества жизни и развития городских инфраструктур.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "Математика – 3,1 балла\n(25 вопросов)\n\nФизика – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
+    "Социальная работа": {
+        "image": "",
+        "Информация о направлении": "Социальная работа – это учебное направление, которое готовит специалистов для поддержки и помощи людям в сложных жизненных ситуациях, улучшения их качества жизни и защиты прав.\nВыпускники могут работать социальными работниками в государственных и некоммерческих организациях, консультантами и специалистами в центрах социальной помощи и реабилитационных центрах, кураторами программ в благотворительных и волонтерских организациях, исследователями и преподавателями в вузах и научных институтах.",
+        "Квота на 2024/2025 год": "",
+        "Требования к поступлению": "История – 3,1 балла\n(25 вопросов)\n\nАнглийский язык – 2,1 балла\n(25 вопросов)\n\nЛогические вопросы – 1,1 балла\n(10 вопросов)"
+    },
 }
 
 
@@ -299,7 +373,33 @@ CONTRACT_INFO_UZ = {
         "Kunduzgi": "4 yil – 16 800 000 so’m",
         "Kechki": "4,5 yil – 8 800 000 so’m",
         "Sirtqi": "5 yil – 12 600 000 so’m"
-    }
+    },
+    "Maxsus pedagogika": {
+        "Kunduzgi": "4 yil – 16 800 000 so’m",
+        "Kechki": "4,5 yil – 12 600 000 so’m",
+    },
+    "O‘zbek tili va adabiyoti": {
+        "Kunduzgi": "4 yil – 16 800 000 so’m",
+        "Kechki": "4,5 yil – 12 600 000 so’m",
+    },
+    "Matematika": {
+        "Kunduzgi": "4 yil – 15 800 000 so’m",
+        "Kechki": "4,5 yil – 12 600 000 so’m",
+    },
+    "Kompyuter injiniringi": {
+        "Kunduzgi": "4 yil – 15 800 000 so’m",
+        "Kechki": "4,5 yil – 12 600 000 so’m",
+        "Sirtqi": "5 yil – 12 900 000 so’m"
+    },
+    "Arxitektura": {
+        "Kunduzgi": "4 yil – 17 800 000 so’m",
+        "Kechki": "4,5 yil – 14 500 000 so’m",
+    },
+    "Ijtimoiy ish": {
+        "Kunduzgi": "4 yil – 15 800 000 so’m",
+        "Kechki": "4,5 yil – 12 600 000 so’m",
+        "Sirtqi": "5 yil – 12 600 000 so’m"
+    },
 }
 
 CONTRACT_INFO_RU = {
@@ -361,5 +461,31 @@ CONTRACT_INFO_RU = {
         "Очная": "4 года – 16 800 000 сум",
         "Вечерняя": "4,5 года – 8 800 000 сум",
         "Заочная": "5 лет – 12 600 000 сум"
-    }
+    },
+    "Специальная педагогика": {
+        "Очная": "4 года – 16 800 000 сум",
+        "Вечерняя": "4,5 года – 12 600 000 сум",
+    },
+    "Узбекский язык и литература": {
+        "Очная": "4 года – 16 800 000 сум",
+        "Вечерняя": "4,5 года – 12 600 000 сум",
+    },
+    "Математика": {
+        "Очная": "4 года – 15 800 000 сум",
+        "Вечерняя": "4,5 года – 12 600 000 сум",
+    },
+    "Компьютерный инжиниринг": {
+        "Очная": "4 года – 15 800 000 сум",
+        "Вечерняя": "4,5 года – 12 600 000 сум",
+        "Заочная": "5 лет – 12 900 000 сум"
+    },
+    "Архитектура": {
+        "Очная": "4 года – 17 800 000 сум",
+        "Вечерняя": "4,5 года – 14 500 000 сум",
+    },
+    "Социальная работа": {
+        "Очная": "4 года – 15 800 000 сум",
+        "Вечерняя": "4,5 года – 12 600 000 сум",
+        "Заочная": "5 лет – 12 600 000 сум"
+    },
 }
