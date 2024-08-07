@@ -12,8 +12,7 @@ RESPONSE_TEXTS = {
                    "universitetiga talabalikka tavsiya etildingiz! Shartnomani https://qabul.usat.uz saytidagi "
                    "shaxsiy kabinetdan yuklab olishingiz mumkin. Saytga kirish uchun parol sizga SMS xabar sifatida "
                    "yuborilgan. Savollaringiz bo’lsa bizga qo’ng’iroq qiling: 78-888-38-88"),
-        'examined': ("✅ Siz imtihon topshirib bo'lgansiz!\n"
-                     "Imtihon natijangizni «👤 Profilim» ning «📊 Imtihon natijam» bo'limida ko'rishingiz mumkin."),
+        'examined': "✅ Siz imtihon topshirib bo'lgansiz!",
         'no_exam_questions': "❗️ Hozirda imtihon savollari mavjud emas!",
         'welcome_message': ("Fan va texnologiyalar universitetining kirish imtihonlari tizimiga xush "
                             "kelibsiz!\n{} ta fandan umumiy {} ta test savollari uchun 4 soat vaqt beriladi."),
@@ -33,9 +32,7 @@ RESPONSE_TEXTS = {
         'passed': ("🥳 Поздравляем, вас рекомендовали к зачислению в Университет науки и технологий! Вы можете "
                    "скачать договор из личного кабинета на сайте https://qabul.usat.uz. Пароль для входа на сайт был "
                    "отправлен вам в SMS-сообщении. Если у вас есть вопросы, позвоните нам: 78-888-38-88"),
-        'examined': ("✅ Вы сдали экзамен!\n"
-                     "Ваши результаты экзамена можно посмотреть в разделе «👤 Мой профиль» -> «📊 Мои "
-                     "результаты экзамена»."),
+        'examined': "✅ Вы сдали экзамен!",
         'no_exam_questions': "❗️ В настоящее время экзаменационные вопросы отсутствуют!",
         'welcome_message': (
             "Добро пожаловать в систему вступительных экзаменов Университета науки и технологий!\n"
