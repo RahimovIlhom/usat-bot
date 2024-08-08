@@ -47,7 +47,7 @@ async def check_execution_text(msg: types.Message):
             await msg.answer(RESPONSE_TEXTS[language]['error'])
             return
 
-        if status in ['SUBMITTED', 'EXAMINED', 'REJECTED']:
+        if status in ['SUBMITTED', 'REJECTED']:
             user_data_resp = await get_applicant_in_admission(msg.from_user.id)
             if user_data_resp.status_code == 200:
                 status = user_data_resp.json().get('status')
