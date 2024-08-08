@@ -292,6 +292,10 @@ class Database:
         query = "UPDATE applicants SET applicationStatus = %s WHERE tgId = %s;"
         await self.execute_query(query, new_status, tgId)
 
+    async def update_contract_file(self, tgId, contractFile):
+        query = "UPDATE applicants SET contractFile = %s WHERE tgId = %s;"
+        await self.execute_query(query, contractFile, tgId)
+
     async def add_draft_applicant(self, tgId, applicantId, applicantNumber, phoneNumber, additionalPhoneNumber,
                                   passport, birthDate, gender=None, photo=None,
                                   olympian=False, *args, **kwargs):

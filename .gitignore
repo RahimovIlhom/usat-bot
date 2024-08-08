@@ -162,4 +162,5 @@ cython_debug/
 webhook.py
 ngrok.exe
 data/applicants
+data/contacts
 admin/media

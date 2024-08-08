@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Contract
+  </title>
+  <style>
+   @page {
+            margin: 0 35px 0 100px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        p {
+            text-indent: 2.5em;
+            margin: 0; /* Matnlar orasidagi bo'shliqni yo'qotish uchun */
+            line-height: 1.5; /* Qatorlar orasidagi bo'shliqni boshqarish uchun */
+        }
+        ._text-center {
+            text-align: center;
+        }
+        table, th, td {
+            border: 1.5px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        td {
+            vertical-align: top; /* Matnni hujayraning yuqori qismiga joylashtirish uchun */
+        }
+        footer {
+            position: relative;
+            margin-bottom: 50px;
+        }
+        .rek-block {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .rek-block2 {
+            margin-top: 115px;
+        }
+        .rek-block p {
+            text-align: justify;
+        }
+        .sign {
+            position: absolute;
+            width: 350px;
+            left: 0;
+            top: 200px;
+            height: auto;
+        }
+        .sign img {
+            width: 100%;
+        }
+        .sf-headline {
+            margin-bottom: 15px;
+        }
+        .sf-headline p {
+            text-align: center;
+        }
+        .sf-block {
+            font-size: 12px;
+        }
+        .sf-1 {
+            width: 250px;
+        }
+        .sf-rekv {
+            margin-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .sf-rekv p {
+            margin-bottom: 3px;
+        }
+        .sf-rekv-left, .sf-rekv-right {
+            width: 40%;
+        }
+        .sf-sign {
+            margin: 25px 0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sf-sign p {
+            margin-bottom: 8px;
+        }
+        .sf-pechat {
+            width: 300px;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-text {
+            flex-grow: 1;
+            text-align: center;
+        }
+  </style>
+ </head>
+ <body>
+  <div class="page-break">
+   <section style="padding: 2px 2px 2px 2px; color: black; font-size: 1em; text-align: justify;">
+    <div style="display: flex; justify-content: space-between;">
+     <div style="margin: 30px 0 0 0 ">
+      <img alt="QR Code" src="data:image/png;base64,{{ pdfData.qrCode }}" style="width: 125px; height: 125px;"/>
+     </div>
+     <div class="header-text" style="text-align: center; margin: 60px 0 0 0 ">
+      <b>
+       To‘lov kontrakt asosida mutaxassis tayyorlashga
+       <br/>
+       SHARTNOMA № {{ pdfData.facultyCode }}
+      </b>
+     </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 0 5px; position: relative;">
+     <div>
+      <b style="margin-left: 20px">
+       {{ pdfData.contractDate }} yil
+      </b>
+     </div>
+     <div>
+      <b>
+       Toshkent shahri
+      </b>
+     </div>
+    </div>
+    <br/>
+    <div>
+     <b>
+      "FAN VA TEXNOLOGIYALAR UNIVERSITETI" nodavlat oliy ta’lim
+                tashkiloti
+     </b>
+     (keyingi o‘rinlarda matnda
+     <b>
+      "Universitet"
+     </b>
+     deb yuritiladi)
+              nomidan nizomi asosida ish yurituvchi rektor XAMDAMOV ANVAR
+              NOROVICH bir tomondan,
+     <br/>
+     <b style="text-transform:uppercase;">
+      {{ pdfData.fullName }}
+     </b>
+     keyingi o‘rinlarda “Talaba” deb
+              ataluvchi ikkinchi tomondan, keyingi o‘rinlarda birgalikda
+              “Tomonlar” deb ataluvchilar o‘rtasida mazkur shartnoma quyidagilar
+              haqida tuzildi:
+    </div>
+   </section>
+   <section>
+    <div class="_text-center">
+     <b>
+      1. Shartnoma predmeti
+     </b>
+    </div>
+    <div>
+     <p>
+      <b>
+       1.1
+      </b>
+      Mazkur shartnomaga muvofiq Universitet Talabani
+                quyida ko'rsatilgan ta’lim yo‘nalishi va ta’lim shakli bo‘yicha
+                oliy ta’limning davlat ta’lim standartlari asosida tasdiqlangan
+                o‘quv reja va o‘quv dasturlari asosida o‘qitish majburiyatini
+                oladi
+     </p>
+     <div>
+      <table width="100%">
+       <tbody>
+        <tr style="text-align: center">
+         <th>
+          Ta’lim yo‘nalishi
+         </th>
+         <th>
+          Ta’lim kodi
+         </th>
+         <th>
+          Ta’lim turi
+         </th>
+         <th>
+          Ta’lim shakli
+         </th>
+         <th>
+          Ta’lim tili
+         </th>
+         <th>
+          O‘quv kursi
+         </th>
+         <th>
+          O‘qish muddati
+         </th>
+        </tr>
+        <tr style="text-align: center">
+         <td>
+          {{ pdfData.educationFacultyName }}
+         </td>
+         <td>
+          {{ pdfData.mvdir }}
+         </td>
+         <td>
+          Bakalavr
+         </td>
+         <td>
+          {{ pdfData.educationTypeName }}
+         </td>
+         <td>
+          {{ pdfData.educationLanguage }}
+         </td>
+         <td>
+          {{ pdfData.kurs }}
+         </td>
+         <td>
+          {{ pdfData.srok }}
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+     <p>
+      Talaba esa Universitet tomonidan belgilangan tartib-qoidalarga
+                rioya qilgan holda ta’lim olish va ta’lim olganlik uchun haq
+                to‘lash majburiyatini oladi.
+     </p>
+     <p>
+      <b>
+       1.2
+      </b>
+      Universitetda shartnoma asosida o‘qitishning to‘lovi
+                (keyingi o‘rinlarda – shartnoma to‘lovi) miqdori ta’lim
+                yo‘nalishi, ta’lim shakli kunduzgi, kechki va sirtqi, o‘qishni
+                ko‘chirish bilan bog‘liq fanlarning farqini o‘qitish hamda
+                to‘plagan ballidan kelib chiqib, har bir o‘quv yili uchun
+                alohida belgilanadi.
+     </p>
+    </div>
+   </section>
+   <section>
+    <div class="_text-center">
+     <b>
+      2.Universitet majburiyatlari:
+     </b>
+    </div>
+    <div>
+     <p>
+      <b>
+       2.1.
+      </b>
+      Universitetning huquqlari:
+     </p>
+     <p>
+      Talabadan shartnoma majburiyatlari bajarilishini, shu jumladan
+                Universitetning ichki tartib-qoidalariga rioya qilishni, dars
+                mashg‘ulotlarida muntazam qatnashishni, shartnoma to‘lovini o‘z
+                vaqtida to‘lashni talab qilish, Talaba shartnoma to‘lovini
+                amalga oshirganidan so‘ng o‘qishga qabul qilish; Universitetning
+                ichki tartib-qoidalariga rioya qilmagan yoki shartnoma to‘lovini
+                o‘z vaqtida amalga oshirmagan Talabani ogohlantirmasdan
+                talabalar safidan chiqarish yoki tegishli kursda qoldirish;
+                Talaba Universitetning ichki tartib-qoidalarini qo‘pol ravishda
+                buzgan, xususan huquqbuzarlik sodir etgan hollarda shartnomani
+                bir tomonlama bekor qilish; mehnatga haq to‘lashning eng kam
+                miqdori yoki bazaviy hisoblash miqdori o‘zgarganda, shartnoma
+                to‘lovi miqdorini o‘zgartirish; shartnoma to‘lovi muddatlarini
+                uzaytirish.
+     </p>
+     <p>
+      <b>
+       2.2.
+      </b>
+      Universitetning majburiyatlari:
+     </p>
+     <p>
+      Talabani o‘qitish uchun texnika va yong‘in xavfsizligi,
+                sanitariya qoidalari, normalari va gigiyena normativlariga
+                muvofiq zarur shart-sharoitlarni yaratib berish;
+     </p>
+     <p>
+      Talabaning qonunchilik hujjatlarida belgilangan huquq va
+                manfaatlarini himoya qilish;
+     </p>
+     <p>
+      Talabaga oliy ta’limning davlat ta’lim standarti asosida yuqori
+                darajada ta’lim berish;
+     </p>
+     <p>
+      Bakalavriat uchun mo‘ljallangan o‘quv reja va dasturlarda
+                belgilangan fanlarni o‘zlashtirgan, imtihonlardan muvaffaqiyatli
+                o‘tib, Universitetni tamomlagan Talabaga oliy ma’lumot
+                to‘g‘risida hujjat (diplom) berish.
+     </p>
+     <p>
+      <b>
+       2.3.
+      </b>
+      Talabaning huquqlari:
+     </p>
+     <p>
+      Universitetdan shartnoma majburiyatlari bajarilishini talab
+                qilish; oliy ta’limning davlat ta’lim standarti asosida
+                tasdiqlangan o‘quv reja va dasturlarga muvofiq ta’lim olish;
+     </p>
+     <p>
+      Universitetning moddiy-texnik bazasidan, jumladan, laboratoriya
+                jihozlari, asbob-uskunalar, axborot resurs markazi va Wi-Fi
+                hududidan bepul foydalanish;
+     </p>
+     <p>
+      Universitetning ta’lim jarayonlarini yaxshilashga doir takliflar
+                berish.
+     </p>
+    </div>
+   </section>
+   <section class="pdf-item" style="
+            padding: 10px 5px 5px 5px;
+            color: black;
+            font-size: 1em;
+            text-align: justify;
+          ">
+    <section>
+     <div>
+      <p>
+       <b>
+        2.4.
+       </b>
+       Talabaning majburiyatlari:
+      </p>
+      <p>
+       Shartnoma to‘lovini mazkur shartnomada belgilangan muddatlarda
+                to‘lash;
+      </p>
+      <p>
+       Universitet nizomi va ichki tartib-qoidalariga qat’iy rioya
+                qilish;
+      </p>
+      <p>
+       Dars mashg‘ulotlariga uzrli sabablarsiz muntazam qatnashish;
+      </p>
+      <p>
+       Ta’lim olish jarayonida o‘z bilim darajasini muntazam oshirib
+                borish;
+      </p>
+      <p>
+       Boshqa oliy ta’lim tashkilotidan, jumladan xorijiy oliy ta’lim
+                tashkilotidan o‘qishini ko‘chirish uchun universitetdan
+                shartnoma olgan talabalar hujjatlari to’liq holda 60 kun ichida
+                Universitetga olib kelishlari;
+      </p>
+      <p>
+       O‘zining xatti-harakatlari, OAV va ijtimoiy tarmoqlardagi
+                chiqishlari bilan Universitetning ishchanlik obro‘si va
+                manfaatlariga putur yetkazishdan tiyilish.
+      </p>
+     </div>
+    </section>
+    <section>
+     <div class="_text-center">
+      <b>
+       3. To‘lov miqdorlari va muddatlari
+      </b>
+     </div>
+     <div>
+      <p>
+       <b>
+        3.1.
+       </b>
+       O‘quv yilining Universitet bakalavriat kurs bosqichi
+                uchun shartnomaning 1.1 bandida ko‘rsatilgan ta’lim yo‘nalishi
+                va ta’lim shakliga Talaba tomonidan to‘lanishi lozim bo‘lgan
+                shartnoma to‘lovi miqdori:
+      </p>
+      <p>
+       <b>
+        {{ pdfData.summ }} so`m
+       </b>
+      </p>
+      <p>
+       Hamda shartnomada ko‘rsatilgan to'lovning 50% 2024-yilning
+                1-oktabrga qadar, qolgan qismi 2025-yilning 15-fevralga qadar
+                to‘lanishi shart.
+      </p>
+      <p>
+       <b>
+        3.2.
+       </b>
+       Talaba tomonidan shartnoma to‘lovini to‘lashda
+                shartnomaning tartib raqami va sanasi, familiyasi, ismi va
+                sharifi hamda o‘quv kursi to‘lov topshiriqnomasida to‘liq
+                ko‘rsatiladi.
+      </p>
+      <p>
+       <b>
+        3.3.
+       </b>
+       Talaba tegishli fanlar bo‘yicha akademik
+                qarzdorlikni qayta topshirish sharti bilan keyingi kurs
+                (semestr)ga o‘tkazilgan taqdirda, keyingi semestr uchun
+                shartnoma to‘lovi Talaba tomonidan akademik qarzdorlik
+                topshirilgunga qadar amalga oshiriladi.
+      </p>
+      <p>
+       <b>
+        3.4.
+       </b>
+       Universitet ichki-tartib qoidalariga rioya
+                qilmaganligi (bir semestr davomida 36 akademik soat dars
+                qoldirganligi yoki ma’lumoti haqidagi hujjatning asl nusxasini
+                Universitetga o‘z vaqtida taqdim etmaganligi) sababli talabalar
+                safidan chiqarilgan Talaba tomonidan to‘langan shartnoma to‘lovi
+                qaytarib berilmaydi.
+      </p>
+      <p>
+       Boshqa oliy ta’lim tashkilotidan, jumladan xorijiy oliy ta’lim
+                tashkilotidan o‘qishini ko‘chirish uchun murojaat qilgan hamda
+                Universitetga o‘qishga qabul qilingan Talabaning soxta
+                hujjatlardan foydalanganligi, o‘qishni ko‘chirish bilan bog‘liq
+                hujjatlarida yolg‘on va haqqoniy bo‘lmagan ma’lumotlar
+                mavjudligi aniqlansa yoki hujjatlar belgilangan muddatda
+                Universitetga taqdim etilmasa, Talaba Universitet talabalari
+                safidan chiqariladi, bunda Talaba tomonidan amalga oshirilgan
+                shartnoma to‘lovi qaytarib berilmaydi.
+      </p>
+      <p>
+       <b>
+        3.5.
+       </b>
+       Talaba tomonidan to‘lov amalga oshirilgandan so‘ng
+                o‘qimasligini yoki o‘qishni davom ettirmasligini bildirib
+                murojat qilgan taqdirda, Universitetning Talabaga ta’lim berish
+                bilan bog‘liq barcha xarajatlari kontrakt summasidan ushlab
+                qolinadi, biroq ushlab qolingan summa jami kontrakt summasining
+                10 foizidan kam bo‘lmasligi kerak.
+      </p>
+     </div>
+    </section>
+    <section>
+     <div class="_text-center">
+      <b>
+       4. Shartnomani bekor qilish
+      </b>
+     </div>
+     <div>
+      <p>
+       <b>
+        4.1.
+       </b>
+       Shartnoma quyidagi hollarda bekor qilinadi:
+      </p>
+      <p>
+       Tomonlarning o‘zaro roziligi bilan;
+      </p>
+      <p>
+       Universitetning tashabbusiga ko‘ra Talaba talabalar safidan
+                chiqarilganda;
+      </p>
+      <p>
+       Talaba tomonidan shartnoma to‘lovi mazkur shartnomada
+                belgilangan muddatlarda va miqdorlarda amalga oshirilmasa;
+      </p>
+      <p>
+       Talabaning tashabbusiga ko‘ra Talaba yozma murojaat qilganda;
+      </p>
+      <p>
+       Qonunchilik hujjatlarida belgilangan boshqa hollarda;
+      </p>
+      <p>
+       <b>
+        4.2.
+       </b>
+       Talaba tomonidan shartnoma to‘lovi mazkur
+                shartnomaning 3.2-bandi birinchi xatboshida belgilangan
+                muddatlarda amalga oshirilmasa, Universitet Talabani
+                ogohlantirmasdan talabalar safidanchiqarishga yoki kursdan
+                kursga qoldirishga haqli. Boshqa hollarda Tomonlardan biri
+                shartnoma shartlariga amal qilmaganda, ikkinchi Tomon
+                shartnomani bekor qilish haqida kamida 5 kun oldin ogohlantirgan
+                holda shartnomani bir tomonlama bekor qilishi mumkin.
+      </p>
+     </div>
+    </section>
+    <section>
+     <div class="_text-center">
+      <b>
+       5. Fors-major holatlari
+      </b>
+     </div>
+     <div>
+      <p>
+       <b>
+        5.1.
+       </b>
+       Ushbu shartnomaga asosan majburiyatlarning
+                bajarilmasligi holatlari yengib bo‘lmas kuchlar natijasida
+                vujudga kelganda fors-major holatlari deb hisoblanadi, bunda
+                Tomonlar o‘z majburiyatlarini bajarishdan qisman yoki to‘liq
+                ozod bo‘ladilar.
+      </p>
+     </div>
+    </section>
+   </section>
+   <section class="pdf-item" style="
+            padding: 10px 5px 5px 5px;
+            color: black;
+            font-size: 1em;
+            text-align: justify;
+          ">
+    <section>
+     <div>
+      <p>
+       <b>
+        5.2.
+       </b>
+       Fors-major holatlariga Tomonlarning irodasi va
+                faoliyatiga bog‘liq bo‘lmagan tabiat hodisalari (pandemiya,
+                zilzila, ko‘chki, bo‘ron, qurg‘oqchilik va boshqalar) yoki
+                ijtimoiy-iqtisodiy holatlar (urush holati, qamal, davlat
+                manfaatlarini ko‘zlab import va eksportni taqiqlash va hokazo)
+                sababli yuzaga keladigan sharoitlarda Tomonlarga qabul qilingan
+                majburiyatlarni bajarish imkonini bermaydigan favqulodda, oldini
+                olib bo‘lmaydigan va kutilmagan holatlar kiradi.
+      </p>
+      <p>
+       <b>
+        5.3.
+       </b>
+       Tomonlardan qaysi biriga majburiyatlarni fors-major
+                holatlari sababli bajarmaslik ma’lum bo‘lsa, darhol ikkinchi
+                Tomonga 10 kun ichida majburiyatni bajarmaslik sabablari haqida
+                dalillar bilan xabar berishi lozim.
+      </p>
+      <p>
+       <b>
+        5.4.
+       </b>
+       Shartnomaga asosan majburiyatlarni ijro etish
+                muddati fors-major holatlari davom etish muddatiga qadar
+                uzaytiriladi. Agar fors-major ta’siri 30 kundan ortiq vaqt davom
+                etsa, Tomonlar o‘zaro kelishuvga binoan shartnomani bekor
+                qilishlari mumkin.
+      </p>
+     </div>
+    </section>
+    <section>
+     <div class="_text-center">
+      <b>
+       6. Nizolarni hal qilish tartibi
+      </b>
+     </div>
+     <div>
+      <p>
+       <b>
+        6.1.
+       </b>
+       Tomonlar o‘rtasida ushbu shartnoma bo‘yicha nizolar
+                va kelishmovchiliklar ular o‘rtasida muzokara o‘tkazish yo‘li
+                bilan hal qilinadi.
+      </p>
+      <p>
+       <b>
+        6.2.
+       </b>
+       Agar nizo va kelishmovchiliklarni muzokaralar yo‘li
+                bilan hal qilib bo‘lmasa, tegishlilik bo‘yicha Universitet
+                joylashgan hududdagi sudga murojaat qilinadi.
+      </p>
+     </div>
+    </section>
+    <section>
+     <div class="_text-center">
+      <b>
+       7. Yakuniy qoidalar
+      </b>
+     </div>
+     <div>
+      <p>
+       <b>
+        7.1.
+       </b>
+       Talaba shartnoma shartlaridan norozi bo‘lgan
+                taqdirda, Universitetga shartnoma olingan kundan boshlab 15 kun
+                ichida murojaat qilishi lozim, mazkur muddat tugagach shartnoma
+                shartlari bo‘yicha etirozlar qabul qilinmaydi.
+      </p>
+      <p>
+       <b>
+        7.2.
+       </b>
+       O‘zbekiston Respublikasi Prezidentining tegishli
+                farmoniga muvofiq mehnatga haq to‘lashning eng kam miqdori yoki
+                bazaviy hisoblash miqdori o‘zgarganda, shartnoma to‘lovi miqdori
+                qayta hisoblanishi mumkin.
+      </p>
+      <p>
+       <b>
+        7.3.
+       </b>
+       Mazkur shartnoma tomonlar imzolagan paytdan
+                e’tiboran kuchga kiradi. Shartnoma 2025-yil 1-iyulga qadar amal
+                qiladi. Shartnomaning amal qilish muddati tugaganligi qarzdor
+                Tomonni o‘z zimmasidagi majburiyatlarni bajarishdan ozod
+                qilmaydi.
+      </p>
+      <p>
+       <b>
+        7.4.
+       </b>
+       Тomonlar shartnoma majburiyatlarini bajarmagan
+                taqdirda, qonunchilikda belgilangan tartibda javobgar
+                bo‘ladilar.
+      </p>
+      <p>
+       <b>
+        7.5.
+       </b>
+       Ushbu shartnoma har ikki Tomon uchun bittadan ikki
+                nusxada davlat tilida tuzilgan bo‘lib, har ikki nusxa bir xil
+                yuridik kuchga ega.
+      </p>
+     </div>
+    </section>
+   </section>
+   <div class="page-break" style="margin: 40px 0 0 0">
+    <section style="padding: 2px 2px 2px 2px; color: black; font-size: 1em; text-align: justify;">
+     <div class="_text-center">
+      <b>
+       8. Tomonlarning rekvizitlari
+      </b>
+     </div>
+     <footer>
+      <section class="rek-block">
+       <table width="100%">
+        <tr>
+         <td style="vertical-align: top;">
+          <b>
+           “FAN VA TEXNOLOGIYALAR
+           <br/>
+           UNIVERSITETI ” nodavlat oliy ta’lim tashkiloti
+          </b>
+          <br/>
+          <b>
+           Tel:
+          </b>
+          +998788883888
+          <br/>
+          <b>
+           Manzil:
+          </b>
+          Toshkent shahri, Chilonzor tumani
+          <br/>
+          Diydor ko’chasi 71 uy
+          <br/>
+          <b>
+           Qabul qiluvchi tashkilot nomi:
+           <br/>
+           “UNIVERSITY OF SCIENCE AND
+           <br/>
+           TECHNOLOGIES” MCHJ
+          </b>
+          <br/>
+          <b>
+           Hisob raqami:
+          </b>
+          20208000105449663001
+          <br/>
+          <b>
+           Bank kodi (MFO):
+          </b>
+          00083
+          <br/>
+          <b>
+           Bank nomi:
+          </b>
+          “HAMKORBANK” ATB BOSH
+          <br/>
+          OFIS ANDIJON SHAHAR
+          <br/>
+          <b>
+           IFUT (OKED):
+          </b>
+          85420
+          <b>
+           INN:
+          </b>
+          308956140
+          <br/>
+          <img alt="imzo" class="sf-pechat" src="assets/img/sign.png" style="width: 350px; height: 175px;"/>
+         </td>
+         <td style="vertical-align: top;">
+          <b>
+           TALABA:
+           <br/>
+           <b style="text-transform:uppercase;">
+            {{ pdfData.fullName }}
+           </b>
+           <br/>
+           Pasport ma’lumotlari: {{ pdfData.passportNumber }}
+           <br/>
+           JSHSHIR: {{ pdfData.pinfl }}
+           <br/>
+           Telefon raqam: {{ pdfData.phoneNumber }}
+           <br/>
+           <br/>
+           Sana: {{ pdfData.contractDate }}
+          </b>
+          <br/>
+         </td>
+        </tr>
+       </table>
+      </section>
+      <br/>
+      <section>
+       <table width="100%">
+        <tr>
+         <td style="vertical-align: top; font-size: 0.9em;" width="90%">
+          <b>
+           SHARTNOMA RAQAMI: {{ pdfData.facultyCode }}
+           <br/>
+           SHARTNOMA TO’LOV MIQDORI: {{ pdfData.summ }}
+          </b>
+          <br/>
+          To‘lovni amalga oshirish usullari:
+          <br/>
+          Yuridik shaxslar va bank kassalari orqali. Bunda To‘lov maqsadida
+          <b>
+           SHARTNOMA
+          </b>
+          raqam.
+          <b>
+           JSHSHIR
+          </b>
+          . Talabaning
+          <b>
+           FISH
+          </b>
+          tartibida yozilgan bo‘lishi talab etiladi.
+          <table style="width: 100%">
+           <tr style="width: 100%;">
+            <td>
+             {{ pdfData.facultyCode }}|{{ pdfData.pinfl }}.
+             <b style="text-transform:uppercase;">
+              {{ pdfData.fullName }}
+             </b>
+             <b>
+              kontrakt to‘lovi uchun
+             </b>
+            </td>
+           </tr>
+          </table>
+          <div style="color: red">
+           To‘lov maqsadi belgilangan tartibda to‘ldirilmagan taqdirda to‘lovni qabul qilishga doir muammolar kelib chiqishi mumkin. Shu sababli to‘lov qilish jarayonida to‘lov maqsadini belgilangan tartibda ko‘rsatilishi shart!
+          </div>
+          <br/>
+          <b>
+           To‘lovlarni amalga oshirish uchun Universitetning bank hisob ma’lumotlari:
+          </b>
+          <table width="100%">
+           <tr>
+            <td>
+             <b>
+              Qabul qiluvchi tashkilot nomi:
+             </b>
+            </td>
+            <td>
+             <b>
+              “UNIVERSITY OF SCIENCE AND TECHNOLOGIES” MCHJ
+             </b>
+            </td>
+           </tr>
+           <tr>
+            <td>
+             <b>
+              Hisob raqami:
+             </b>
+            </td>
+            <td>
+             <b>
+              20208000105449663001
+             </b>
+            </td>
+           </tr>
+           <tr>
+            <td>
+             <b>
+              Bank kodi (MFO):
+             </b>
+            </td>
+            <td>
+             <b>
+              00083
+             </b>
+            </td>
+           </tr>
+           <tr>
+            <td>
+             <b>
+              Bank nomi:
+             </b>
+            </td>
+            <td>
+             <b>
+              “HAMKORBANK” ATB BOSH OFIS ANDIJON SHAHAR
+             </b>
+            </td>
+           </tr>
+           <tr>
+            <td>
+             <b>
+              STIR (INN):
+             </b>
+            </td>
+            <td>
+             <b>
+              308956140
+             </b>
+            </td>
+           </tr>
+           <tr>
+            <td>
+             <b>
+              IFUT (OKED):
+             </b>
+            </td>
+            <td>
+             <b>
+              85420
+             </b>
+            </td>
+           </tr>
+          </table>
+          <br/>
+         </td>
+         <td style="vertical-align: middle; width: 20%">
+          <div style="text-align: center;">
+           <img alt="logo" src="assets/img/logo.png" style="width: 165px; height: 250px; margin: 0 auto; text-align: center"/>
+          </div>
+          <br/>
+          <br/>
+          <span style="font-size: 0.9em; text-align: justify; margin: 3px">
+           Jami kontrakt to‘lov miqdori: {{ pdfData.summ_n }} so‘m bo‘lib Talaba to‘lovni 2 qismga bo‘lib to‘lashi mumkin.
+          </span>
+         </td>
+        </tr>
+       </table>
+      </section>
+     </footer>
+    </section>
+   </div>
+  </div>
+ </body>
+</html>

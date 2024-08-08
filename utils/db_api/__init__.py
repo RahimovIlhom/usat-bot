@@ -6,3 +6,4 @@ from .admission_post_applicant import submit_applicant_for_admission
 from .admission_signup_user import signup_applicant
 from .admission_get_applicant import get_applicant_in_admission
 from .admission_post_exam_result import send_exam_result_for_admission
+from .admission_get_contract_data import get_contract_data_in_admission

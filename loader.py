@@ -13,4 +13,4 @@ db_olympian = DatabaseOlympian()
 
 async def main():
     await db.connect()
-    await db_olympian.connect()
+    # await db_olympian.connect()
